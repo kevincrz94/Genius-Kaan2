@@ -16,6 +16,20 @@
 4. Llena `APP_URL`, datos `DB_*` y variables `COGNIFIT_*`.
 5. No pegues credenciales de Cognifit en el repositorio.
 
+## Variables de Cognifit
+
+Usa los campos del panel de Cognifit asi:
+
+```env
+COGNIFIT_CLIENT_ID=publishable_key
+COGNIFIT_CLIENT_SECRET=secret_key
+COGNIFIT_HASH=url_hash
+COGNIFIT_LAUNCH_URL=to_use_as_url
+COGNIFIT_API_BASE_URL=https://api.cognifit.com
+```
+
+`COGNIFIT_CLIENT_SECRET` debe vivir solo en el backend. No lo pongas en Flutter.
+
 ## Comandos de despliegue
 
 ```bash

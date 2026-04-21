@@ -14,12 +14,22 @@ class CognifitService
 {
     public function configured(): bool
     {
-        return filled($this->apiKey()) && filled($this->secretKey()) && filled($this->clientId());
+        return filled($this->clientId()) && filled($this->clientSecret());
     }
 
     public function clientId(): ?string
     {
         return config('services.cognifit.client_id');
+    }
+
+    public function hash(): ?string
+    {
+        return config('services.cognifit.hash');
+    }
+
+    public function launchUrl(): ?string
+    {
+        return config('services.cognifit.launch_url');
     }
 
     public function registerUser(User $user, string $locale = 'es', ?string $password = null): string
@@ -30,7 +40,7 @@ class CognifitService
             return $user->cognifit_user_token;
         }
 
-        $api = new UserAccount($this->apiKey(), $this->secretKey());
+        $api = new UserAccount($this->clientId(), $this->clientSecret());
         $response = $api->registration(new UserData([
             'user_name' => $user->name,
             'user_email' => $user->email,
@@ -63,7 +73,7 @@ class CognifitService
         $this->ensureConfigured();
         $this->ensureCognifitUser($user);
 
-        $api = new UserAccount($this->apiKey(), $this->secretKey());
+        $api = new UserAccount($this->clientId(), $this->clientSecret());
         $response = $api->update($user->cognifit_user_token, new UserData([
             'user_locale' => $locale,
         ]));
@@ -80,7 +90,7 @@ class CognifitService
         $this->ensureConfigured();
         $this->ensureCognifitUser($user);
 
-        $api = new UserActivity($this->apiKey(), $this->secretKey());
+        $api = new UserActivity($this->clientId(), $this->clientSecret());
         $response = $api->getHistoricalScoreAndSkills($user->cognifit_user_token);
 
         if ($response->hasError()) {
@@ -95,7 +105,7 @@ class CognifitService
         $this->ensureConfigured();
         $this->ensureCognifitUser($user);
 
-        $api = new UserActivity($this->apiKey(), $this->secretKey());
+        $api = new UserActivity($this->clientId(), $this->clientSecret());
         $response = $api->getPlayedGames($user->cognifit_user_token);
 
         if ($response->hasError()) {
@@ -147,13 +157,8 @@ class CognifitService
         return Carbon::now()->subYears($age)->startOfYear()->format('Y-m-d');
     }
 
-    private function apiKey(): ?string
+    private function clientSecret(): ?string
     {
-        return config('services.cognifit.api_key');
-    }
-
-    private function secretKey(): ?string
-    {
-        return config('services.cognifit.secret_key');
+        return config('services.cognifit.client_secret');
     }
 }

@@ -20,6 +20,8 @@ class CognifitApiController extends Controller
         return response()->json([
             'configured' => $this->cognifit->configured(),
             'client_id_present' => filled($this->cognifit->clientId()),
+            'hash_present' => filled($this->cognifit->hash()),
+            'launch_url_present' => filled($this->cognifit->launchUrl()),
         ]);
     }
 

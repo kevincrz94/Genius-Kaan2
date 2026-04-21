@@ -24,10 +24,11 @@ class HealthController extends Controller
                 'ok' => $databaseOk,
             ],
             'cognifit' => [
-                'configured' => filled(config('services.cognifit.api_key'))
-                    && filled(config('services.cognifit.secret_key'))
-                    && filled(config('services.cognifit.client_id')),
+                'configured' => filled(config('services.cognifit.client_id'))
+                    && filled(config('services.cognifit.client_secret')),
                 'client_id_present' => filled(config('services.cognifit.client_id')),
+                'hash_present' => filled(config('services.cognifit.hash')),
+                'launch_url_present' => filled(config('services.cognifit.launch_url')),
             ],
         ], $databaseOk ? 200 : 503);
     }
