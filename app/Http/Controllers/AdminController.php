@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Services\customBlock;
 use App\Services\FileHelper;
 use App\Services\StringHelper;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use CognifitSdk\Api\UserAccount;
 use CognifitSdk\Api\UserActivity;
@@ -16,6 +15,7 @@ use CognifitSdk\Lib\UserData;
 use Illuminate\Http\Request;
 // Top par
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class AdminController extends Controller
 {
@@ -23,14 +23,9 @@ class AdminController extends Controller
 
     protected $auth;
 
-    /**
-     * Initialize Firebase Realtime Database and Authentication.
-     */
     public function __construct()
     {
-        $this->database = app('firebase.database');
-
-        $this->auth = app('firebase.auth');
+        //
     }
 
     public function login()
@@ -61,12 +56,17 @@ class AdminController extends Controller
             $adminEmail = null;
             $adminPassword = null;
 
-            $getAdminData = customBlock::getFireBaseData('admin', $this->database);
+            $getAdminData = $this->database()
+                ? customBlock::getFireBaseData('admin', $this->database())
+                : collect([]);
 
-            if ($getAdminData) {
+            if ($getAdminData && isset($getAdminData['email'], $getAdminData['password'])) {
                 $adminEmail = $getAdminData['email'];
                 $adminPassword = $getAdminData['password'];
             }
+
+            $adminEmail = $adminEmail ?: config('admin.email');
+            $adminPassword = $adminPassword ?: config('admin.password');
 
             if ($adminEmail != $emailCheck) {
                 return redirect()->back()->with('error', 'Invalid Email!');
@@ -85,7 +85,9 @@ class AdminController extends Controller
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
-            customBlock::generateLogs('logs', $logArray, $this->database);
+            if ($this->database()) {
+                customBlock::generateLogs('logs', $logArray, $this->database());
+            }
             /***** End Method *****/
 
             session()->put('admin_id', $generateToken);
@@ -127,7 +129,10 @@ class AdminController extends Controller
     {
         $title = 'User Management';
 
-        $list = customBlock::getFireBaseData('users', $this->database);
+        $list = User::query()
+            ->latest('id')
+            ->get()
+            ->map(fn (User $user) => $this->userPayload($user));
 
         $data = compact('title', 'list');
 
@@ -136,18 +141,18 @@ class AdminController extends Controller
 
     public function userProfile($id)
     {
-        $viewData = customBlock::class;
-        $info = customBlock::getSpecificData('users/'.$id, $this->database);
+        $user = User::find($id);
 
-        if (! $info) {
+        if (! $user) {
             return response()->json(['status' => false, 'message' => 'User not found']);
         }
 
+        $info = $this->userPayload($user);
         $gameData = null;
         $playedGames = [];
         $brainGames = [];
 
-        $getToken = $info['user_token'] ?? null;
+        $getToken = $user->cognifit_user_token;
         if ($getToken && $getToken != '-') {
             $api = new \CognifitSdk\Api\UserActivity(
                 config('services.cognifit.client_id'),
@@ -180,7 +185,7 @@ class AdminController extends Controller
     public function registerUserInGame(Request $request)
     {
         $request->validate([
-            'user_id' => 'required',
+            'user_id' => 'required|exists:users,id',
             'locale' => 'required',
         ]);
 
@@ -189,38 +194,12 @@ class AdminController extends Controller
             $userID = $request->user_id;
             $locale = $request->locale;
 
-            $getSpecificUser = customBlock::getSpecificData('users/'.$userID, $this->database);
+            $user = User::findOrFail($userID);
+            $userToken = $this->registerCognifitUser($user, $locale, $request->password);
 
-            $name = $getSpecificUser['name'];
-            $email = $getSpecificUser['email'];
-            $userBirth = Carbon::parse('16-Oct-1999')->format('Y-m-d');
-            $userPassword = 'Web@'.$request->password;
-
-            $cognifitApiUserAccount = new UserAccount(
-                config('services.cognifit.client_id'),
-                config('services.cognifit.client_secret')
-            );
-
-            $response = $cognifitApiUserAccount->registration(new UserData([
-                'user_name' => $name,
-                'user_email' => $email,
-                'user_birthday' => $userBirth,
-                'user_locale' => $locale,
-                'user_password' => $userPassword,
-            ]));
-
-            $userToken = null;
-
-            if (! $response->hasError()) {
-                $cognifitUserToken = $response->get('user_token');
-                if ($cognifitUserToken) {
-                    $userToken = $cognifitUserToken;
-                }
+            if (! filled($userToken)) {
+                return redirect()->back()->with('error', 'Cognifit did not return a user token.');
             }
-
-            $this->database->getReference('users/'.$userID)->update([
-                'user_token' => $userToken,
-            ]);
 
             return redirect()->back()->with('success', 'User registered successfully.');
 
@@ -250,6 +229,10 @@ class AdminController extends Controller
             ]));
 
             if (! $response->hasError()) {
+                User::where('cognifit_user_token', $userToken)->update([
+                    'cognifit_locale' => $locale,
+                ]);
+
                 return redirect()->back()->with('success', 'User locale updated successfully.');
             }
 
@@ -262,16 +245,16 @@ class AdminController extends Controller
 
     public function userReport(Request $request, $id)
     {
-        // 1. Data fetch karein usi tarah jaise profile mein kiya tha
-        $info = customBlock::getSpecificData('users/'.$id, $this->database);
+        $user = User::find($id);
 
-        if (! $info) {
+        if (! $user) {
             abort(404, 'User not found in database');
         }
 
+        $info = $this->userPayload($user);
         $playedGames = [];
         $brainGames = [];
-        $getToken = $info['user_token'] ?? null;
+        $getToken = $user->cognifit_user_token;
 
         // 2. Agar token hai to Cognifit API se games ka data lein
         if ($getToken && $getToken != '-') {
@@ -339,67 +322,44 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'email' => 'required|email',
-            'image' => 'required|image',
+            'email' => 'required|email|unique:users,email',
+            'image' => 'nullable|image',
             'age' => 'required',
             'gender' => 'required',
             'password' => 'required',
             'confirm_password' => 'required|same:password',
         ]);
 
-        $imageName = FileHelper::uploadImage($request->file('image'), 'UserImages');
+        $imageName = null;
 
-        // Checking The Email Existing
-        $userBool = customBlock::getUserBool($request->email, $this->auth);
-
-        if ($userBool == true) {
-            return redirect()->back()->with('error', 'Email Already Exists!');
+        if ($request->hasFile('image')) {
+            FileHelper::createDirectory(public_path('UserImages'));
+            $imageName = FileHelper::uploadImage($request->file('image'), 'UserImages');
         }
 
-        // Pehle SQL mein user create karo
-        $user = customBlock::createUser($request->name, $request->email, $request->password, $this->auth);
-
-        $firebaseUid = $user;
-
-        $userName = $request->name;
-        $userEmail = $request->email;
-        $userBirth = Carbon::parse('16-Oct-1999')->format('Y-m-d');
-        $locale = 'es';
-        $userPassword = 'Web@'.$request->password;
-
-        $cognifitApiUserAccount = new UserAccount(
-            config('services.cognifit.client_id'),
-            config('services.cognifit.client_secret')
-        );
-
-        $response = $cognifitApiUserAccount->registration(new UserData([
-            'user_name' => $userName,
-            'user_email' => $userEmail,
-            'user_birthday' => $userBirth,
-            'user_locale' => $locale,
-            'user_password' => $userPassword,
-        ]));
-
-        $userToken = null;
-
-        if (! $response->hasError()) {
-            $cognifitUserToken = $response->get('user_token');
-            if ($cognifitUserToken) {
-                $userToken = $cognifitUserToken;
-            }
-        }
-
-        $this->database->getReference('users/'.$firebaseUid)->set([
-            'id' => $firebaseUid,
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'image' => $imageName,
             'age' => $request->age,
             'gender' => $request->gender,
+            'password' => $request->password,
             'status' => 1,
-            'user_token' => $userToken,
-            'created_at' => now()->toDateTimeString(),
         ]);
+
+        try {
+            $userToken = $this->registerCognifitUser($user, 'es', $request->password);
+
+            if (! filled($userToken)) {
+                return redirect()
+                    ->route('admin.user.management')
+                    ->with('warning', 'User created, but Cognifit did not return a user token.');
+            }
+        } catch (Throwable $th) {
+            return redirect()
+                ->route('admin.user.management')
+                ->with('warning', 'User created, but Cognifit registration failed: '.$th->getMessage());
+        }
 
         return redirect()->route('admin.user.management')->with('success', 'User created successfully');
     }
@@ -437,14 +397,16 @@ class AdminController extends Controller
         // Firebase mein UID ke naam se update karo
         $firebaseUid = $user->id; // ya jo bhi tum use kar rahe ho
 
-        $this->database->getReference('users/'.$firebaseUid)->update([
-            'name' => $user->name,
-            'email' => $user->email,
-            'image' => $user->image ?? $user->getOriginal('image'),
-            'age' => $user->age,
-            'gender' => $user->gender,
-            'status' => $user->status,
-        ]);
+        if ($this->database()) {
+            $this->database()->getReference('users/'.$firebaseUid)->update([
+                'name' => $user->name,
+                'email' => $user->email,
+                'image' => $user->image ?? $user->getOriginal('image'),
+                'age' => $user->age,
+                'gender' => $user->gender,
+                'status' => $user->status,
+            ]);
+        }
 
         return redirect()->route('admin.users')->with('success', 'User updated successfully');
     }
@@ -453,16 +415,10 @@ class AdminController extends Controller
     public function usersDestroy($id)
     {
         try {
+            $user = User::findOrFail($id);
+            $user->delete();
 
-            $boolUser = customBlock::getUserBool($id, $this->auth);
-
-            if ($boolUser) {
-                customBlock::deleteCreatedUser($id, $this->auth);
-
-                customBlock::deleteRecord('users/'.$id, $this->database);
-
-                return redirect()->route('admin.user.management')->with('success', 'User deleted successfully');
-            }
+            return redirect()->route('admin.user.management')->with('success', 'User deleted successfully');
 
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Something went wrong');
@@ -548,53 +504,22 @@ class AdminController extends Controller
             $gender = $row['gender'];
             $password = $row['password'];
 
-            $checkUser = customBlock::getUserBool($email, $this->auth);
-
-            if ($checkUser == false) {
-
-                $UID = customBlock::createUser($name, $email, $password, $this->auth);
-
-                $firebaseUid = $UID;
-
-                $userName = $name;
-                $userEmail = $email;
-                $userBirth = Carbon::parse('16-Oct-1999')->format('Y-m-d');
-                $locale = 'es';
-                $userPassword = 'Web@'.$password;
-
-                $cognifitApiUserAccount = new UserAccount(
-                    config('services.cognifit.client_id'),
-                    config('services.cognifit.client_secret')
-                );
-
-                $response = $cognifitApiUserAccount->registration(new UserData([
-                    'user_name' => $userName,
-                    'user_email' => $userEmail,
-                    'user_birthday' => $userBirth,
-                    'user_locale' => $locale,
-                    'user_password' => $userPassword,
-                ]));
-
-                $userToken = null;
-
-                if (! $response->hasError()) {
-                    $cognifitUserToken = $response->get('user_token');
-                    if ($cognifitUserToken) {
-                        $userToken = $cognifitUserToken;
-                    }
-                }
-
-                $this->database->getReference('users/'.$firebaseUid)->update([
+            if (! User::where('email', $email)->exists()) {
+                $user = User::create([
                     'name' => $name,
                     'email' => $email,
-                    'image' => 'default.png',
+                    'image' => null,
                     'age' => $age,
-                    'gender' => $gender,
+                    'gender' => strtolower($gender),
+                    'password' => $password,
                     'status' => 1,
-                    'id' => $firebaseUid,
-                    'userToken' => $userToken,
-                    'created_at' => now()->toDateTimeString(),
                 ]);
+
+                try {
+                    $this->registerCognifitUser($user, 'es', $password);
+                } catch (Throwable $th) {
+                    //
+                }
 
                 $count++;
             }
@@ -606,5 +531,78 @@ class AdminController extends Controller
         // } catch (\Throwable $th) {
         //     return redirect()->back()->with("error", "Something went wrong");
         // }
+    }
+
+    private function userPayload(User $user): array
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'image' => $user->image,
+            'age' => $user->age,
+            'gender' => $user->gender,
+            'status' => $user->status,
+            'user_token' => $user->cognifit_user_token,
+            'cognifit_user_token' => $user->cognifit_user_token,
+            'cognifit_locale' => $user->cognifit_locale,
+            'cognifit_registered_at' => optional($user->cognifit_registered_at)->toDateTimeString(),
+            'created_at' => optional($user->created_at)->toDateTimeString(),
+            'userIntrest' => [
+                'goals' => [],
+                'areas' => [],
+            ],
+        ];
+    }
+
+    private function registerCognifitUser(User $user, string $locale = 'es', ?string $password = null): ?string
+    {
+        if (filled($user->cognifit_user_token)) {
+            return $user->cognifit_user_token;
+        }
+
+        $cognifitApiUserAccount = new UserAccount(
+            config('services.cognifit.client_id'),
+            config('services.cognifit.client_secret')
+        );
+
+        $response = $cognifitApiUserAccount->registration(new UserData([
+            'user_name' => $user->name,
+            'user_email' => $user->email,
+            'user_birthday' => Carbon::now()->subYears($user->age ?: 18)->startOfYear()->format('Y-m-d'),
+            'user_locale' => $locale,
+            'user_password' => 'Web@'.($password ?: StringHelper::randomString(12)),
+        ]));
+
+        if ($response->hasError()) {
+            return null;
+        }
+
+        $userToken = $response->get('user_token');
+
+        if (filled($userToken)) {
+            $user->forceFill([
+                'cognifit_user_token' => $userToken,
+                'cognifit_locale' => $locale,
+                'cognifit_registered_at' => now(),
+            ])->save();
+        }
+
+        return $userToken;
+    }
+
+    private function database()
+    {
+        if ($this->database !== null) {
+            return $this->database;
+        }
+
+        try {
+            $this->database = app('firebase.database');
+        } catch (Throwable $th) {
+            $this->database = false;
+        }
+
+        return $this->database ?: null;
     }
 }

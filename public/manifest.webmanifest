@@ -1,0 +1,25 @@
+{
+    "name": "Genius Kaan",
+    "short_name": "Genius Kaan",
+    "description": "Entrenamiento y seguimiento de desarrollo cognitivo.",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#2a9d8f",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/common/favicon.png",
+            "sizes": "201x201",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

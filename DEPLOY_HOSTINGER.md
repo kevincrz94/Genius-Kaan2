@@ -31,6 +31,9 @@ APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://tu-dominio.com
 
+ADMIN_EMAIL=admin@tu-dominio.com
+ADMIN_PASSWORD=define-una-clave-segura
+
 DB_CONNECTION=mysql
 DB_HOST=localhost
 DB_PORT=3306
