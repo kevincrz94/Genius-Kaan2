@@ -157,11 +157,24 @@
         }
 
         #cognifit-container {
+            width: 100%;
+            height: 74vh;
             min-height: 74vh;
             border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
-            background: #0b1220;
+            background: #ffffff;
+        }
+
+        #cognifit-container iframe,
+        #cognifit-container canvas,
+        #cognifit-container object,
+        #cognifit-container embed {
+            width: 100% !important;
+            height: 74vh !important;
+            min-height: 620px;
+            display: block;
+            border: 0;
         }
 
         #cognifit-loader-button {
@@ -228,6 +241,7 @@
         $goal = $launchConfig['goal'] ?? 'Entrenamiento cognitivo';
         $userToken = $launchConfig['userToken'] ?? '';
         $locale = $launchConfig['locale'] ?? 'es';
+        $image = $launchConfig['image'] ?? '';
     @endphp
 
     <div class="launcher-page">
@@ -268,7 +282,9 @@
             <section class="panel game-panel">
                 <div id="game-status" class="status">Preparando juego Cognifit.</div>
                 <div id="cognifit-loader-button">
-                    <button id="cognifit-button" type="button"></button>
+                    <button id="cognifit-button" type="button"
+                        @if ($image) style="background-image: url('{{ $image }}');" @endif
+                        onclick="startCognifitGame();"></button>
                     <span id="pMoreGames">
                         Más juegos en <a href="https://www.cognifit.com" target="_blank" rel="noopener">cognifit.com</a>
                     </span>
@@ -301,10 +317,9 @@
             }
 
             statusBox.textContent = 'Cargando juego ' + gameKey + '.';
+            document.getElementById('cognifit-loader-button').style.display = 'none';
             window.HTML5JS.loadGame(gameKey, 'cognifit-container');
         }
-
-        button.addEventListener('click', startCognifitGame);
     </script>
 </body>
 

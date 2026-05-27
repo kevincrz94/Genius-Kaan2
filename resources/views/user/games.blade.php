@@ -108,6 +108,7 @@
                                 'locale' => $user->cognifit_locale ?: 'es',
                                 'user_token' => $user->cognifit_user_token,
                                 'game_key' => $game['key'],
+                                'image' => $game['image'] ?? '',
                             ]) }}">
                                 Iniciar
                             </a>

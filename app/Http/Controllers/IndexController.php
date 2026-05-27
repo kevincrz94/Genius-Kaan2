@@ -205,6 +205,7 @@ class IndexController extends Controller
             'gameKey' => strtoupper($request->string('game_key')->trim()->value()),
             'userToken' => $request->string('user_token')->trim()->value(),
             'locale' => $request->string('locale')->trim()->value() ?: 'es',
+            'image' => $request->string('image')->trim()->value(),
             'clientId' => config('services.cognifit.client_id') ?: '2cc41d68527b1b5eb49ee8ce8d802468',
         ];
 
