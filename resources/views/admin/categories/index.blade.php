@@ -8,7 +8,7 @@
                 <div class="col-sm-12">
                     <div class="card customShadow">
                         <div class="card-header">
-                            <h4 class="card-title">Skills Count: {{ $list->count() }}</h4>
+                            <h4 class="card-title">Habilidades: {{ $list->count() }}</h4>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -16,9 +16,9 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Icon</th>
-                                            <th>Name</th>
-                                            <th>Key</th>
+                                            <th>Icono</th>
+                                            <th>Nombre</th>
+                                            <th>Clave</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -30,11 +30,11 @@
                                                         <a href="javascript:void(0)" class="avatar avatar-sm me-2">
                                                             <img class="avatar-img rounded-circle"
                                                                 src="{{ $item->assets->images->whiteIcon }}"
-                                                                alt="User Image" style="background: #00254C;">
+                                                                alt="Icono" style="background: #00254C;">
                                                         </a>
                                                     </h2>
                                                 </td>
-                                                <td>{{ $item->assets->titles->en }}</td>
+                                                <td>{{ $item->assets->titles->es ?? $item->assets->titles->en }}</td>
                                                 <td>{{ $item->key }}</td>
                                             </tr>
                                         @endforeach

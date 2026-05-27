@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8">
@@ -50,22 +50,22 @@
                     </div>
                     <div class="login-right">
                         <div class="login-right-wrap">
-                            <h1>Login</h1>
-                            <p class="account-subtitle">Access to our dashboard</p>
+                            <h1>Ingreso</h1>
+                            <p class="account-subtitle">Acceso al panel operativo</p>
 
                             <!-- Form -->
                             <form action="{{ route('admin.login') }}" method="post">
                                 @csrf
                                 <div class="mb-3">
-                                    <input name="email" class="form-control" type="text" placeholder="Email"
+                                    <input name="email" class="form-control" type="text" placeholder="Correo"
                                         value="{{ old('email') }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <input name= "password"class="form-control" type="password" placeholder="Password"
+                                    <input name= "password"class="form-control" type="password" placeholder="Contrasena"
                                         required>
                                 </div>
                                 <div class="mb-3">
-                                    <button class="btn btn-primary w-100" type="submit">Login</button>
+                                    <button class="btn btn-primary w-100" type="submit">Ingresar</button>
                                 </div>
                             </form>
                             <!-- /Form -->

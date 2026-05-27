@@ -24,7 +24,7 @@ class UserImport implements ToCollection
                 'email' => $row[1] ?? null,
                 'password' => $row[2] ?? null,
                 'age' => $row[3] ?? null,
-                'gender' => $row[4] ?? null,
+                'gender' => $this->normalizeGender($row[4] ?? null),
                 'badge_number' => $row[5] ?? null,
                 'rank' => $row[6] ?? null,
                 'security_unit' => $row[7] ?? null,
@@ -49,5 +49,17 @@ class UserImport implements ToCollection
     public function getData()
     {
         return $this->data;
+    }
+
+    private function normalizeGender($value): ?string
+    {
+        $normalized = strtolower(trim((string) $value));
+
+        return match ($normalized) {
+            'masculino', 'hombre' => 'male',
+            'femenino', 'mujer' => 'female',
+            'otro', 'otra' => 'other',
+            default => $normalized ?: null,
+        };
     }
 }

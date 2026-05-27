@@ -36,7 +36,7 @@ class AdminController extends Controller
             return redirect()->back();
         }
 
-        $title = 'Login';
+        $title = 'Ingreso';
 
         $data = compact('title');
 
@@ -71,11 +71,11 @@ class AdminController extends Controller
             $adminPassword = $adminPassword ?: config('admin.password');
 
             if ($adminEmail != $emailCheck) {
-                return redirect()->back()->with('error', 'Invalid Email!');
+                return redirect()->back()->with('error', 'Correo no valido.');
             }
 
             if ($passwordCheck != $adminPassword) {
-                return redirect()->back()->with('error', 'Invalid Password!');
+                return redirect()->back()->with('error', 'Contrasena no valida.');
             }
 
             $generateToken = StringHelper::randomString(20);
@@ -83,7 +83,7 @@ class AdminController extends Controller
             /***** This method is working for the generation of the logs *****/
             $logArray = [
                 'log' => $generateToken,
-                'type' => 'Login',
+                'type' => 'Ingreso',
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
@@ -94,10 +94,10 @@ class AdminController extends Controller
 
             session()->put('admin_id', $generateToken);
 
-            return redirect()->route('admin.dashboard')->with('success', 'Logged in successfully.');
+            return redirect()->route('admin.dashboard')->with('success', 'Sesion iniciada correctamente.');
 
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Something Went Wrong!');
+            return redirect()->back()->with('error', 'Ocurrio un error.');
         }
     }
 
@@ -105,7 +105,7 @@ class AdminController extends Controller
     {
         session()->forget('admin_id');
 
-        return redirect()->route('admin.showLogin')->with('success', 'Logged out successfully.');
+        return redirect()->route('admin.showLogin')->with('success', 'Sesion cerrada correctamente.');
     }
 
     public function dashboard()
@@ -129,7 +129,7 @@ class AdminController extends Controller
 
     public function userManagement()
     {
-        $title = 'User Management';
+        $title = 'Gestion de elementos';
 
         $list = User::query()
             ->latest('id')
@@ -146,7 +146,7 @@ class AdminController extends Controller
         $user = User::find($id);
 
         if (! $user) {
-            return response()->json(['status' => false, 'message' => 'User not found']);
+            return response()->json(['status' => false, 'message' => 'Elemento no encontrado']);
         }
 
         $info = $this->userPayload($user);
@@ -200,10 +200,10 @@ class AdminController extends Controller
             $userToken = $this->registerCognifitUser($user, $locale, $request->password);
 
             if (! filled($userToken)) {
-                return redirect()->back()->with('error', 'Cognifit did not return a user token.');
+                return redirect()->back()->with('error', 'Cognifit no devolvio token de usuario.');
             }
 
-            return redirect()->back()->with('success', 'User registered successfully.');
+            return redirect()->back()->with('success', 'Elemento registrado correctamente.');
 
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', $th->getMessage());
@@ -235,7 +235,7 @@ class AdminController extends Controller
                     'cognifit_locale' => $locale,
                 ]);
 
-                return redirect()->back()->with('success', 'User locale updated successfully.');
+                return redirect()->back()->with('success', 'Idioma actualizado correctamente.');
             }
 
             return redirect()->back()->with('error', 'Failed to update user locale.');
@@ -250,7 +250,7 @@ class AdminController extends Controller
         $user = User::find($id);
 
         if (! $user) {
-            abort(404, 'User not found in database');
+            abort(404, 'Elemento no encontrado en la base de datos');
         }
 
         $info = $this->userPayload($user);
@@ -303,7 +303,7 @@ class AdminController extends Controller
 
     public function createUser()
     {
-        $title = 'Create User';
+        $title = 'Crear elemento';
         $units = SecurityUnit::query()->orderBy('name')->get();
         $groups = OperationalGroup::query()->with('unit')->orderBy('name')->get();
 
@@ -315,7 +315,7 @@ class AdminController extends Controller
     public function addUser()
     {
 
-        $title = 'Add User';
+        $title = 'Agregar elemento';
 
         $data = compact('title');
 
@@ -372,15 +372,15 @@ class AdminController extends Controller
             if (! filled($userToken)) {
                 return redirect()
                     ->route('admin.user.management')
-                    ->with('warning', 'User created, but Cognifit did not return a user token.');
+                    ->with('warning', 'Elemento creado, pero Cognifit no devolvio token de usuario.');
             }
         } catch (Throwable $th) {
             return redirect()
                 ->route('admin.user.management')
-                ->with('warning', 'User created, but Cognifit registration failed: '.$th->getMessage());
+                ->with('warning', 'Elemento creado, pero el registro en Cognifit fallo: '.$th->getMessage());
         }
 
-        return redirect()->route('admin.user.management')->with('success', 'User created successfully');
+        return redirect()->route('admin.user.management')->with('success', 'Elemento creado correctamente');
     }
 
     public function usersEdit($id)
@@ -427,7 +427,7 @@ class AdminController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.users')->with('success', 'User updated successfully');
+        return redirect()->route('admin.users')->with('success', 'Elemento actualizado correctamente');
     }
 
     // Delete User
@@ -437,10 +437,10 @@ class AdminController extends Controller
             $user = User::findOrFail($id);
             $user->delete();
 
-            return redirect()->route('admin.user.management')->with('success', 'User deleted successfully');
+            return redirect()->route('admin.user.management')->with('success', 'Elemento eliminado correctamente');
 
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Something went wrong');
+            return redirect()->back()->with('error', 'Ocurrio un error');
         }
     }
 
@@ -483,7 +483,7 @@ class AdminController extends Controller
 
         session()->put('excel_data', $importedData);
 
-        return redirect()->route('admin.review.excel')->with('success', 'Please review the data before saving.');
+        return redirect()->route('admin.review.excel')->with('success', 'Revisa los datos antes de guardar.');
     }
 
     public function reviewExcelData()
@@ -491,7 +491,7 @@ class AdminController extends Controller
         $title = 'Review Excel Sheet';
 
         if (! session()->has('excel_data')) {
-            return redirect()->route('admin.user.management')->with('error', 'No data found !');
+            return redirect()->route('admin.user.management')->with('error', 'No se encontraron datos.');
         }
 
         $list = session()->get('excel_data');
@@ -557,7 +557,7 @@ class AdminController extends Controller
 
         }
 
-        return redirect()->route('admin.user.management')->with('success', $count.' Users imported successfully');
+        return redirect()->route('admin.user.management')->with('success', $count.' elementos importados correctamente');
 
         // } catch (\Throwable $th) {
         //     return redirect()->back()->with("error", "Something went wrong");

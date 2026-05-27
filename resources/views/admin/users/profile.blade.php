@@ -19,7 +19,7 @@
                                     @endphp
                                     <img class="avatar-img avatar-xl rounded-circle"
                                         src="{{ $imagePath && file_exists($imagePath) ? asset('profiles/' . $image) : asset('common/favicon.png') }}"
-                                        alt="User Image" style="">
+                                        alt="Elemento" style="">
                                     <div class="d-flex flex-column gap-2">
                                         <a href="javascript:void(0);">{{ $viewData::printData($info, 'name') }}</a>
                                         <a class="text-muted" href="javascript:void(0)"
@@ -30,20 +30,20 @@
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="d-flex justify-content-between align-items-center list-group-item">
-                                Gender:
+                                Genero:
                                 <span class="fw-bold">
                                     {{ $viewData::printData($info, 'gender') }}
                                 </span>
                             </li>
                             <li class="d-flex justify-content-between align-items-center list-group-item">
-                                Base Score:
+                                Puntaje base:
                                 <span class="fw-bold">
                                     {{-- @dd($gameData) --}}
                                     {{ $gameData['baseScore'] ?? '-' }}
                                 </span>
                             </li>
                             <li class="d-flex justify-content-between align-items-center list-group-item">
-                                Status:
+                                Estado:
                                 @php
                                     $getStatus = $viewData::printData($info, 'status');
 
@@ -51,11 +51,11 @@
                                 @endphp
                                 <span
                                     class="badge badge-{{ $status == 2 ? 'danger' : ($status == 1 ? 'success' : 'warning') }}">
-                                    {{ $status == 2 ? 'Suspended' : ($status == 1 ? 'Active' : 'Inactive') }}
+                                    {{ $status == 2 ? 'Suspendido' : ($status == 1 ? 'Activo' : 'Inactivo') }}
                                 </span>
                             </li>
                             <li class="d-flex justify-content-between align-items-center list-group-item">
-                                Games Played:
+                                Juegos realizados:
                                 @php
                                     $getUserToken = $viewData::printData($info, 'user_token');
 
@@ -63,11 +63,11 @@
                                 @endphp
                                 <span
                                     class="badge badge-{{ $gamePlayed == 2 ? 'danger' : ($gamePlayed == 1 ? 'success' : 'warning') }}">
-                                    {{ $gamePlayed == 2 ? 'No' : ($gamePlayed == 1 ? 'Yes' : 'Inactive') }}
+                                    {{ $gamePlayed == 2 ? 'No' : ($gamePlayed == 1 ? 'Si' : 'Inactivo') }}
                                 </span>
                             </li>
                             <li class="d-flex justify-content-between align-items-center list-group-item">
-                                Joined on:
+                                Fecha de alta:
                                 <span class="fw-bold">
                                     {{ \Carbon\Carbon::parse($viewData::printData($info, 'created_at'))->format(' M Y') }}
                                 </span>
@@ -88,7 +88,7 @@
                                                     ? $info['userIntrest']['goals']
                                                     : [];
                                             @endphp
-                                            Goals ({{ count($goalsArray) }})
+                                            Objetivos ({{ count($goalsArray) }})
                                         </a>
                                     </li>
                                     <li class="nav-item" role="presentation">
@@ -105,7 +105,7 @@
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link" href="#bottom-tab3" data-bs-toggle="tab" aria-selected="false"
                                             tabindex="-1" role="tab">
-                                            Games
+                                            Juegos
                                         </a>
                                     </li>
                                 </ul>
@@ -125,7 +125,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>Name</th>
+                                                    <th>Nombre</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -151,7 +151,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>Name</th>
+                                                    <th>Nombre</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -171,7 +171,7 @@
                                             $titleMap = [];
                                             foreach ($brainGames as $game) {
                                                 if (isset($game->key, $game->assets->titles->en)) {
-                                                    $titleMap[$game->key] = $game->assets->titles->en;
+                                                    $titleMap[$game->key] = $game->assets->titles->es ?? $game->assets->titles->en;
                                                 }
                                             }
                                         @endphp
@@ -179,21 +179,21 @@
                                         <table class="datatable table table-stripped">
                                             <thead>
                                                 <tr>
-                                                    <th>Game</th>
-                                                    <th>Level</th>
-                                                    <th>Sublevel</th>
-                                                    <th>Score</th>
-                                                    <th>Time Played (sec)</th>
-                                                    <th>Date & Time</th>
-                                                    <th>Exit Reason</th>
-                                                    <th>Type</th>
+                                                    <th>Juego</th>
+                                                    <th>Nivel</th>
+                                                    <th>Subnivel</th>
+                                                    <th>Puntaje</th>
+                                                    <th>Tiempo jugado (seg)</th>
+                                                    <th>Fecha y hora</th>
+                                                    <th>Motivo de salida</th>
+                                                    <th>Tipo</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @forelse ($playedGames as $game)
                                                     <tr>
                                                         <td>
-                                                            {{ $titleMap[$game['key']] ?? 'Unknown Game' }}
+                                                            {{ $titleMap[$game['key']] ?? 'Juego desconocido' }}
                                                         </td>
                                                         <td>{{ $game['level'] ?? '-' }}</td>
                                                         <td>{{ $game['sublevel'] ?? '-' }}</td>
@@ -207,7 +207,7 @@
                                                     </tr>
                                                 @empty
                                                     <tr>
-                                                        <td colspan="8" class="text-center">No games played yet.</td>
+                                                        <td colspan="8" class="text-center">Sin juegos registrados.</td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>

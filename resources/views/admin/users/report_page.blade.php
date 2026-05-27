@@ -16,11 +16,11 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
-    <title>User Report - {{ $info['name'] ?? 'User' }}</title>
+    <title>Reporte del elemento - {{ $info['name'] ?? 'Elemento' }}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Favicon -->
@@ -79,41 +79,41 @@
     <div class="container mb-5">
         <div class="d-flex justify-content-end gap-2 mt-4 no-print">
             <button onclick="window.print()" class="btn btn-secondary">
-                <i class="fa fa-print"></i> Print
+                <i class="fa fa-print"></i> Imprimir
             </button>
             <button id="downloadPdf" class="btn btn-primary">
-                <i class="fa fa-file-pdf"></i> Download PDF
+                <i class="fa fa-file-pdf"></i> Descargar PDF
                 </but>
         </div>
 
         <div class="report-card" id="report">
             <div class="header-border d-flex justify-content-between align-items-center">
-                <h2 class="text-primary m-0">User Progress Report</h2>
-                <span class="text-muted">Date: {{ date('d M Y') }}</span>
+                <h2 class="text-primary m-0">Reporte de progreso operativo</h2>
+                <span class="text-muted">Fecha: {{ date('d M Y') }}</span>
             </div>
 
             <div class="row mt-4">
                 <div class="col-8">
-                    <h5>Personal Details</h5>
+                    <h5>Datos del elemento</h5>
                     <table class="table table-sm table-borderless">
                         <tr>
-                            <td width="150"><strong>Name:</strong></td>
+                            <td width="150"><strong>Nombre:</strong></td>
                             <td>{{ $info['name'] ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Email:</strong></td>
+                            <td><strong>Correo:</strong></td>
                             <td>{{ $info['email'] ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Gender:</strong></td>
+                            <td><strong>Genero:</strong></td>
                             <td>{{ $info['gender'] ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Status:</strong></td>
+                            <td><strong>Estado:</strong></td>
                             <td>
                                 <span
                                     class="badge bg-{{ $status == 2 ? 'danger' : ($status == 1 ? 'success' : 'warning') }}">
-                                    {{ $status == 2 ? 'Suspended' : ($status == 1 ? 'Active' : 'Inactive') }}
+                                    {{ $status == 2 ? 'Suspendido' : ($status == 1 ? 'Activo' : 'Inactivo') }}
                                 </span>
                             </td>
                         </tr>
@@ -137,37 +137,37 @@
 
             <div class="row mt-4">
                 <div class="col-md-6">
-                    <h6 class="section-title">Selected Goals</h6>
+                    <h6 class="section-title">Objetivos seleccionados</h6>
                     <ul class="list-group list-group-flush border">
                         @forelse($goals as $goal)
                             <li class="list-group-item small">
-                                {{ is_string($goal) ? $goal : $goal['name'] ?? 'Unknown' }}</li>
+                                {{ is_string($goal) ? $goal : $goal['name'] ?? 'Sin nombre' }}</li>
                         @empty
-                            <li class="list-group-item small text-muted">No goals selected</li>
+                            <li class="list-group-item small text-muted">Sin objetivos seleccionados</li>
                         @endforelse
                     </ul>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="section-title">Focus Areas</h6>
+                    <h6 class="section-title">Areas de enfoque</h6>
                     <ul class="list-group list-group-flush border">
                         @forelse($areas as $area)
                             <li class="list-group-item small">
-                                {{ is_string($area) ? $area : $area['name'] ?? 'Unknown' }}</li>
+                                {{ is_string($area) ? $area : $area['name'] ?? 'Sin nombre' }}</li>
                         @empty
-                            <li class="list-group-item small text-muted">No areas selected</li>
+                            <li class="list-group-item small text-muted">Sin areas seleccionadas</li>
                         @endforelse
                     </ul>
                 </div>
             </div>
 
-            <h6 class="section-title">Game Activity (Recent 10)</h6>
+            <h6 class="section-title">Actividad de juegos (ultimos 10)</h6>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped mt-2">
                     <thead class="table-light">
                         <tr>
-                            <th>Game Name</th>
-                            <th class="text-center">Score</th>
-                            <th class="text-end">Date Played</th>
+                            <th>Juego</th>
+                            <th class="text-center">Puntaje</th>
+                            <th class="text-end">Fecha</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,10 +176,10 @@
                                 <td>
                                     @php
                                         // Game name fetch karne ka wahi tareeka jo profile mein tha
-                                        $gameName = $game['key'] ?? 'Unknown';
+                                        $gameName = $game['key'] ?? 'Sin nombre';
                                         if (isset($brainGames) && !is_array($brainGames)) {
                                             $gameObj = $brainGames->where('key', $game['key'] ?? '')->first();
-                                            $gameName = $gameObj->assets->titles->en ?? $gameName;
+                                            $gameName = $gameObj->assets->titles->es ?? $gameObj->assets->titles->en ?? $gameName;
                                         }
                                     @endphp
                                     {{ $gameName }}
@@ -191,7 +191,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="text-center py-3 text-muted">No game records found.</td>
+                                <td colspan="3" class="text-center py-3 text-muted">Sin registros de juego.</td>
                             </tr>
                         @endforelse
                     </tbody>

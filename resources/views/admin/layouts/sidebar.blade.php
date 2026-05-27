@@ -9,7 +9,7 @@
                     <a href="{{ route('admin.dashboard') }}">
                         <i class="fe fe-home"></i>
                         <span>
-                            Dashboard
+                            Panel
                         </span>
                     </a>
                 </li>
@@ -17,7 +17,7 @@
                     <a href="{{ route('admin.user.management') }}">
                         <i class="fa-solid fa-user"></i>
                         <span>
-                            Users
+                            Elementos
                         </span>
                     </a>
                 </li>
@@ -26,7 +26,7 @@
                     <a href="{{ route('admin.skills.management') }}">
                         <i class="fa-solid fa-brain"></i>
                         <span>
-                            Skills
+                            Habilidades
                         </span>
                     </a>
                 </li>

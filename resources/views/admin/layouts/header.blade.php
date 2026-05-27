@@ -4,7 +4,7 @@
     <div class="header-left d-flex align-items-center">
         <a href="{{ route('admin.dashboard') }}" class="logo d-flex align-items-center me-3">
             <img src="{{ asset('common/small-logo.png') }}" alt="Logo" class="me-2">
-            <span class="fw-bold fs-5 text-dark">Admin Panel</span>
+            <span class="fw-bold fs-5 text-dark">Panel operativo</span>
         </a>
         <a href="{{ route('admin.dashboard') }}" class="logo logo-small d-none">
             <img src="{{ asset('common/small-logo.png') }}" alt="Logo" width="30" height="30">
@@ -51,20 +51,20 @@
             <div class="dropdown-menu dropdown-menu-end shadow-sm rounded-3 py-2">
                 <div class="user-header d-flex align-items-center px-3 mb-2 border-bottom">
                     <div class="avatar avatar-sm me-2">
-                        <img src="{{ asset('common/favicon.png') }}" alt="User Image" class="rounded-circle">
+                        <img src="{{ asset('common/favicon.png') }}" alt="Administrador" class="rounded-circle">
                     </div>
                     <div class="user-text">
                         <h6 class="mb-0 fw-semibold">Admin</h6>
-                        <small class="text-muted">Administrator</small>
+                        <small class="text-muted">Administrador</small>
                     </div>
                 </div>
-                <a class="dropdown-item px-3 py-2" href="javascript:void(0)">Settings</a>
+                <a class="dropdown-item px-3 py-2" href="javascript:void(0)">Configuracion</a>
                 <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
                 <a class="dropdown-item px-3 py-2" href="javascript:void(0)"
                     onclick="document.getElementById('logout-form').submit();">
-                    Logout
+                    Cerrar sesion
                 </a>
             </div>
         </li>

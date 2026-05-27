@@ -10,11 +10,11 @@
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">
-                                    Add User
+                                    Agregar elemento
                                 </h4>
                                 <a href="{{ route('admin.user.management') }}" class="btn btn-primary">
                                     <i class="fa fa-arrow-left"></i>
-                                    Back
+                                    Volver
                                 </a>
                             </div>
                         </div>
@@ -23,18 +23,18 @@
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Name</label>
-                                        <input type="text" class="form-control" placeholder="Name" name="name"
+                                        <label for="">Nombre</label>
+                                        <input type="text" class="form-control" placeholder="Nombre" name="name"
                                             value="{{ old('name') }}" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Email</label>
-                                        <input type="email" class="form-control" placeholder="Email" name="email"
+                                        <label for="">Correo</label>
+                                        <input type="email" class="form-control" placeholder="Correo" name="email"
                                             value="{{ old('email') }}" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Age</label>
-                                        <input type="number" class="form-control" placeholder="Age" name="age"
+                                        <label for="">Edad</label>
+                                        <input type="number" class="form-control" placeholder="Edad" name="age"
                                             value="{{ old('age') }}" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
@@ -63,26 +63,26 @@
                                             name="assignment_area" value="{{ old('assignment_area') }}">
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Password</label>
-                                        <input type="password" class="form-control" placeholder="Password" name="password"
+                                        <label for="">Contrasena</label>
+                                        <input type="password" class="form-control" placeholder="Contrasena" name="password"
                                             required>
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Confirm Password</label>
-                                        <input type="password" class="form-control" placeholder="Confirm Password"
+                                        <label for="">Confirmar contrasena</label>
+                                        <input type="password" class="form-control" placeholder="Confirmar contrasena"
                                             name="confirm_password" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Gender</label>
+                                        <label for="">Genero</label>
                                         <select name="gender" class="form-control" required>
-                                            <option selected disabled>Select Gender</option>
-                                            <option value="male">Male</option>
-                                            <option value="female">Female</option>
-                                            <option value="other">Other</option>
+                                            <option selected disabled>Selecciona genero</option>
+                                            <option value="male">Masculino</option>
+                                            <option value="female">Femenino</option>
+                                            <option value="other">Otro</option>
                                         </select>
                                     </div>
                                     <div class="col-lg-12 form-group">
-                                        <label for="">Image</label>
+                                        <label for="">Imagen</label>
                                         <input type="file" class="form-control" name="image" accept="image/*">
                                     </div>
                                 </div>
@@ -90,7 +90,7 @@
                             <div class="card-footer">
                                 <div class="text-end">
                                     <button type="submit" class="btn btn-primary">
-                                        Submit
+                                        Guardar
                                     </button>
                                 </div>
                             </div>

@@ -31,32 +31,32 @@
                 <a href="{{ route('admin.user.report', ['id' => $info['id']]) }}" target="_blank"
                     class="btn btn-primary btn-sm btn-rounded">
                     <i class="fa fa-download"></i>
-                    Download PDF
+                    Descargar PDF
                 </a>
                 @if (isset($info['user_token']) && $info['user_token'] != null)
                     <button class="btn btn-warning btn-sm btn-rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#changeLocaleModal{{ $info['id'] }}">
                         <i class="fa fa-globe"></i>
-                        Change Game Locale
+                        Cambiar idioma
                     </button>
                 @else
                     <button class="btn btn-success btn-sm btn-rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#registerInGameModal{{ $info['id'] }}">
                         <i class="fa fa-user-plus"></i>
-                        Register In Game
+                        Registrar en Cognifit
                     </button>
                 @endif
                 <button class="btn btn-danger btn-sm btn-rounded" type="button" data-bs-toggle="modal"
                     data-bs-target="#deleteModal{{ $info['id'] }}">
                     <i class="fa fa-trash"></i>
-                    Delete
+                    Eliminar
                 </button>
             </div>
         </div>
     </div>
 
     <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex justify-content-between">Gender:
+        <li class="list-group-item d-flex justify-content-between">Genero:
             <span>{{ $viewData::printData($info, 'gender') }}</span>
         </li>
         <li class="list-group-item d-flex justify-content-between">Placa / ID:
@@ -74,12 +74,12 @@
         <li class="list-group-item d-flex justify-content-between">Area:
             <span>{{ $viewData::printData($info, 'assignment_area') }}</span>
         </li>
-        <li class="list-group-item d-flex justify-content-between">Status:
+        <li class="list-group-item d-flex justify-content-between">Estado:
             <span class="badge badge-{{ $status == 2 ? 'danger' : ($status == 1 ? 'success' : 'warning') }}">
-                {{ $status == 2 ? 'Suspended' : ($status == 1 ? 'Active' : 'Inactive') }}
+                {{ $status == 2 ? 'Suspendido' : ($status == 1 ? 'Activo' : 'Inactivo') }}
             </span>
         </li>
-        <li class="list-group-item d-flex justify-content-between">Joined On:
+        <li class="list-group-item d-flex justify-content-between">Fecha de alta:
             <span>{{ \Carbon\Carbon::parse($viewData::printData($info, 'created_at'))->format('d M Y') }}</span>
         </li>
     </ul>
@@ -87,13 +87,13 @@
     <div class="card-body p-0 mt-3">
         <ul class="nav nav-tabs border-bottom" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#goals-tab">Goals ({{ count($goals) }})</a>
+                <a class="nav-link active" data-bs-toggle="tab" href="#goals-tab">Objetivos ({{ count($goals) }})</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#areas-tab">Areas ({{ count($areas) }})</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#games-tab">Games</a>
+                <a class="nav-link" data-bs-toggle="tab" href="#games-tab">Juegos</a>
             </li>
         </ul>
 
@@ -103,12 +103,12 @@
                 @if (count($goals) > 0)
                     <ul class="list-group list-group-flush">
                         @foreach ($goals as $goal)
-                            <li class="list-group-item">{{ is_string($goal) ? $goal : $goal['name'] ?? 'Unknown' }}
+                            <li class="list-group-item">{{ is_string($goal) ? $goal : $goal['name'] ?? 'Sin nombre' }}
                             </li>
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-muted">No goals selected</p>
+                    <p class="text-muted">Sin objetivos seleccionados</p>
                 @endif
             </div>
 
@@ -117,12 +117,12 @@
                 @if (count($areas) > 0)
                     <ul class="list-group list-group-flush">
                         @foreach ($areas as $area)
-                            <li class="list-group-item">{{ is_string($area) ? $area : $area['name'] ?? 'Unknown' }}
+                            <li class="list-group-item">{{ is_string($area) ? $area : $area['name'] ?? 'Sin nombre' }}
                             </li>
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-muted">No areas selected</p>
+                    <p class="text-muted">Sin areas seleccionadas</p>
                 @endif
             </div>
 
@@ -133,15 +133,18 @@
                         <table class="table table-sm table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Game</th>
-                                    <th>Score</th>
-                                    <th>Date</th>
+                                    <th>Juego</th>
+                                    <th>Puntaje</th>
+                                    <th>Fecha</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach (array_slice($playedGames, 0, 10) as $game)
                                     <tr>
-                                        <td>{{ $brainGames->where('key', $game['key'] ?? '')->first()->assets->titles->en ?? ($game['key'] ?? 'Unknown') }}
+                                        @php
+                                            $gameMeta = $brainGames->where('key', $game['key'] ?? '')->first();
+                                        @endphp
+                                        <td>{{ $gameMeta->assets->titles->es ?? $gameMeta->assets->titles->en ?? ($game['key'] ?? 'Sin nombre') }}
                                         </td>
                                         <td>{{ $game['score'] ?? '-' }}</td>
                                         <td>{{ \Carbon\Carbon::parse($game['time'] ?? now())->format('d M Y') }}</td>
@@ -151,7 +154,7 @@
                         </table>
                     </div>
                 @else
-                    <p class="text-muted text-center py-3">No games played yet.</p>
+                    <p class="text-muted text-center py-3">Sin juegos registrados.</p>
                 @endif
             </div>
         </div>
@@ -164,17 +167,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete {{ $info['name'] }}</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Eliminar {{ $info['name'] }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete <span class="fw-bold">{{ $info['name'] }}</span> with email <span
-                        class="fw-bold">{{ $info['email'] }}</span>?</p>
+                <p>Confirma que deseas eliminar a <span class="fw-bold">{{ $info['name'] }}</span> con correo <span
+                        class="fw-bold">{{ $info['email'] }}</span>.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <a href="{{ route('admin.users.destroy', ['id' => $info['id']]) }}" class="btn btn-danger">
-                    Yes
+                    Si, eliminar
                 </a>
             </div>
         </div>
@@ -188,30 +191,30 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Change Locale</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Cambiar idioma</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form action="{{ route('admin.update.game.locale') }}" method="post">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
                         <input type="hidden" name="user_token" value="{{ $info['user_token'] }}">
-                        <label for="">Game Locale</label>
+                        <label for="">Idioma del juego</label>
                         <select name="locale" id="locale" class="form-control" required>
-                            <option value="">Select Locale</option>
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
+                            <option value="">Selecciona idioma</option>
+                            <option value="en">Ingles</option>
+                            <option value="es">Espanol</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fa fa-times"></i>
-                        Close
+                        Cerrar
                     </button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fa fa-save"></i>
-                        Update
+                        Actualizar
                     </button>
                 </div>
             </form>
@@ -226,32 +229,32 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Register {{ $info['name'] }}</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Registrar {{ $info['name'] }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form action="{{ route('admin.register.user.game') }}" method="post">
                 @csrf
                 <div class="modal-body">
                     <div class="alert alert-info" role="alert">
-                        <h4 class="alert-heading">Register {{ $info['name'] }}</h4>
+                        <h4 class="alert-heading">Registrar {{ $info['name'] }}</h4>
                         <p>
-                            Are you sure you want to register {{ $info['name'] }} in the game mode?
+                            Confirma que deseas registrar este elemento en Cognifit.
                         </p>
                     </div>
                     <div class="form-group">
                         <input type="hidden" name="user_id" value="{{ $info['id'] }}">
-                        <label for="locale">Game Locale</label>
+                        <label for="locale">Idioma del juego</label>
                         <select name="locale" id="locale" class="form-control" required>
-                            <option value="">Select Locale</option>
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
+                            <option value="">Selecciona idioma</option>
+                            <option value="en">Ingles</option>
+                            <option value="es">Espanol</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="submit" class="btn btn-primary">
-                        Register
+                        Registrar
                     </button>
                 </div>
             </form>

@@ -51,7 +51,7 @@
                                         placeholder="Ej. Evaluacion de atencion dividida">
                                 </div>
                                 <div class="form-group">
-                                    <label>Score 0-100</label>
+                                    <label>Puntaje 0-100</label>
                                     <input type="number" name="score" min="0" max="100" step="0.01"
                                         class="form-control" required>
                                 </div>
@@ -83,7 +83,7 @@
                                 <thead>
                                     <tr>
                                         <th>Categoria</th>
-                                        <th class="text-center">Score</th>
+                                        <th class="text-center">Puntaje</th>
                                         <th>Nivel</th>
                                     </tr>
                                 </thead>
@@ -119,7 +119,7 @@
                                         <th>Fecha</th>
                                         <th>Categoria</th>
                                         <th>Metrica</th>
-                                        <th class="text-center">Score</th>
+                                        <th class="text-center">Puntaje</th>
                                         <th>Fuente</th>
                                     </tr>
                                 </thead>

@@ -9,9 +9,9 @@
             <div class="page-header">
                 <div class="row">
                     <div class="col-sm-12">
-                        <h3 class="page-title">Welcome Admin!</h3>
+                        <h3 class="page-title">Bienvenido, administrador</h3>
                         <ul class="breadcrumb">
-                            <li class="breadcrumb-item active">Dashboard</li>
+                            <li class="breadcrumb-item active">Panel</li>
                         </ul>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                                 </div>
                             </div>
                             <div class="dash-widget-info">
-                                <h6 class="text-muted">Users</h6>
+                                <h6 class="text-muted">Elementos</h6>
                                 <div class="progress progress-sm">
                                     <div class="progress-bar bg-primary" style="width: 10%;"></div>
                                 </div>
@@ -51,7 +51,7 @@
                                 </div>
                             </div>
                             <div class="dash-widget-info">
-                                <h6 class="text-muted">Skills</h6>
+                                <h6 class="text-muted">Habilidades</h6>
                                 <div class="progress progress-sm">
                                     <div class="progress-bar bg-primary" style="width: 25%;"></div>
                                 </div>

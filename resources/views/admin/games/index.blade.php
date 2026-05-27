@@ -8,7 +8,6 @@
     <div class="page-wrapper">
         <div class="content container-fluid">
 
-            {{-- Search Bar Section --}}
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card customShadow">
@@ -17,13 +16,13 @@
                                 <div class="d-flex align-items-center flex-grow-1">
                                     <i class="fas fa-search me-2 text-muted"></i>
                                     <input type="text" id="gameSearch" class="form-control"
-                                        placeholder="Search games by title or skill...">
+                                        placeholder="Buscar juegos por titulo o habilidad...">
                                 </div>
                                 <div class="ms-3">
                                     <span class="badge bg-primary" id="gameCount"
                                         style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                                        Showing <span id="visibleCount">{{ count($list) }}</span> of <span
-                                            id="totalCount">{{ count($list) }}</span> games
+                                        Mostrando <span id="visibleCount">{{ count($list) }}</span> de <span
+                                            id="totalCount">{{ count($list) }}</span> juegos
                                     </span>
                                 </div>
                             </div>
@@ -32,27 +31,26 @@
                 </div>
             </div>
 
-            {{-- No Results Message (hidden by default) --}}
             <div class="row mb-3" id="noResults" style="display: none;">
                 <div class="col-12">
                     <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle me-2"></i>No games found matching your search.
+                        <i class="fas fa-info-circle me-2"></i>No se encontraron juegos con esa busqueda.
                     </div>
                 </div>
             </div>
 
             <div class="row" id="gamesContainer">
                 @foreach ($list as $item)
-                    <div class="col-lg-3 game-card" data-title="{{ strtolower($item->assets->titles->en) }}"
+                    <div class="col-lg-3 game-card" data-title="{{ strtolower($item->assets->titles->es ?? $item->assets->titles->en) }}"
                         data-skills="{{ strtolower(implode(' ', $item->skills)) }}">
                         <div class="card customShadow">
                             <div class="card-header">
                                 <div class="d-flex justify-content-start gap-2 align-items-center">
                                     <div class="d-flex justify-content-start gap-2 align-items-center">
-                                        <img class="avatar-img rounded-circle" style="width: 150px;" alt="User Image"
+                                        <img class="avatar-img rounded-circle" style="width: 150px;" alt="Juego"
                                             src="{{ $item->assets->images->icon }}">
                                         <div>
-                                            <h4 class="card-title">{{ $item->assets->titles->en }}</h4>
+                                            <h4 class="card-title">{{ $item->assets->titles->es ?? $item->assets->titles->en }}</h4>
                                             @foreach ($item->skills as $skillName)
                                                 <span class="badge badge-primary">
                                                     {{ $customFunction::processStringNames($skillName) }}
@@ -68,16 +66,16 @@
                             </div>
                             <div class="card-body">
                                 @php
-                                    $description = $item->assets->descriptions->en;
+                                    $description = $item->assets->descriptions->es ?? $item->assets->descriptions->en;
                                     $truncated = \Illuminate\Support\Str::words($description, 20, '...');
                                 @endphp
                                 <p>
                                     {{ $truncated }}
                                     @if (\Illuminate\Support\Str::wordCount($description) > 20)
                                         <a href="javascript:void(0);" class="text-primary view-more-btn"
-                                            data-title="{{ $item->assets->titles->en }}"
+                                            data-title="{{ $item->assets->titles->es ?? $item->assets->titles->en }}"
                                             data-description="{{ $description }}">
-                                            View More
+                                            Ver mas
                                         </a>
                                     @endif
                                 </p>
@@ -90,19 +88,18 @@
         </div>
     </div>
 
-    <!-- View More Modal -->
     <div class="modal fade" id="viewMoreModal" tabindex="-1" aria-labelledby="viewMoreModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="viewMoreModalLabel">Game Description</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="viewMoreModalLabel">Descripcion del juego</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
                     <p id="modalDescription"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>

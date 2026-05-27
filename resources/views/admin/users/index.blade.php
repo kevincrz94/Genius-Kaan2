@@ -9,17 +9,16 @@
         <div class="content container-fluid">
             <div class="row">
 
-                <!-- LEFT SIDE USERS LIST -->
                 <div class="col-lg-3">
                     <div class="card customShadow">
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h4 class="card-title">
-                                    Users ({{ count($list) }})
+                                    Elementos ({{ count($list) }})
                                 </h4>
                                 <a href="{{ route('admin.user.management.add') }}" class="btn btn-primary">
                                     <i class="fa fa-plus"></i>
-                                    Add User
+                                    Agregar
                                 </a>
                             </div>
                         </div>
@@ -27,12 +26,12 @@
                             <div class="d-flex justify-content-between align-items center">
                                 <a href="{{ route('admin.download.excel') }}" class="btn btn-primary btn-rounded">
                                     <i class="fa-solid fa-file-excel"></i>
-                                    Download Template
+                                    Descargar plantilla
                                 </a>
                                 <button class="btn btn-primary btn-rounded" type="button" data-bs-toggle="modal"
                                     data-bs-target="#importModal">
                                     <i class="fa fa-download"></i>
-                                    Import Users
+                                    Importar elementos
                                 </button>
                             </div>
                         </div>
@@ -57,11 +56,10 @@
                     </div>
                 </div>
 
-                <!-- RIGHT SIDE USER DETAILS -->
                 <div class="col-lg-9">
                     <div id="user-details">
                         <div class="alert alert-info text-center">
-                            Select a user from the left to view details.
+                            Selecciona un elemento para ver el detalle.
                         </div>
                     </div>
                 </div>
@@ -69,34 +67,32 @@
         </div>
     </div>
 
-    {{-- This modal is working for the importing of the data --}}
     <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Import Users</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Importar elementos</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <form action="{{ route('admin.upload.excel') }}" method="post" target="_blank"
                     enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="">Upload Excel File</label>
+                            <label for="">Archivo Excel</label>
                             <input type="file" class="form-control" name="file" accept="excel/*" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                         <button type="submit" class="btn btn-primary">
-                            Upload
+                            Cargar
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    {{-- End Modal --}}
 @endsection
 
 @section('scripts')
@@ -122,12 +118,12 @@
                         $("#user-details").html(res.html);
                     } else {
                         $("#user-details").html(
-                            '<div class="alert alert-danger">User not found</div>');
+                            '<div class="alert alert-danger">Elemento no encontrado</div>');
                     }
                 }).fail(function(xhr) {
                     console.log(xhr.responseText);
                     $("#user-details").html(
-                        '<div class="alert alert-danger">Error! Check browser console (F12)</div>'
+                        '<div class="alert alert-danger">Error al cargar el detalle.</div>'
                     );
                 });
             });

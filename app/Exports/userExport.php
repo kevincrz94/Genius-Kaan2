@@ -22,16 +22,16 @@ class userExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'Name',
-            'Email',
-            'Password',
-            'Age',
-            'Gender',
-            'Badge Number',
-            'Rank',
-            'Security Unit',
-            'Operational Group',
-            'Assignment Area',
+            'Nombre',
+            'Correo',
+            'Contrasena',
+            'Edad',
+            'Genero',
+            'Placa',
+            'Rango',
+            'Unidad',
+            'Grupo Operativo',
+            'Area Asignada',
         ];
     }
 }

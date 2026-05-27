@@ -95,7 +95,7 @@
                                 <thead>
                                     <tr>
                                         <th>Categoria</th>
-                                        <th class="text-center">Score</th>
+                                        <th class="text-center">Puntaje</th>
                                         <th>Nivel</th>
                                     </tr>
                                 </thead>
@@ -167,7 +167,7 @@
                                     <tr>
                                         <th>Unidad</th>
                                         <th>Elementos</th>
-                                        <th class="text-center">Score</th>
+                                        <th class="text-center">Puntaje</th>
                                     </tr>
                                 </thead>
                                 <tbody>
