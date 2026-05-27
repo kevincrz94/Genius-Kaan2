@@ -38,7 +38,7 @@
 
         .launcher-page {
             min-height: 100vh;
-            padding: 1.5rem;
+            padding: 0;
         }
 
         .launcher-header,
@@ -50,9 +50,10 @@
         .launcher-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 1rem;
-            margin-bottom: 1rem;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0;
         }
 
         .kicker {
@@ -71,20 +72,27 @@
         }
 
         h1 {
-            margin-top: 0.45rem;
-            font-size: clamp(2rem, 4vw, 3.3rem);
+            margin-top: 0.2rem;
+            font-size: clamp(1.1rem, 2.2vw, 1.7rem);
             line-height: 1.05;
         }
 
         p {
             color: var(--muted);
-            line-height: 1.75;
+            line-height: 1.45;
+            margin: 0.25rem 0 0;
+        }
+
+        .launcher-header p {
+            display: none;
         }
 
         .launcher-grid {
-            display: grid;
-            grid-template-columns: 340px minmax(0, 1fr);
-            gap: 1rem;
+            display: block;
+        }
+
+        .info-panel {
+            display: none;
         }
 
         .panel {
@@ -153,15 +161,19 @@
         }
 
         .game-panel {
-            padding: 1rem;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
         }
 
         #cognifit-container {
             width: 100%;
-            height: 74vh;
-            min-height: 74vh;
-            border: 1px solid var(--line);
-            border-radius: 12px;
+            height: calc(100vh - 132px);
+            min-height: calc(100vh - 132px);
+            border: 0;
+            border-radius: 0;
             overflow: hidden;
             background: #ffffff;
         }
@@ -171,14 +183,14 @@
         #cognifit-container object,
         #cognifit-container embed {
             width: 100% !important;
-            height: 74vh !important;
-            min-height: 620px;
+            height: calc(100vh - 132px) !important;
+            min-height: calc(100vh - 132px);
             display: block;
             border: 0;
         }
 
         #cognifit-loader-button {
-            display: grid;
+            display: none;
             gap: 0.8rem;
             margin-bottom: 1rem;
         }
@@ -215,10 +227,12 @@
         }
 
         .status {
-            margin-bottom: 1rem;
+            margin: 0;
             padding: 0.9rem 1rem;
-            border: 1px solid var(--line);
-            border-radius: 10px;
+            border: 0;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            border-radius: 0;
             color: var(--muted);
             background: rgba(255, 255, 255, 0.04);
         }
@@ -243,6 +257,7 @@
         $image = $launchConfig['image'] ?? '';
         $clientId = $launchConfig['clientId'] ?? '';
         $sdkVersion = $launchConfig['sdkVersion'] ?? '';
+        $appType = $launchConfig['appType'] ?? 'web';
         $launchError = $launchConfig['launchError'] ?? '';
     @endphp
 
@@ -253,6 +268,7 @@
                 <h1>{{ $participant }}</h1>
                 <p>{{ $goal }}</p>
             </div>
+            <a class="btn" href="{{ route('user.games') }}">Volver a juegos</a>
         </header>
 
         <main class="launcher-grid">
@@ -308,6 +324,7 @@
         const clientId = @json($clientId);
         const sdkVersion = @json($sdkVersion);
         const locale = @json($locale);
+        const appType = @json($appType);
         const launchError = @json($launchError);
         const statusBox = document.getElementById('game-status');
         const button = document.getElementById('start-game-button');
@@ -370,7 +387,7 @@
                 window.HTML5JS.loadMode(sdkVersion, 'gameMode', gameKey, 'cognifit-container', {
                     clientId: clientId,
                     accessToken: userToken,
-                    appType: 'web',
+                    appType: appType,
                     locale: locale
                 });
             } catch (error) {
@@ -395,6 +412,7 @@
         });
 
         button && button.addEventListener('click', startCognifitGame);
+        startCognifitGame();
     </script>
 </body>
 

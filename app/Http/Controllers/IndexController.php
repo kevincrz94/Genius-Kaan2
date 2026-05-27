@@ -221,6 +221,9 @@ class IndexController extends Controller
             'image' => $request->string('image')->trim()->value(),
             'clientId' => config('services.cognifit.client_id') ?: '2cc41d68527b1b5eb49ee8ce8d802468',
             'sdkVersion' => $this->cognifitSdkVersion(),
+            'appType' => in_array($request->string('app_type')->trim()->value(), ['web', 'app'], true)
+                ? $request->string('app_type')->trim()->value()
+                : 'web',
             'launchError' => $launchError,
         ];
 
