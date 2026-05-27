@@ -84,9 +84,21 @@
         <div class="grid-3">
             @foreach ($availableGames as $game)
                 <article class="card feature-card">
+                    @if (! empty($game['image']))
+                        <img src="{{ $game['image'] }}" alt="{{ $game['title'] }}"
+                            style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:1rem;">
+                    @endif
                     <div class="accent-dot" style="--card-accent: #00254c"></div>
                     <h3>{{ $game['title'] }}</h3>
-                    <p>{{ $game['focus'] }}</p>
+                    <p>{{ \Illuminate\Support\Str::words($game['focus'], 24, '...') }}</p>
+
+                    @if (! empty($game['skills']))
+                        <div class="badge-row">
+                            @foreach (array_slice($game['skills'], 0, 3) as $skill)
+                                <span class="soft-chip">{{ $skill }}</span>
+                            @endforeach
+                        </div>
+                    @endif
 
                     <div class="cta-row">
                         @if (filled($user->cognifit_user_token))

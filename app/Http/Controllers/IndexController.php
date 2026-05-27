@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\CognifitService;
+use App\Services\customBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Throwable;
@@ -226,6 +227,36 @@ class IndexController extends Controller
 
     private function availableGames(): array
     {
+        $games = customBlock::getBrainGamesData('programs/tasks', 'GET')
+            ->map(function ($game): array {
+                $title = $game->assets->titles->es
+                    ?? $game->assets->titles->en
+                    ?? customBlock::processStringNames((string) ($game->key ?? 'Juego'));
+
+                $description = $game->assets->descriptions->es
+                    ?? $game->assets->descriptions->en
+                    ?? 'Entrenamiento cognitivo Cognifit.';
+
+                return [
+                    'key' => (string) ($game->key ?? ''),
+                    'title' => $title,
+                    'focus' => $description,
+                    'image' => $game->assets->images->icon ?? null,
+                    'skills' => collect($game->skills ?? [])
+                        ->map(fn ($skill) => customBlock::processStringNames((string) $skill))
+                        ->values()
+                        ->all(),
+                ];
+            })
+            ->filter(fn (array $game): bool => $game['key'] !== '')
+            ->sortBy('title')
+            ->values()
+            ->all();
+
+        if ($games !== []) {
+            return $games;
+        }
+
         return [
             [
                 'key' => 'THE_BLUE_SHAPE',
