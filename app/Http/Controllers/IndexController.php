@@ -6,7 +6,9 @@ use App\Models\User;
 use App\Services\CognifitService;
 use App\Services\customBlock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Throwable;
 
 class IndexController extends Controller
@@ -207,9 +209,66 @@ class IndexController extends Controller
             'locale' => $request->string('locale')->trim()->value() ?: 'es',
             'image' => $request->string('image')->trim()->value(),
             'clientId' => config('services.cognifit.client_id') ?: '2cc41d68527b1b5eb49ee8ce8d802468',
+            'sdkVersion' => $this->cognifitSdkVersion(),
         ];
 
         return view('index', compact('pageTitle', 'launchConfig'));
+    }
+
+    private function cognifitSdkVersion(): ?string
+    {
+        if (filled(config('services.cognifit.sdk_version'))) {
+            return config('services.cognifit.sdk_version');
+        }
+
+        return Cache::remember('cognifit_sdkjs_version', now()->addHours(6), function () {
+            try {
+                $response = Http::timeout(8)
+                    ->acceptJson()
+                    ->get(rtrim(config('services.cognifit.base_url'), '/').'/description/versions/sdkjs', [
+                        'v' => '2.0',
+                    ]);
+
+                if (! $response->successful()) {
+                    return null;
+                }
+
+                return $this->extractCognifitVersion($response->json() ?? trim($response->body()));
+            } catch (Throwable $th) {
+                return null;
+            }
+        });
+    }
+
+    private function extractCognifitVersion(mixed $payload): ?string
+    {
+        if (is_string($payload)) {
+            $version = trim($payload, " \t\n\r\0\x0B\"'");
+
+            return $version !== '' ? $version : null;
+        }
+
+        if (is_array($payload)) {
+            foreach (['version', 'sdkjs', 'sdkJs', 'current', 'latest'] as $key) {
+                if (array_key_exists($key, $payload)) {
+                    $version = $this->extractCognifitVersion($payload[$key]);
+
+                    if ($version) {
+                        return $version;
+                    }
+                }
+            }
+
+            foreach ($payload as $value) {
+                $version = $this->extractCognifitVersion($value);
+
+                if ($version) {
+                    return $version;
+                }
+            }
+        }
+
+        return null;
     }
 
     private function operationalUser(): ?User

@@ -40,6 +40,7 @@ return [
         'client_secret' => env('COGNIFIT_CLIENT_SECRET'),
         'hash' => env('COGNIFIT_HASH'),
         'launch_url' => env('COGNIFIT_LAUNCH_URL'),
+        'sdk_version' => env('COGNIFIT_SDK_VERSION'),
         'base_url' => env('COGNIFIT_API_BASE_URL', 'https://api.cognifit.com'),
     ],
 

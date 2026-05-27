@@ -231,7 +231,6 @@
             }
         }
     </style>
-    <script src="https://js.cognifit.com/v1/gameWidget.js"></script>
 </head>
 
 <body>
@@ -242,6 +241,8 @@
         $userToken = $launchConfig['userToken'] ?? '';
         $locale = $launchConfig['locale'] ?? 'es';
         $image = $launchConfig['image'] ?? '';
+        $clientId = $launchConfig['clientId'] ?? '';
+        $sdkVersion = $launchConfig['sdkVersion'] ?? '';
     @endphp
 
     <div class="launcher-page">
@@ -302,24 +303,76 @@
 
     <script>
         const gameKey = @json($gameKey);
+        const userToken = @json($userToken);
+        const clientId = @json($clientId);
+        const sdkVersion = @json($sdkVersion);
+        const locale = @json($locale);
         const statusBox = document.getElementById('game-status');
         const button = document.getElementById('start-game-button');
+        let loaderPromise = null;
 
-        function startCognifitGame() {
+        function loadCognifitLoader(version) {
+            if (loaderPromise) {
+                return loaderPromise;
+            }
+
+            loaderPromise = new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = `https://js.cognifit.com/${version}/html5Loader.js`;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('No se pudo cargar html5Loader.js de Cognifit.'));
+                document.head.appendChild(script);
+            });
+
+            return loaderPromise;
+        }
+
+        async function startCognifitGame() {
             if (!gameKey) {
                 statusBox.textContent = 'No se recibió la clave del juego.';
                 return;
             }
 
-            if (!window.HTML5JS || typeof window.HTML5JS.loadGame !== 'function') {
-                statusBox.textContent = 'No se pudo cargar el widget de Cognifit.';
+            if (!clientId) {
+                statusBox.textContent = 'No se recibio el Client ID de Cognifit.';
                 return;
             }
 
-            statusBox.textContent = 'Cargando juego ' + gameKey + '.';
-            document.getElementById('cognifit-loader-button').style.display = 'none';
-            window.HTML5JS.loadGame(gameKey, 'cognifit-container');
+            if (!userToken) {
+                statusBox.textContent = 'No se recibio el User Token de Cognifit.';
+                return;
+            }
+
+            if (!sdkVersion) {
+                statusBox.textContent = 'No se pudo resolver la version del SDK de Cognifit.';
+                return;
+            }
+
+            try {
+                statusBox.textContent = 'Cargando SDK de Cognifit.';
+                await loadCognifitLoader(sdkVersion);
+
+                if (!window.HTML5JS || typeof window.HTML5JS.loadMode !== 'function') {
+                    statusBox.textContent = 'No se pudo cargar el launcher autenticado de Cognifit.';
+                    return;
+                }
+
+                statusBox.textContent = 'Cargando juego ' + gameKey + '.';
+                document.getElementById('cognifit-loader-button').style.display = 'none';
+                window.HTML5JS.loadMode(sdkVersion, 'gameMode', gameKey, 'cognifit-container', {
+                    clientId: clientId,
+                    accessToken: userToken,
+                    appType: 'web',
+                    locale: locale
+                });
+            } catch (error) {
+                console.error(error);
+                statusBox.textContent = error.message || 'No se pudo iniciar el juego Cognifit.';
+            }
         }
+
+        button && button.addEventListener('click', startCognifitGame);
     </script>
 </body>
 
