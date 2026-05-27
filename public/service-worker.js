@@ -1,7 +1,5 @@
-const CACHE_NAME = 'genius-kaan-v1';
+const CACHE_NAME = 'genius-kaan-v2';
 const APP_SHELL = [
-    '/',
-    '/launcher',
     '/icon.svg',
     '/common/favicon.png',
     '/manifest.webmanifest'
@@ -28,7 +26,23 @@ self.addEventListener('fetch', event => {
         return;
     }
 
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request).catch(() => caches.match('/'))
+        );
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request).then(cached => cached || fetch(event.request))
+        caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+                return response;
+            }
+
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+
+            return response;
+        }))
     );
 });
