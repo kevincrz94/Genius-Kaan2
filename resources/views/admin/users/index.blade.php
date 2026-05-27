@@ -49,6 +49,8 @@
                                     <span>{{ $viewData::printData($user, 'name') }}</span>
                                     <br>
                                     <span>{{ $viewData::printData($user, 'email') }}</span>
+                                    <br>
+                                    <small>{{ $viewData::printData($user, 'unit') }} / {{ $viewData::printData($user, 'badge_number') }}</small>
                                 </li>
                             @endforeach
                         </ul>

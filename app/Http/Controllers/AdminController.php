@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\userExport;
 use App\Imports\UserImport;
+use App\Models\OperationalGroup;
+use App\Models\SecurityUnit;
 use App\Models\User;
 use App\Services\customBlock;
 use App\Services\FileHelper;
@@ -302,8 +304,10 @@ class AdminController extends Controller
     public function createUser()
     {
         $title = 'Create User';
+        $units = SecurityUnit::query()->orderBy('name')->get();
+        $groups = OperationalGroup::query()->with('unit')->orderBy('name')->get();
 
-        $data = compact('title');
+        $data = compact('title', 'units', 'groups');
 
         return view('admin.users.add')->with($data);
     }
@@ -323,6 +327,11 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
+            'badge_number' => 'nullable|string|max:80',
+            'rank' => 'nullable|string|max:120',
+            'security_unit_name' => 'nullable|string|max:160',
+            'operational_group_name' => 'nullable|string|max:160',
+            'assignment_area' => 'nullable|string|max:160',
             'image' => 'nullable|image',
             'age' => 'required',
             'gender' => 'required',
@@ -337,9 +346,19 @@ class AdminController extends Controller
             $imageName = FileHelper::uploadImage($request->file('image'), 'UserImages');
         }
 
+        [$unit, $group] = $this->resolveOperationalAssignment(
+            $request->string('security_unit_name')->trim()->value(),
+            $request->string('operational_group_name')->trim()->value(),
+        );
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'badge_number' => $request->badge_number,
+            'rank' => $request->rank,
+            'assignment_area' => $request->assignment_area,
+            'security_unit_id' => $unit?->id,
+            'operational_group_id' => $group?->id,
             'image' => $imageName,
             'age' => $request->age,
             'gender' => $request->gender,
@@ -503,11 +522,23 @@ class AdminController extends Controller
             $age = $row['age'];
             $gender = $row['gender'];
             $password = $row['password'];
+            $badgeNumber = $row['badge_number'] ?? null;
+            $rank = $row['rank'] ?? null;
+            $unitName = $row['security_unit'] ?? null;
+            $groupName = $row['operational_group'] ?? null;
+            $assignmentArea = $row['assignment_area'] ?? null;
 
             if (! User::where('email', $email)->exists()) {
+                [$unit, $group] = $this->resolveOperationalAssignment($unitName, $groupName);
+
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
+                    'badge_number' => $badgeNumber,
+                    'rank' => $rank,
+                    'assignment_area' => $assignmentArea,
+                    'security_unit_id' => $unit?->id,
+                    'operational_group_id' => $group?->id,
                     'image' => null,
                     'age' => $age,
                     'gender' => strtolower($gender),
@@ -542,6 +573,11 @@ class AdminController extends Controller
             'image' => $user->image,
             'age' => $user->age,
             'gender' => $user->gender,
+            'badge_number' => $user->badge_number,
+            'rank' => $user->rank,
+            'unit' => $user->securityUnit?->name,
+            'operational_group' => $user->operationalGroup?->name,
+            'assignment_area' => $user->assignment_area,
             'status' => $user->status,
             'user_token' => $user->cognifit_user_token,
             'cognifit_user_token' => $user->cognifit_user_token,
@@ -589,6 +625,28 @@ class AdminController extends Controller
         }
 
         return $userToken;
+    }
+
+    private function resolveOperationalAssignment(?string $unitName, ?string $groupName): array
+    {
+        $unitName = trim((string) $unitName);
+        $groupName = trim((string) $groupName);
+
+        $unit = $unitName !== ''
+            ? SecurityUnit::firstOrCreate(['name' => $unitName], ['active' => true])
+            : null;
+
+        $group = $groupName !== ''
+            ? OperationalGroup::firstOrCreate(
+                [
+                    'security_unit_id' => $unit?->id,
+                    'name' => $groupName,
+                ],
+                ['active' => true]
+            )
+            : null;
+
+        return [$unit, $group];
     }
 
     private function database()

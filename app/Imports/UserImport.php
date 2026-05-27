@@ -25,6 +25,11 @@ class UserImport implements ToCollection
                 'password' => $row[2] ?? null,
                 'age' => $row[3] ?? null,
                 'gender' => $row[4] ?? null,
+                'badge_number' => $row[5] ?? null,
+                'rank' => $row[6] ?? null,
+                'security_unit' => $row[7] ?? null,
+                'operational_group' => $row[8] ?? null,
+                'assignment_area' => $row[9] ?? null,
             ];
 
             if (

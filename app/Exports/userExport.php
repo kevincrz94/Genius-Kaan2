@@ -27,6 +27,11 @@ class userExport implements FromCollection, WithHeadings
             'Password',
             'Age',
             'Gender',
+            'Badge Number',
+            'Rank',
+            'Security Unit',
+            'Operational Group',
+            'Assignment Area',
         ];
     }
 }

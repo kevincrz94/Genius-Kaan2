@@ -38,6 +38,31 @@
                                             value="{{ old('age') }}" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
+                                        <label for="">Placa / ID operativo</label>
+                                        <input type="text" class="form-control" placeholder="Placa" name="badge_number"
+                                            value="{{ old('badge_number') }}">
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="">Rango / cargo</label>
+                                        <input type="text" class="form-control" placeholder="Rango" name="rank"
+                                            value="{{ old('rank') }}">
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="">Unidad</label>
+                                        <input type="text" class="form-control" placeholder="Policia Municipal"
+                                            name="security_unit_name" value="{{ old('security_unit_name') }}">
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="">Grupo operativo</label>
+                                        <input type="text" class="form-control" placeholder="Turno A / Patrullaje"
+                                            name="operational_group_name" value="{{ old('operational_group_name') }}">
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="">Area asignada</label>
+                                        <input type="text" class="form-control" placeholder="Transito, proximidad, reaccion"
+                                            name="assignment_area" value="{{ old('assignment_area') }}">
+                                    </div>
+                                    <div class="col-lg-4 form-group">
                                         <label for="">Password</label>
                                         <input type="password" class="form-control" placeholder="Password" name="password"
                                             required>
@@ -58,7 +83,7 @@
                                     </div>
                                     <div class="col-lg-12 form-group">
                                         <label for="">Image</label>
-                                        <input type="file" class="form-control" name="image" accept="image/*" required>
+                                        <input type="file" class="form-control" name="image" accept="image/*">
                                     </div>
                                 </div>
                             </div>

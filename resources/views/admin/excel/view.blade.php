@@ -34,6 +34,11 @@
                                                 <th style="width:15%">Password</th>
                                                 <th style="width:10%">Age</th>
                                                 <th style="width:10%">Gender</th>
+                                                <th>Placa</th>
+                                                <th>Rango</th>
+                                                <th>Unidad</th>
+                                                <th>Grupo</th>
+                                                <th>Area</th>
                                                 <th style="width:15%">Actions</th>
                                             </tr>
                                         </thead>
@@ -80,13 +85,38 @@
                                                         </select>
                                                     </td>
                                                     <td>
+                                                        <input type="text" name="rows[{{ $i }}][badge_number]"
+                                                            class="form-control"
+                                                            value="{{ old("rows.$i.badge_number", $row['Badge Number'] ?? ($row['badge_number'] ?? '')) }}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="rows[{{ $i }}][rank]"
+                                                            class="form-control"
+                                                            value="{{ old("rows.$i.rank", $row['Rank'] ?? ($row['rank'] ?? '')) }}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="rows[{{ $i }}][security_unit]"
+                                                            class="form-control"
+                                                            value="{{ old("rows.$i.security_unit", $row['Security Unit'] ?? ($row['security_unit'] ?? '')) }}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="rows[{{ $i }}][operational_group]"
+                                                            class="form-control"
+                                                            value="{{ old("rows.$i.operational_group", $row['Operational Group'] ?? ($row['operational_group'] ?? '')) }}">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="rows[{{ $i }}][assignment_area]"
+                                                            class="form-control"
+                                                            value="{{ old("rows.$i.assignment_area", $row['Assignment Area'] ?? ($row['assignment_area'] ?? '')) }}">
+                                                    </td>
+                                                    <td>
                                                         <button type="button"
                                                             class="btn btn-sm btn-danger remove-row">Remove</button>
                                                     </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="text-center py-4">No data available in
+                                                    <td colspan="11" class="text-center py-4">No data available in
                                                         session.</td>
                                                 </tr>
                                             @endforelse

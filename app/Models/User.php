@@ -21,6 +21,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'badge_number',
+        'rank',
+        'assignment_area',
+        'security_unit_id',
+        'operational_group_id',
         'image',
         'age',
         'gender',
@@ -66,5 +71,25 @@ class User extends Authenticatable
     public function cognitiveSkillScores()
     {
         return $this->hasMany(CognitiveSkillScore::class);
+    }
+
+    public function securityUnit()
+    {
+        return $this->belongsTo(SecurityUnit::class);
+    }
+
+    public function operationalGroup()
+    {
+        return $this->belongsTo(OperationalGroup::class);
+    }
+
+    public function operationalMetrics()
+    {
+        return $this->hasMany(OperationalMetricSnapshot::class);
+    }
+
+    public function operationalAlerts()
+    {
+        return $this->hasMany(OperationalAlert::class);
     }
 }

@@ -59,6 +59,21 @@
         <li class="list-group-item d-flex justify-content-between">Gender:
             <span>{{ $viewData::printData($info, 'gender') }}</span>
         </li>
+        <li class="list-group-item d-flex justify-content-between">Placa / ID:
+            <span>{{ $viewData::printData($info, 'badge_number') }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">Rango:
+            <span>{{ $viewData::printData($info, 'rank') }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">Unidad:
+            <span>{{ $viewData::printData($info, 'unit') }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">Grupo:
+            <span>{{ $viewData::printData($info, 'operational_group') }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between">Area:
+            <span>{{ $viewData::printData($info, 'assignment_area') }}</span>
+        </li>
         <li class="list-group-item d-flex justify-content-between">Status:
             <span class="badge badge-{{ $status == 2 ? 'danger' : ($status == 1 ? 'success' : 'warning') }}">
                 {{ $status == 2 ? 'Suspended' : ($status == 1 ? 'Active' : 'Inactive') }}

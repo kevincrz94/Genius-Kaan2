@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminMetricsController;
 use App\Http\Middleware\Admin;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,12 @@ Route::prefix('admin')->group(function () {
 
         // Route For Skills
         Route::get('/skills', [AdminController::class, 'skillManagement'])->name('admin.skills.management');
+
+        Route::prefix('metrics')->group(function () {
+            Route::get('/', [AdminMetricsController::class, 'index'])->name('admin.metrics.index');
+            Route::get('/users/{user}', [AdminMetricsController::class, 'user'])->name('admin.metrics.user');
+            Route::post('/users/{user}/metrics', [AdminMetricsController::class, 'storeUserMetric'])->name('admin.metrics.user.store');
+        });
 
         // User management
         Route::prefix('users')->group(function () {

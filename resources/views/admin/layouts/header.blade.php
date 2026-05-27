@@ -16,15 +16,19 @@
     <div class="d-flex align-items-center gap-2">
         <a href="{{ route('admin.user.management') }}"
             class="btn {{ Route::is(['admin.user.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Users
+            Elementos
+        </a>
+        <a href="{{ route('admin.metrics.index') }}"
+            class="btn {{ Route::is(['admin.metrics.*']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
+            Metricas
         </a>
         <a href="{{ route('admin.skills.management') }}"
             class="btn {{ Route::is(['admin.skills.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Skills
+            Habilidades
         </a>
         <a href="{{ route('admin.games.list') }}"
             class="btn {{ Route::is(['admin.games.list']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Games
+            Juegos
         </a>
     </div>
 
