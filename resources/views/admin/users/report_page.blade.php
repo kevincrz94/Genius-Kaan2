@@ -3,7 +3,7 @@
     $image = $viewData::printData($info, 'image');
     $status = $viewData::printData($info, 'status') ?? 1;
 
-    // Goals aur Areas ko parse karein
+    // Se normalizan objetivos y áreas para el reporte.
     $goals = [];
     $areas = [];
 
@@ -105,7 +105,7 @@
                             <td>{{ $info['email'] ?? 'N/A' }}</td>
                         </tr>
                         <tr>
-                            <td><strong>Genero:</strong></td>
+                            <td><strong>Género:</strong></td>
                             <td>{{ $info['gender'] ?? 'N/A' }}</td>
                         </tr>
                         <tr>
@@ -148,19 +148,19 @@
                     </ul>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="section-title">Areas de enfoque</h6>
+                    <h6 class="section-title">Áreas de enfoque</h6>
                     <ul class="list-group list-group-flush border">
                         @forelse($areas as $area)
                             <li class="list-group-item small">
                                 {{ is_string($area) ? $area : $area['name'] ?? 'Sin nombre' }}</li>
                         @empty
-                            <li class="list-group-item small text-muted">Sin areas seleccionadas</li>
+                            <li class="list-group-item small text-muted">Sin áreas seleccionadas</li>
                         @endforelse
                     </ul>
                 </div>
             </div>
 
-            <h6 class="section-title">Actividad de juegos (ultimos 10)</h6>
+            <h6 class="section-title">Actividad de juegos (últimos 10)</h6>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped mt-2">
                     <thead class="table-light">

@@ -13,7 +13,7 @@
                             @csrf
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">
-                                    Vista previa de importacion
+                                    Vista previa de importación
                                     ({{ count($excel) }})
                                 </h5>
                                 <div>
@@ -31,14 +31,14 @@
                                             <tr>
                                                 <th style="width:25%">Nombre</th>
                                                 <th style="width:25%">Correo</th>
-                                                <th style="width:15%">Contrasena</th>
+                                                <th style="width:15%">Contraseña</th>
                                                 <th style="width:10%">Edad</th>
-                                                <th style="width:10%">Genero</th>
+                                                <th style="width:10%">Género</th>
                                                 <th>Placa</th>
                                                 <th>Rango</th>
                                                 <th>Unidad</th>
                                                 <th>Grupo</th>
-                                                <th>Area</th>
+                                                <th>Área</th>
                                                 <th style="width:15%">Acciones</th>
                                             </tr>
                                         </thead>
@@ -60,7 +60,7 @@
                                                     <td>
                                                         <input type="text" name="rows[{{ $i }}][password]"
                                                             class="form-control"
-                                                            value="{{ old("rows.$i.password", $row['Contrasena'] ?? ($row['Password'] ?? ($row['password'] ?? ''))) }}"
+                                                            value="{{ old("rows.$i.password", $row['Contraseña'] ?? ($row['Contrasena'] ?? ($row['Password'] ?? ($row['password'] ?? '')))) }}"
                                                             required>
                                                     </td>
                                                     <td>
@@ -74,13 +74,13 @@
                                                             class="form-control" required>
                                                             <option value="">Selecciona</option>
                                                             <option value="male"
-                                                                {{ old("rows.$i.gender", strtolower($row['Genero'] ?? ($row['Gender'] ?? ($row['gender'] ?? '')))) == 'male' ? 'selected' : '' }}>
+                                                                {{ old("rows.$i.gender", strtolower($row['Género'] ?? ($row['Genero'] ?? ($row['Gender'] ?? ($row['gender'] ?? ''))))) == 'male' ? 'selected' : '' }}>
                                                                 Masculino</option>
                                                             <option value="female"
-                                                                {{ old("rows.$i.gender", strtolower($row['Genero'] ?? ($row['Gender'] ?? ($row['gender'] ?? '')))) == 'female' ? 'selected' : '' }}>
+                                                                {{ old("rows.$i.gender", strtolower($row['Género'] ?? ($row['Genero'] ?? ($row['Gender'] ?? ($row['gender'] ?? ''))))) == 'female' ? 'selected' : '' }}>
                                                                 Femenino</option>
                                                             <option value="other"
-                                                                {{ old("rows.$i.gender", strtolower($row['Genero'] ?? ($row['Gender'] ?? ($row['gender'] ?? '')))) == 'other' ? 'selected' : '' }}>
+                                                                {{ old("rows.$i.gender", strtolower($row['Género'] ?? ($row['Genero'] ?? ($row['Gender'] ?? ($row['gender'] ?? ''))))) == 'other' ? 'selected' : '' }}>
                                                                 Otro</option>
                                                         </select>
                                                     </td>
@@ -107,7 +107,7 @@
                                                     <td>
                                                         <input type="text" name="rows[{{ $i }}][assignment_area]"
                                                             class="form-control"
-                                                            value="{{ old("rows.$i.assignment_area", $row['Area Asignada'] ?? ($row['Assignment Area'] ?? ($row['assignment_area'] ?? ''))) }}">
+                                                            value="{{ old("rows.$i.assignment_area", $row['Área Asignada'] ?? ($row['Area Asignada'] ?? ($row['Assignment Area'] ?? ($row['assignment_area'] ?? '')))) }}">
                                                     </td>
                                                     <td>
                                                         <button type="button"
@@ -116,7 +116,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="11" class="text-center py-4">No hay datos disponibles en la sesion.</td>
+                                                    <td colspan="11" class="text-center py-4">No hay datos disponibles en la sesión.</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>

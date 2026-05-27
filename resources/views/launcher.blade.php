@@ -5,17 +5,17 @@
         <div class="panel hero-copy">
             <span class="eyebrow">Configurar entrenamiento</span>
             <h1>
-                Prepara una sesion cognitiva con
-                <span class="highlight">parametros claros antes de lanzar el juego</span>.
+                Prepara una sesión cognitiva con
+                <span class="highlight">parámetros claros antes de lanzar el juego</span>.
             </h1>
             <p class="lead">
                 Este flujo permite capturar participante, objetivo y credenciales antes de entrar al launcher React de
-                Cognifit. Asi el acceso publico queda separado del panel administrativo.
+                Cognifit. Así el acceso público queda separado del panel administrativo.
             </p>
 
             <div class="badge-row">
-                <span class="soft-chip">Requiere user token valido</span>
-                <span class="soft-chip">Seleccion de juego editable</span>
+                <span class="soft-chip">Requiere user token válido</span>
+                <span class="soft-chip">Selección de juego editable</span>
                 <span class="soft-chip">Listo para conectar resultados</span>
             </div>
         </div>
@@ -23,7 +23,7 @@
         <div class="panel hero-board">
             <article class="card session-card">
                 <span class="eyebrow">Antes de iniciar</span>
-                <h3>Checklist minimo para una sesion util</h3>
+                <h3>Checklist mínimo para una sesión útil</h3>
                 <div class="checklist">
                     <div class="check-item">
                         <strong>Token correcto</strong>
@@ -35,7 +35,7 @@
                     </div>
                     <div class="check-item">
                         <strong>Entorno estable</strong>
-                        <span>Sesiones breves, sin interrupciones y con revision posterior del resultado.</span>
+                        <span>Sesiones breves, sin interrupciones y con revisión posterior del resultado.</span>
                     </div>
                 </div>
             </article>
@@ -46,10 +46,10 @@
         <div class="dashboard">
             <article class="panel card">
                 <span class="eyebrow">Formulario de arranque</span>
-                <h2>Completa la sesion y abre el launcher.</h2>
+                <h2>Completa la sesión y abre el launcher.</h2>
                 <p class="section-copy">
                     El formulario usa GET para que puedas compartir enlaces de prueba o volver a abrir una misma
-                    configuracion rapidamente.
+                    configuración rápidamente.
                 </p>
 
                 <form action="{{ route('start.game') }}" method="GET">
@@ -69,7 +69,7 @@
                         </div>
 
                         <div class="field field-full">
-                            <label for="goal">Meta de la sesion</label>
+                            <label for="goal">Meta de la sesión</label>
                             <input id="goal" class="input" type="text" name="goal"
                                 value="{{ $sessionDefaults['goal'] }}" required>
                         </div>
@@ -88,7 +88,7 @@
                         <div class="field">
                             <label for="user_token">User token</label>
                             <input id="user_token" class="input" type="text" name="user_token"
-                                value="{{ $sessionDefaults['user_token'] }}" placeholder="Pega aqui el token" required>
+                                value="{{ $sessionDefaults['user_token'] }}" placeholder="Pega aquí el token" required>
                         </div>
                     </div>
 
@@ -103,7 +103,7 @@
                 <span class="eyebrow">Juegos sugeridos</span>
                 <h2>Biblioteca inicial para el MVP.</h2>
                 <p class="section-copy">
-                    La seleccion puede crecer despues con catalogos por habilidad, edad o intensidad de entrenamiento.
+                    La selección puede crecer después con catálogos por habilidad, edad o intensidad de entrenamiento.
                 </p>
 
                 @foreach ($availableGames as $game)
@@ -117,7 +117,7 @@
                 @endforeach
 
                 <div class="hero-note">
-                    Si quieres cerrar el flujo completo, el siguiente paso es registrar sesiones, guardar historicos y
+                    Si quieres cerrar el flujo completo, el siguiente paso es registrar sesiones, guardar históricos y
                     mostrar reportes por usuario en la portada o en el panel.
                 </div>
             </article>

@@ -562,7 +562,7 @@
 
     <footer class="footer">
         <div class="container">
-            Genius Kaan organiza evaluacion, entrenamiento y seguimiento cognitivo para fuerzas de seguridad publica.
+            Genius Kaan organiza evaluación, entrenamiento y seguimiento cognitivo para fuerzas de seguridad pública.
         </div>
     </footer>
     @stack('scripts')

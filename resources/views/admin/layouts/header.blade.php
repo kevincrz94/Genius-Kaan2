@@ -20,7 +20,7 @@
         </a>
         <a href="{{ route('admin.metrics.index') }}"
             class="btn {{ Route::is(['admin.metrics.*']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Metricas
+            Métricas
         </a>
         <a href="{{ route('admin.skills.management') }}"
             class="btn {{ Route::is(['admin.skills.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
@@ -58,13 +58,13 @@
                         <small class="text-muted">Administrador</small>
                     </div>
                 </div>
-                <a class="dropdown-item px-3 py-2" href="javascript:void(0)">Configuracion</a>
+                <a class="dropdown-item px-3 py-2" href="javascript:void(0)">Configuración</a>
                 <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
                 <a class="dropdown-item px-3 py-2" href="javascript:void(0)"
                     onclick="document.getElementById('logout-form').submit();">
-                    Cerrar sesion
+                    Cerrar sesión
                 </a>
             </div>
         </li>

@@ -56,7 +56,7 @@
     </div>
 
     <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex justify-content-between">Genero:
+        <li class="list-group-item d-flex justify-content-between">Género:
             <span>{{ $viewData::printData($info, 'gender') }}</span>
         </li>
         <li class="list-group-item d-flex justify-content-between">Placa / ID:
@@ -71,7 +71,7 @@
         <li class="list-group-item d-flex justify-content-between">Grupo:
             <span>{{ $viewData::printData($info, 'operational_group') }}</span>
         </li>
-        <li class="list-group-item d-flex justify-content-between">Area:
+        <li class="list-group-item d-flex justify-content-between">Área:
             <span>{{ $viewData::printData($info, 'assignment_area') }}</span>
         </li>
         <li class="list-group-item d-flex justify-content-between">Estado:
@@ -90,7 +90,7 @@
                 <a class="nav-link active" data-bs-toggle="tab" href="#goals-tab">Objetivos ({{ count($goals) }})</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#areas-tab">Areas ({{ count($areas) }})</a>
+                <a class="nav-link" data-bs-toggle="tab" href="#areas-tab">Áreas ({{ count($areas) }})</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#games-tab">Juegos</a>
@@ -112,7 +112,7 @@
                 @endif
             </div>
 
-            <!-- Areas Tab -->
+            <!-- Áreas Tab -->
             <div id="areas-tab" class="tab-pane fade">
                 @if (count($areas) > 0)
                     <ul class="list-group list-group-flush">
@@ -122,7 +122,7 @@
                         @endforeach
                     </ul>
                 @else
-                    <p class="text-muted">Sin areas seleccionadas</p>
+                    <p class="text-muted">Sin áreas seleccionadas</p>
                 @endif
             </div>
 
@@ -177,7 +177,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <a href="{{ route('admin.users.destroy', ['id' => $info['id']]) }}" class="btn btn-danger">
-                    Si, eliminar
+                    Sí, eliminar
                 </a>
             </div>
         </div>
@@ -202,8 +202,8 @@
                         <label for="">Idioma del juego</label>
                         <select name="locale" id="locale" class="form-control" required>
                             <option value="">Selecciona idioma</option>
-                            <option value="en">Ingles</option>
-                            <option value="es">Espanol</option>
+                            <option value="en">Inglés</option>
+                            <option value="es">Español</option>
                         </select>
                     </div>
                 </div>
@@ -246,8 +246,8 @@
                         <label for="locale">Idioma del juego</label>
                         <select name="locale" id="locale" class="form-control" required>
                             <option value="">Selecciona idioma</option>
-                            <option value="en">Ingles</option>
-                            <option value="es">Espanol</option>
+                            <option value="en">Inglés</option>
+                            <option value="es">Español</option>
                         </select>
                     </div>
                 </div>

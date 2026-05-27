@@ -50,7 +50,7 @@
                                     </div>
                                     <div class="col-lg-4 form-group">
                                         <label for="">Unidad</label>
-                                        <input type="text" class="form-control" placeholder="Policia Municipal"
+                                        <input type="text" class="form-control" placeholder="Policía Municipal"
                                             name="security_unit_name" value="{{ old('security_unit_name') }}">
                                     </div>
                                     <div class="col-lg-4 form-group">
@@ -59,24 +59,24 @@
                                             name="operational_group_name" value="{{ old('operational_group_name') }}">
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Area asignada</label>
-                                        <input type="text" class="form-control" placeholder="Transito, proximidad, reaccion"
+                                        <label for="">Área asignada</label>
+                                        <input type="text" class="form-control" placeholder="Tránsito, proximidad, reacción"
                                             name="assignment_area" value="{{ old('assignment_area') }}">
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Contrasena</label>
-                                        <input type="password" class="form-control" placeholder="Contrasena" name="password"
+                                        <label for="">Contraseña</label>
+                                        <input type="password" class="form-control" placeholder="Contraseña" name="password"
                                             required>
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Confirmar contrasena</label>
-                                        <input type="password" class="form-control" placeholder="Confirmar contrasena"
+                                        <label for="">Confirmar contraseña</label>
+                                        <input type="password" class="form-control" placeholder="Confirmar contraseña"
                                             name="confirm_password" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
-                                        <label for="">Genero</label>
+                                        <label for="">Género</label>
                                         <select name="gender" class="form-control" required>
-                                            <option selected disabled>Selecciona genero</option>
+                                            <option selected disabled>Selecciona género</option>
                                             <option value="male">Masculino</option>
                                             <option value="female">Femenino</option>
                                             <option value="other">Otro</option>

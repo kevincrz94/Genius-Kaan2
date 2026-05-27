@@ -6,7 +6,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h3 class="mb-1">Panel de aptitud cognitiva operativa</h3>
-                    <p class="text-muted mb-0">Seguimiento por elemento, unidad, grupo y categoria.</p>
+                    <p class="text-muted mb-0">Seguimiento por elemento, unidad, grupo y categoría.</p>
                 </div>
             </div>
 
@@ -36,7 +36,7 @@
                             </select>
                         </div>
                         <div class="col-lg-3">
-                            <label class="form-label">Categoria</label>
+                            <label class="form-label">Categoría</label>
                             <select name="category" class="form-control">
                                 <option value="">Todas</option>
                                 @foreach ($categories as $key => $label)
@@ -69,7 +69,7 @@
                 @foreach ([
                     ['label' => 'Elementos', 'value' => $summary['elements']],
                     ['label' => 'Evaluados', 'value' => $summary['evaluated']],
-                    ['label' => 'Indice operativo', 'value' => $summary['operational_index'] ?: '0'],
+                    ['label' => 'Índice operativo', 'value' => $summary['operational_index'] ?: '0'],
                     ['label' => 'Alertas activas', 'value' => $summary['active_alerts']],
                     ['label' => 'Refuerzo requerido', 'value' => $summary['reinforcement_required']],
                 ] as $card)
@@ -88,13 +88,13 @@
                 <div class="col-lg-6">
                     <div class="card customShadow h-100">
                         <div class="card-header">
-                            <h5 class="mb-0">Promedio por categoria</h5>
+                            <h5 class="mb-0">Promedio por categoría</h5>
                         </div>
                         <div class="card-body p-0">
                             <table class="table mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Categoria</th>
+                                        <th>Categoría</th>
                                         <th class="text-center">Puntaje</th>
                                         <th>Nivel</th>
                                     </tr>
@@ -108,7 +108,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted py-4">Sin metricas registradas.</td>
+                                            <td colspan="3" class="text-center text-muted py-4">Sin métricas registradas.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -128,7 +128,7 @@
                                     <tr>
                                         <th>Elemento</th>
                                         <th>Unidad</th>
-                                        <th class="text-center">Indice</th>
+                                        <th class="text-center">Índice</th>
                                     </tr>
                                 </thead>
                                 <tbody>

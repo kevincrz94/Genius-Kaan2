@@ -61,7 +61,7 @@
                                         value="{{ old('email') }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <input name= "password"class="form-control" type="password" placeholder="Contrasena"
+                                    <input name= "password"class="form-control" type="password" placeholder="Contraseña"
                                         required>
                                 </div>
                                 <div class="mb-3">

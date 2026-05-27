@@ -30,7 +30,7 @@
                         </div>
                         <ul class="list-group list-group-flush">
                             <li class="d-flex justify-content-between align-items-center list-group-item">
-                                Genero:
+                                Género:
                                 <span class="fw-bold">
                                     {{ $viewData::printData($info, 'gender') }}
                                 </span>
@@ -63,7 +63,7 @@
                                 @endphp
                                 <span
                                     class="badge badge-{{ $gamePlayed == 2 ? 'danger' : ($gamePlayed == 1 ? 'success' : 'warning') }}">
-                                    {{ $gamePlayed == 2 ? 'No' : ($gamePlayed == 1 ? 'Si' : 'Inactivo') }}
+                                    {{ $gamePlayed == 2 ? 'No' : ($gamePlayed == 1 ? 'Sí' : 'Inactivo') }}
                                 </span>
                             </li>
                             <li class="d-flex justify-content-between align-items-center list-group-item">
@@ -99,7 +99,7 @@
                                                     ? $info['userIntrest']['areas']
                                                     : [];
                                             @endphp
-                                            Areas ({{ count($goalsArray) }})
+                                            Áreas ({{ count($goalsArray) }})
                                         </a>
                                     </li>
                                     <li class="nav-item" role="presentation">

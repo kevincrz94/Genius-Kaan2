@@ -44,7 +44,7 @@
                     </div>
                     <div class="mb-3">
                         <select name="gender" class="form-control" required>
-                            <option value="">Selecciona genero</option>
+                            <option value="">Selecciona género</option>
                             <option value="male" {{ isset($user) && $user->gender == 'male' ? 'selected' : '' }}>Masculino
                             </option>
                             <option value="female" {{ isset($user) && $user->gender == 'female' ? 'selected' : '' }}>
@@ -56,7 +56,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <input type="password" name="password" class="form-control" placeholder="Contrasena"
+                        <input type="password" name="password" class="form-control" placeholder="Contraseña"
                             {{ isset($user) ? '' : 'required' }}>
                     </div>
                     <button type="submit" class="btn btn-primary">{{ isset($user) ? 'Actualizar' : 'Agregar' }}</button>
@@ -76,7 +76,7 @@
                 <th>Correo</th>
                 <th>Imagen</th>
                 <th>Edad</th>
-                <th>Genero</th>
+                <th>Género</th>
                 <th>Acciones</th>
             </tr>
         </thead>

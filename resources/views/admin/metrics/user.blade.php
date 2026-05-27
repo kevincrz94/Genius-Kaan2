@@ -19,26 +19,26 @@
                 <div class="col-lg-4">
                     <div class="card customShadow">
                         <div class="card-body">
-                            <span class="text-muted">Indice cognitivo operativo</span>
+                            <span class="text-muted">Índice cognitivo operativo</span>
                             <h1 class="mt-2">{{ $operationalIndex ?: 0 }}</h1>
                             <div class="small text-muted">
                                 Grupo: {{ $user->operationalGroup?->name ?: 'Sin grupo' }}
                             </div>
                             <div class="small text-muted">
-                                Area: {{ $user->assignment_area ?: 'Sin area asignada' }}
+                                Área: {{ $user->assignment_area ?: 'Sin área asignada' }}
                             </div>
                         </div>
                     </div>
 
                     <div class="card customShadow mt-3">
                         <div class="card-header">
-                            <h5 class="mb-0">Registrar medicion</h5>
+                            <h5 class="mb-0">Registrar medición</h5>
                         </div>
                         <div class="card-body">
                             <form method="post" action="{{ route('admin.metrics.user.store', $user) }}">
                                 @csrf
                                 <div class="form-group">
-                                    <label>Categoria</label>
+                                    <label>Categoría</label>
                                     <select name="category" class="form-control" required>
                                         @foreach ($categories as $key => $label)
                                             <option value="{{ $key }}">{{ $label }}</option>
@@ -46,9 +46,9 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Metrica</label>
+                                    <label>Métrica</label>
                                     <input type="text" name="metric_name" class="form-control"
-                                        placeholder="Ej. Evaluacion de atencion dividida">
+                                        placeholder="Ej. Evaluación de atención dividida">
                                 </div>
                                 <div class="form-group">
                                     <label>Puntaje 0-100</label>
@@ -67,7 +67,7 @@
                                     <label>Fecha</label>
                                     <input type="date" name="measured_at" class="form-control" value="{{ now()->toDateString() }}">
                                 </div>
-                                <button class="btn btn-primary w-100">Guardar medicion</button>
+                                <button class="btn btn-primary w-100">Guardar medición</button>
                             </form>
                         </div>
                     </div>
@@ -76,13 +76,13 @@
                 <div class="col-lg-8">
                     <div class="card customShadow">
                         <div class="card-header">
-                            <h5 class="mb-0">Categorias operativas</h5>
+                            <h5 class="mb-0">Categorías operativas</h5>
                         </div>
                         <div class="card-body p-0">
                             <table class="table mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Categoria</th>
+                                        <th>Categoría</th>
                                         <th class="text-center">Puntaje</th>
                                         <th>Nivel</th>
                                     </tr>
@@ -96,7 +96,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3" class="text-center text-muted py-4">Sin metricas para este elemento.</td>
+                                            <td colspan="3" class="text-center text-muted py-4">Sin métricas para este elemento.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -117,8 +117,8 @@
                                 <thead>
                                     <tr>
                                         <th>Fecha</th>
-                                        <th>Categoria</th>
-                                        <th>Metrica</th>
+                                        <th>Categoría</th>
+                                        <th>Métrica</th>
                                         <th class="text-center">Puntaje</th>
                                         <th>Fuente</th>
                                     </tr>
