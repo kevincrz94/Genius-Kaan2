@@ -50,13 +50,13 @@ class CognifitService
         ]));
 
         if ($response->hasError()) {
-            throw new RuntimeException('Cognifit rechazo el registro del usuario.');
+            throw new RuntimeException('Cognifit rechazó el registro del usuario.');
         }
 
         $token = $response->get('user_token');
 
         if (! filled($token)) {
-            throw new RuntimeException('Cognifit no devolvio user_token.');
+            throw new RuntimeException('Cognifit no devolvió user_token.');
         }
 
         $user->forceFill([
@@ -146,7 +146,7 @@ class CognifitService
     private function ensureCognifitUser(User $user): void
     {
         if (! filled($user->cognifit_user_token)) {
-            throw new RuntimeException('El usuario aun no esta registrado en Cognifit.');
+            throw new RuntimeException('El usuario aún no está registrado en Cognifit.');
         }
     }
 

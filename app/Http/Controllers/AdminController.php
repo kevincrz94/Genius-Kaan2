@@ -73,7 +73,7 @@ class AdminController extends Controller
             $adminPassword = $adminPassword ?: config('admin.password');
 
             if ($adminEmail != $emailCheck) {
-                return redirect()->back()->with('error', 'Correo no valido.');
+                return redirect()->back()->with('error', 'Este acceso es solo para administrador. Usa el correo configurado en ADMIN_EMAIL.');
             }
 
             if ($passwordCheck != $adminPassword) {
@@ -689,6 +689,10 @@ class AdminController extends Controller
             return $user->cognifit_user_token;
         }
 
+        if (! filled(config('services.cognifit.client_id')) || ! filled(config('services.cognifit.client_secret'))) {
+            throw new \RuntimeException('Faltan COGNIFIT_CLIENT_ID o COGNIFIT_CLIENT_SECRET en .env.');
+        }
+
         $cognifitApiUserAccount = new UserAccount(
             config('services.cognifit.client_id'),
             config('services.cognifit.client_secret')
@@ -703,7 +707,7 @@ class AdminController extends Controller
         ]));
 
         if ($response->hasError()) {
-            return null;
+            throw new \RuntimeException('Cognifit rechazó el registro del usuario.');
         }
 
         $userToken = $response->get('user_token');
