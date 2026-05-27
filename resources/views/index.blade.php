@@ -164,6 +164,43 @@
             background: #0b1220;
         }
 
+        #cognifit-loader-button {
+            display: grid;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        #cognifit-button {
+            min-height: 8rem;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            color: white;
+            background-color: #0d6efd;
+            background-size: cover;
+            background-position: center;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        #cognifit-button::after {
+            content: 'Iniciar juego';
+            display: grid;
+            place-items: center;
+            min-height: inherit;
+            background: rgba(0, 37, 76, 0.52);
+        }
+
+        #pMoreGames {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        #pMoreGames a {
+            color: #93c5fd;
+        }
+
         .status {
             margin-bottom: 1rem;
             padding: 0.9rem 1rem;
@@ -230,6 +267,12 @@
 
             <section class="panel game-panel">
                 <div id="game-status" class="status">Preparando juego Cognifit.</div>
+                <div id="cognifit-loader-button">
+                    <button id="cognifit-button" type="button"></button>
+                    <span id="pMoreGames">
+                        Más juegos en <a href="https://www.cognifit.com" target="_blank" rel="noopener">cognifit.com</a>
+                    </span>
+                </div>
                 <div id="cognifit-container"></div>
             </section>
         </main>
@@ -262,7 +305,6 @@
         }
 
         button.addEventListener('click', startCognifitGame);
-        window.addEventListener('load', startCognifitGame);
     </script>
 </body>
 
