@@ -10,7 +10,7 @@
 
 ## Configuracion de Plesk
 
-1. Crea la base PostgreSQL y su usuario desde Plesk.
+1. Crea la base MariaDB y su usuario desde Plesk.
 2. Configura el document root del dominio hacia la carpeta `public`.
 3. Copia `.env.plesk.example` como `.env`.
 4. Llena `APP_URL`, datos `DB_*` y variables `COGNIFIT_*`.
@@ -60,7 +60,7 @@ https://TU-DOMINIO.COM/api/health
 https://TU-DOMINIO.COM/api/cognifit/status
 ```
 
-`/api/health` debe responder `status: ok` cuando PostgreSQL este accesible.
+`/api/health` debe responder `status: ok` cuando MariaDB este accesible.
 `/api/cognifit/status` debe responder `configured: true` cuando las credenciales de Cognifit esten completas.
 
 ## Flutter
