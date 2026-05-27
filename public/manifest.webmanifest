@@ -1,8 +1,8 @@
 {
     "name": "Genius Kaan",
     "short_name": "Genius Kaan",
-    "description": "Entrenamiento y seguimiento de desarrollo cognitivo.",
-    "start_url": "/",
+    "description": "Entrenamiento y seguimiento cognitivo operativo para fuerzas de seguridad publica.",
+    "start_url": "/login",
     "scope": "/",
     "display": "standalone",
     "background_color": "#0f172a",
@@ -10,10 +10,16 @@
     "orientation": "portrait",
     "icons": [
         {
-            "src": "/icon.svg",
-            "sizes": "any",
-            "type": "image/svg+xml",
-            "purpose": "any"
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
             "src": "/common/favicon.png",
