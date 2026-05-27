@@ -707,8 +707,9 @@ class AdminController extends Controller
         ]));
 
         if ($response->hasError()) {
-            throw new \RuntimeException('Cognifit rechazó el registro del usuario.');
+            throw new \RuntimeException('Cognifit rechazó el registro del usuario: '.$this->cognifitErrorDetail($response));
         }
+
 
         $userToken = $response->get('user_token');
 
@@ -721,6 +722,60 @@ class AdminController extends Controller
         }
 
         return $userToken;
+    }
+
+    private function cognifitErrorDetail(mixed $response): string
+    {
+        foreach (['getErrorMessage', 'getError', 'getErrors', 'getMessage'] as $method) {
+            if (! method_exists($response, $method)) {
+                continue;
+            }
+
+            try {
+                $detail = $this->stringifyCognifitValue($response->{$method}());
+
+                if ($detail !== '') {
+                    return $detail;
+                }
+            } catch (\Throwable $th) {
+                //
+            }
+        }
+
+        foreach (['getData', 'getResponse'] as $method) {
+            if (! method_exists($response, $method)) {
+                continue;
+            }
+
+            try {
+                $detail = $this->stringifyCognifitValue($response->{$method}());
+
+                if ($detail !== '') {
+                    return $detail;
+                }
+            } catch (\Throwable $th) {
+                //
+            }
+        }
+
+        return 'sin detalle devuelto por el SDK.';
+    }
+
+    private function stringifyCognifitValue(mixed $value): string
+    {
+        if (is_string($value)) {
+            return trim($value);
+        }
+
+        if (is_scalar($value)) {
+            return trim((string) $value);
+        }
+
+        if (is_array($value) || is_object($value)) {
+            return trim((string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
+
+        return '';
     }
 
     private function resolveOperationalAssignment(?string $unitName, ?string $groupName): array
@@ -792,3 +847,4 @@ class AdminController extends Controller
         return $this->database ?: null;
     }
 }
+

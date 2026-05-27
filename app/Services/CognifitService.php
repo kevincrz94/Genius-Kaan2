@@ -50,7 +50,7 @@ class CognifitService
         ]));
 
         if ($response->hasError()) {
-            throw new RuntimeException('Cognifit rechazó el registro del usuario.');
+            throw new RuntimeException('Cognifit rechazó el registro del usuario: '.$this->errorDetail($response));
         }
 
         $token = $response->get('user_token');
@@ -136,6 +136,60 @@ class CognifitService
         ];
     }
 
+    private function errorDetail(mixed $response): string
+    {
+        foreach (['getErrorMessage', 'getError', 'getErrors', 'getMessage'] as $method) {
+            if (! method_exists($response, $method)) {
+                continue;
+            }
+
+            try {
+                $detail = $this->stringifyValue($response->{$method}());
+
+                if ($detail !== '') {
+                    return $detail;
+                }
+            } catch (\Throwable $th) {
+                //
+            }
+        }
+
+        foreach (['getData', 'getResponse'] as $method) {
+            if (! method_exists($response, $method)) {
+                continue;
+            }
+
+            try {
+                $detail = $this->stringifyValue($response->{$method}());
+
+                if ($detail !== '') {
+                    return $detail;
+                }
+            } catch (\Throwable $th) {
+                //
+            }
+        }
+
+        return 'sin detalle devuelto por el SDK.';
+    }
+
+    private function stringifyValue(mixed $value): string
+    {
+        if (is_string($value)) {
+            return trim($value);
+        }
+
+        if (is_scalar($value)) {
+            return trim((string) $value);
+        }
+
+        if (is_array($value) || is_object($value)) {
+            return trim((string) json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
+
+        return '';
+    }
+
     private function ensureConfigured(): void
     {
         if (! $this->configured()) {
@@ -162,3 +216,4 @@ class CognifitService
         return config('services.cognifit.client_secret');
     }
 }
+
