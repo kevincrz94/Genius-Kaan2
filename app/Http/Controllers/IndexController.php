@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Services\CognifitService;
 use App\Services\customBlock;
+use CognifitSdk\Api\UserAccessToken;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -200,44 +200,76 @@ class IndexController extends Controller
     public function startGame(Request $request)
     {
         $pageTitle = 'Genius Kaan | Sesion cognitiva';
+        $cognifitUserToken = $request->string('user_token')->trim()->value();
+        $accessToken = null;
+        $launchError = null;
+
+        if (filled($cognifitUserToken)) {
+            try {
+                $accessToken = $this->cognifitAccessToken($cognifitUserToken);
+            } catch (Throwable $th) {
+                $launchError = $th->getMessage();
+            }
+        }
 
         $launchConfig = [
             'participant' => $request->string('participant')->trim()->value() ?: 'Paciente',
             'goal' => $request->string('goal')->trim()->value() ?: 'Entrenamiento cognitivo personalizado',
             'gameKey' => strtoupper($request->string('game_key')->trim()->value()),
-            'userToken' => $request->string('user_token')->trim()->value(),
+            'userToken' => $accessToken,
             'locale' => $request->string('locale')->trim()->value() ?: 'es',
             'image' => $request->string('image')->trim()->value(),
             'clientId' => config('services.cognifit.client_id') ?: '2cc41d68527b1b5eb49ee8ce8d802468',
             'sdkVersion' => $this->cognifitSdkVersion(),
+            'launchError' => $launchError,
         ];
 
         return view('index', compact('pageTitle', 'launchConfig'));
     }
 
-    private function cognifitSdkVersion(): ?string
+    private function cognifitAccessToken(string $cognifitUserToken): ?string
     {
-        if (filled(config('services.cognifit.sdk_version'))) {
-            return config('services.cognifit.sdk_version');
+        if (! filled(config('services.cognifit.client_id')) || ! filled(config('services.cognifit.client_secret'))) {
+            throw new \RuntimeException('Faltan credenciales de Cognifit en .env.');
         }
 
-        return Cache::remember('cognifit_sdkjs_version', now()->addHours(6), function () {
-            try {
-                $response = Http::timeout(8)
-                    ->acceptJson()
-                    ->get(rtrim(config('services.cognifit.base_url'), '/').'/description/versions/sdkjs', [
-                        'v' => '2.0',
-                    ]);
+        $api = new UserAccessToken(
+            config('services.cognifit.client_id'),
+            config('services.cognifit.client_secret')
+        );
 
-                if (! $response->successful()) {
-                    return null;
-                }
+        $response = $api->issue($cognifitUserToken);
 
-                return $this->extractCognifitVersion($response->json() ?? trim($response->body()));
-            } catch (Throwable $th) {
+        if ($response->hasError()) {
+            throw new \RuntimeException('Cognifit no pudo emitir access token para el usuario.');
+        }
+
+        $accessToken = $response->get('access_token');
+
+        if (! filled($accessToken)) {
+            throw new \RuntimeException('Cognifit no devolvio access token.');
+        }
+
+        return $accessToken;
+    }
+
+    private function cognifitSdkVersion(): ?string
+    {
+        try {
+            $response = Http::timeout(8)
+                ->acceptJson()
+                ->get(rtrim(config('services.cognifit.base_url'), '/').'/description/versions/sdkjs', [
+                    'v' => '2.0',
+                ]);
+
+            if (! $response->successful()) {
                 return null;
             }
-        });
+
+            return $this->extractCognifitVersion($response->json() ?? trim($response->body()));
+        } catch (Throwable $th) {
+            return null;
+        }
     }
 
     private function extractCognifitVersion(mixed $payload): ?string

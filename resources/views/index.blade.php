@@ -243,6 +243,7 @@
         $image = $launchConfig['image'] ?? '';
         $clientId = $launchConfig['clientId'] ?? '';
         $sdkVersion = $launchConfig['sdkVersion'] ?? '';
+        $launchError = $launchConfig['launchError'] ?? '';
     @endphp
 
     <div class="launcher-page">
@@ -265,7 +266,7 @@
                         <strong>{{ $gameKey ?: 'Pendiente' }}</strong>
                     </div>
                     <div class="meta-item">
-                        <span>Token</span>
+                        <span>Access token</span>
                         <strong>{{ $userToken ? substr($userToken, 0, 6).'...'.substr($userToken, -4) : 'Sin token' }}</strong>
                     </div>
                     <div class="meta-item">
@@ -307,6 +308,7 @@
         const clientId = @json($clientId);
         const sdkVersion = @json($sdkVersion);
         const locale = @json($locale);
+        const launchError = @json($launchError);
         const statusBox = document.getElementById('game-status');
         const button = document.getElementById('start-game-button');
         let loaderPromise = null;
@@ -329,6 +331,11 @@
         }
 
         async function startCognifitGame() {
+            if (launchError) {
+                statusBox.textContent = launchError;
+                return;
+            }
+
             if (!gameKey) {
                 statusBox.textContent = 'No se recibió la clave del juego.';
                 return;
@@ -371,6 +378,21 @@
                 statusBox.textContent = error.message || 'No se pudo iniciar el juego Cognifit.';
             }
         }
+
+        window.addEventListener('message', function(event) {
+            const data = event.data || {};
+
+            if (data.status !== 'completed' && data.status !== 'aborted') {
+                return;
+            }
+
+            const container = document.getElementById('cognifit-container');
+            container.innerHTML = '';
+            document.getElementById('cognifit-loader-button').style.display = '';
+            statusBox.textContent = data.status === 'completed'
+                ? 'Actividad completada.'
+                : 'Actividad cancelada.';
+        });
 
         button && button.addEventListener('click', startCognifitGame);
     </script>
