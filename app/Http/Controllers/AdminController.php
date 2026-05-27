@@ -420,10 +420,10 @@ class AdminController extends Controller
             'operational_group_id' => 'nullable|exists:operational_groups,id',
             'assignment_area_id' => 'nullable|exists:assignment_areas,id',
             'image' => 'nullable|image',
-            'age' => 'required',
-            'gender' => 'required',
+            'age' => 'nullable|integer|min:1|max:120',
+            'gender' => 'nullable|in:male,female,other',
             'password' => 'required',
-            'confirm_password' => 'required|same:password',
+            'confirm_password' => 'nullable|same:password',
         ]);
 
         $imageName = null;
@@ -447,8 +447,8 @@ class AdminController extends Controller
             'security_unit_id' => $unit?->id,
             'operational_group_id' => $group?->id,
             'image' => $imageName,
-            'age' => $request->age,
-            'gender' => $request->gender,
+            'age' => $request->filled('age') ? $request->age : null,
+            'gender' => $request->filled('gender') ? $request->gender : null,
             'password' => $request->password,
             'status' => 1,
         ]);
@@ -626,9 +626,7 @@ class AdminController extends Controller
             if (
                 $name === '' ||
                 ! filter_var($email, FILTER_VALIDATE_EMAIL) ||
-                $password === '' ||
-                $age === '' ||
-                $gender === ''
+                $password === ''
             ) {
                 $skipped++;
 
@@ -647,8 +645,8 @@ class AdminController extends Controller
                     'security_unit_id' => $unit?->id,
                     'operational_group_id' => $group?->id,
                     'image' => null,
-                    'age' => $age,
-                    'gender' => strtolower($gender),
+                    'age' => $age !== '' ? $age : null,
+                    'gender' => $gender !== '' ? strtolower($gender) : null,
                     'password' => $password,
                     'status' => 1,
                 ]);
@@ -673,7 +671,7 @@ class AdminController extends Controller
         $message = $count.' elementos importados correctamente. '.$cognifitCount.' registrados en Cognifit.';
 
         if ($skipped > 0) {
-            $message .= ' '.$skipped.' filas omitidas por datos incompletos, correo inválido o correo duplicado.';
+            $message .= ' '.$skipped.' filas omitidas por nombre/correo/contraseña incompletos, correo inválido o correo duplicado.';
         }
 
         if ($cognifitErrors !== []) {

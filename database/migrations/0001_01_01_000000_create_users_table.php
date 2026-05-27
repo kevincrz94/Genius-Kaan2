@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('image')->nullable();
-            $table->integer('age');
-            $table->enum('gender', ['male', 'female', 'other']);
+            $table->integer('age')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->nullable();
             $table->string('password');
             $table->timestamp('created_at')->useCurrent();
             $table->tinyInteger('status')->default(1);

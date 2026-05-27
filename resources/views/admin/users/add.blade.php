@@ -41,7 +41,7 @@
                                     <div class="col-lg-4 form-group">
                                         <label>Edad</label>
                                         <input type="number" class="form-control" placeholder="Edad" name="age"
-                                            value="{{ old('age') }}" required>
+                                            value="{{ old('age') }}">
                                     </div>
                                     <div class="col-lg-4 form-group">
                                         <label>Placa / ID operativo</label>
@@ -100,11 +100,11 @@
                                     <div class="col-lg-4 form-group">
                                         <label>Confirmar contraseña</label>
                                         <input type="password" class="form-control" placeholder="Confirmar contraseña"
-                                            name="confirm_password" required>
+                                            name="confirm_password">
                                     </div>
                                     <div class="col-lg-4 form-group">
                                         <label>Género</label>
-                                        <select name="gender" class="form-control" required>
+                                        <select name="gender" class="form-control">
                                             <option selected disabled>Selecciona género</option>
                                             <option value="male">Masculino</option>
                                             <option value="female">Femenino</option>

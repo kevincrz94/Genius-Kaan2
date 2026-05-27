@@ -85,14 +85,13 @@
                                                     <td>
                                                         <input type="number" name="rows[{{ $i }}][age]"
                                                             class="form-control"
-                                                            value="{{ old("rows.$i.age", $pick($row, ['Edad', 'Age', 'age'])) }}"
-                                                            required>
+                                                            value="{{ old("rows.$i.age", $pick($row, ['Edad', 'Age', 'age'])) }}">
                                                     </td>
                                                     <td>
                                                         @php
                                                             $genderValue = old("rows.$i.gender", strtolower($pick($row, ['Género', 'Genero', 'Gender', 'gender'])));
                                                         @endphp
-                                                        <select name="rows[{{ $i }}][gender]" class="form-control" required>
+                                                        <select name="rows[{{ $i }}][gender]" class="form-control">
                                                             <option value="">Selecciona</option>
                                                             <option value="male" @selected($genderValue === 'male')>Masculino</option>
                                                             <option value="female" @selected($genderValue === 'female')>Femenino</option>
