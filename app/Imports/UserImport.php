@@ -14,31 +14,26 @@ class UserImport implements ToCollection
      */
     public function collection(Collection $collection)
     {
-        // Skip header row
-        $rows = $collection->slice(1)->values();
+        $rows = $this->hasHeaderRow($collection)
+            ? $collection->slice(1)->values()
+            : $collection->values();
 
         foreach ($rows as $row) {
 
             $record = [
-                'name' => $row[0] ?? null,
-                'email' => $row[1] ?? null,
-                'password' => $row[2] ?? null,
-                'age' => $row[3] ?? null,
-                'gender' => $this->normalizeGender($row[4] ?? null),
-                'badge_number' => $row[5] ?? null,
-                'rank' => $row[6] ?? null,
-                'security_unit' => $row[7] ?? null,
-                'operational_group' => $row[8] ?? null,
-                'assignment_area' => $row[9] ?? null,
+                'name' => $this->cell($row, 0),
+                'email' => $this->cell($row, 1),
+                'password' => $this->cell($row, 2),
+                'age' => $this->cell($row, 3),
+                'gender' => $this->normalizeGender($this->cell($row, 4)),
+                'badge_number' => $this->cell($row, 5),
+                'rank' => $this->cell($row, 6),
+                'security_unit' => $this->cell($row, 7),
+                'operational_group' => $this->cell($row, 8),
+                'assignment_area' => $this->cell($row, 9),
             ];
 
-            if (
-                empty($record['name']) ||
-                empty($record['email']) ||
-                empty($record['password']) ||
-                is_null($record['age']) ||
-                empty($record['gender'])
-            ) {
+            if (! $this->hasContent($record)) {
                 continue;
             }
 
@@ -53,13 +48,92 @@ class UserImport implements ToCollection
 
     private function normalizeGender($value): ?string
     {
-        $normalized = strtolower(trim((string) $value));
+        $normalized = $this->normalizeText($value);
 
         return match ($normalized) {
-            'masculino', 'hombre' => 'male',
-            'femenino', 'mujer' => 'female',
-            'otro', 'otra' => 'other',
+            'm', 'masc', 'masculino', 'hombre', 'male' => 'male',
+            'f', 'fem', 'femenino', 'mujer', 'female' => 'female',
+            'o', 'otro', 'otra', 'other' => 'other',
             default => $normalized ?: null,
         };
+    }
+
+    private function cell($row, int $index): ?string
+    {
+        $value = $row[$index] ?? null;
+
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
+    }
+
+    private function hasContent(array $record): bool
+    {
+        foreach ($record as $value) {
+            if ($value !== null && trim((string) $value) !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function hasHeaderRow(Collection $collection): bool
+    {
+        $first = $collection->first();
+
+        if (! $first) {
+            return false;
+        }
+
+        $labels = collect($first)
+            ->take(10)
+            ->map(fn ($value) => $this->normalizeText($value))
+            ->filter()
+            ->all();
+
+        $knownLabels = [
+            'nombre',
+            'name',
+            'correo',
+            'email',
+            'contrasena',
+            'password',
+            'edad',
+            'age',
+            'genero',
+            'gender',
+            'placa',
+            'rango',
+            'unidad',
+            'grupo operativo',
+            'area asignada',
+        ];
+
+        return count(array_intersect($labels, $knownLabels)) >= 2;
+    }
+
+    private function normalizeText($value): string
+    {
+        $text = strtolower(trim((string) $value));
+
+        return strtr($text, [
+            'á' => 'a',
+            'é' => 'e',
+            'í' => 'i',
+            'ó' => 'o',
+            'ú' => 'u',
+            'ñ' => 'n',
+            'Á' => 'a',
+            'É' => 'e',
+            'Í' => 'i',
+            'Ó' => 'o',
+            'Ú' => 'u',
+            'Ñ' => 'n',
+        ]);
     }
 }

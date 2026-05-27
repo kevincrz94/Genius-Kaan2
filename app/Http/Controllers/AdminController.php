@@ -606,21 +606,34 @@ class AdminController extends Controller
         $rows = $request->rows;
 
         $count = 0;
+        $skipped = 0;
         $cognifitCount = 0;
         $cognifitErrors = [];
 
         foreach ($rows as $row) {
 
-            $name = $row['name'];
-            $email = $row['email'];
-            $age = $row['age'];
-            $gender = $row['gender'];
-            $password = $row['password'];
-            $badgeNumber = $row['badge_number'] ?? null;
+            $name = trim((string) ($row['name'] ?? ''));
+            $email = trim((string) ($row['email'] ?? ''));
+            $age = trim((string) ($row['age'] ?? ''));
+            $gender = trim((string) ($row['gender'] ?? ''));
+            $password = trim((string) ($row['password'] ?? ''));
+            $badgeNumber = trim((string) ($row['badge_number'] ?? '')) ?: null;
             $rank = $this->resolveRankName($row['rank'] ?? null);
-            $unitName = $row['security_unit'] ?? null;
-            $groupName = $row['operational_group'] ?? null;
+            $unitName = trim((string) ($row['security_unit'] ?? '')) ?: null;
+            $groupName = trim((string) ($row['operational_group'] ?? '')) ?: null;
             $assignmentArea = $this->resolveAreaName($row['assignment_area'] ?? null);
+
+            if (
+                $name === '' ||
+                ! filter_var($email, FILTER_VALIDATE_EMAIL) ||
+                $password === '' ||
+                $age === '' ||
+                $gender === ''
+            ) {
+                $skipped++;
+
+                continue;
+            }
 
             if (! User::where('email', $email)->exists()) {
                 [$unit, $group] = $this->resolveOperationalAssignment($unitName, $groupName);
@@ -651,11 +664,17 @@ class AdminController extends Controller
                 }
 
                 $count++;
+            } else {
+                $skipped++;
             }
 
         }
 
         $message = $count.' elementos importados correctamente. '.$cognifitCount.' registrados en Cognifit.';
+
+        if ($skipped > 0) {
+            $message .= ' '.$skipped.' filas omitidas por datos incompletos, correo inválido o correo duplicado.';
+        }
 
         if ($cognifitErrors !== []) {
             return redirect()
