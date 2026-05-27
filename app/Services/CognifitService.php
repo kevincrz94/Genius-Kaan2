@@ -175,7 +175,7 @@ class CognifitService
 
     private function passwordForCognifit(): string
     {
-        return 'Gk'.Str::random(10).'9#';
+        return 'Gk'.Str::random(10).'9@';
     }
 
     private function stringifyValue(mixed $value): string

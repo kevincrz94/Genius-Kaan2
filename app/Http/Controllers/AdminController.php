@@ -763,7 +763,7 @@ class AdminController extends Controller
 
     private function cognifitPassword(): string
     {
-        return 'Gk'.StringHelper::randomString(10).'9#';
+        return 'Gk'.StringHelper::randomString(10).'9@';
     }
 
     private function stringifyCognifitValue(mixed $value): string
