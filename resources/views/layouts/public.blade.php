@@ -90,10 +90,14 @@
         }
 
         .brand-mark {
-            width: 4.8rem;
+            width: 5.2rem;
             height: 3rem;
             display: block;
             object-fit: contain;
+            padding: 0.35rem 0.55rem;
+            border-radius: 8px;
+            background: var(--ink);
+            box-shadow: 0 10px 24px rgba(0, 37, 76, 0.18);
         }
 
         .brand-copy small {
@@ -544,7 +548,6 @@
 
                 <nav class="nav-actions">
                     <a href="{{ route('home') }}" class="btn btn-secondary">Inicio</a>
-                    <a href="{{ route('launcher') }}" class="btn btn-secondary">Sesiones</a>
                     <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Panel</a>
                 </nav>
             </div>
