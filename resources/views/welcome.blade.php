@@ -15,7 +15,7 @@
             </p>
 
             <div class="cta-row">
-                <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Iniciar sesión</a>
+                <a href="{{ route('user.login') }}" class="btn btn-primary">Iniciar sesión</a>
             </div>
 
             <div class="badge-row">
@@ -234,7 +234,7 @@
             </p>
 
             <div class="cta-row">
-                <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Iniciar sesión</a>
+                <a href="{{ route('user.login') }}" class="btn btn-primary">Iniciar sesión</a>
             </div>
         </article>
     </section>

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class IndexController extends Controller
 {
@@ -29,13 +31,13 @@ class IndexController extends Controller
             [
                 'label' => 'Entrenamiento',
                 'value' => '1 panel',
-                'description' => 'Evaluacion, sesiones y reportes conectados en un mismo flujo.',
+                'description' => 'Evaluación, sesiones y reportes conectados en un mismo flujo.',
             ],
         ];
 
         $pillars = [
             [
-                'title' => 'Atencion ejecutiva',
+                'title' => 'Atención ejecutiva',
                 'description' => 'Rutinas para sostener foco, alternar tareas y reducir la fatiga cognitiva.',
                 'accent' => '#ef8354',
             ],
@@ -74,7 +76,7 @@ class IndexController extends Controller
             ],
             [
                 'step' => '02',
-                'title' => 'Disenar sesiones utiles',
+                'title' => 'Diseñar sesiones útiles',
                 'description' => 'Cada rutina responde a una necesidad concreta y a un perfil cognitivo real.',
             ],
             [
@@ -106,32 +108,67 @@ class IndexController extends Controller
         return view('welcome', compact('pageTitle', 'signals', 'pillars', 'journey', 'audiences'));
     }
 
+    public function showLogin()
+    {
+        if (session('operational_user_id')) {
+            return redirect()->route('user.games');
+        }
+
+        $pageTitle = 'Genius Kaan | Acceso operativo';
+
+        return view('user.login', compact('pageTitle'));
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $user = User::query()
+            ->where('email', $credentials['email'])
+            ->where('status', 1)
+            ->first();
+
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+            return redirect()
+                ->back()
+                ->withInput($request->only('email'))
+                ->with('error', 'Credenciales inválidas o usuario inactivo.');
+        }
+
+        session()->put('operational_user_id', $user->id);
+
+        return redirect()->route('user.games');
+    }
+
+    public function logout()
+    {
+        session()->forget('operational_user_id');
+
+        return redirect()->route('user.login')->with('success', 'Sesión cerrada correctamente.');
+    }
+
+    public function games()
+    {
+        $user = $this->operationalUser();
+
+        if (! $user) {
+            return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
+        }
+
+        $pageTitle = 'Genius Kaan | Juegos operativos';
+        $availableGames = $this->availableGames();
+
+        return view('user.games', compact('pageTitle', 'user', 'availableGames'));
+    }
+
     public function launcher(Request $request)
     {
-        $pageTitle = 'Genius Kaan | Preparar sesion';
+        $pageTitle = 'Genius Kaan | Preparar sesión';
 
-        $availableGames = [
-            [
-                'key' => 'THE_BLUE_SHAPE',
-                'title' => 'The Blue Shape',
-                'focus' => 'Atencion selectiva y velocidad de respuesta.',
-            ],
-            [
-                'key' => 'MAHJONG',
-                'title' => 'Mahjong',
-                'focus' => 'Memoria visual, estrategia y reconocimiento de patrones.',
-            ],
-            [
-                'key' => 'PIT_STOP',
-                'title' => 'Pit Stop',
-                'focus' => 'Planificacion, alternancia mental y control ejecutivo.',
-            ],
-            [
-                'key' => 'FROGGY_CROSSING',
-                'title' => 'Froggy Crossing',
-                'focus' => 'Coordinacion, anticipacion y gestion de impulsos.',
-            ],
-        ];
+        $availableGames = $this->availableGames();
 
         $sessionDefaults = [
             'participant' => $request->string('participant')->trim()->value() ?: 'Paciente demo',
@@ -158,5 +195,45 @@ class IndexController extends Controller
         ];
 
         return view('index', compact('pageTitle', 'launchConfig'));
+    }
+
+    private function operationalUser(): ?User
+    {
+        $userId = session('operational_user_id');
+
+        if (! $userId) {
+            return null;
+        }
+
+        return User::query()
+            ->with(['securityUnit', 'operationalGroup'])
+            ->where('status', 1)
+            ->find($userId);
+    }
+
+    private function availableGames(): array
+    {
+        return [
+            [
+                'key' => 'THE_BLUE_SHAPE',
+                'title' => 'The Blue Shape',
+                'focus' => 'Atención selectiva y velocidad de respuesta.',
+            ],
+            [
+                'key' => 'MAHJONG',
+                'title' => 'Mahjong',
+                'focus' => 'Memoria visual, estrategia y reconocimiento de patrones.',
+            ],
+            [
+                'key' => 'PIT_STOP',
+                'title' => 'Pit Stop',
+                'focus' => 'Planificación, alternancia mental y control ejecutivo.',
+            ],
+            [
+                'key' => 'FROGGY_CROSSING',
+                'title' => 'Froggy Crossing',
+                'focus' => 'Coordinación, anticipación y gestión de impulsos.',
+            ],
+        ];
     }
 }
