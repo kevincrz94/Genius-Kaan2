@@ -703,7 +703,7 @@ class AdminController extends Controller
             'user_email' => $user->email,
             'user_birthday' => Carbon::now()->subYears($user->age ?: 18)->startOfYear()->format('Y-m-d'),
             'user_locale' => $locale,
-            'user_password' => 'Web@'.($password ?: StringHelper::randomString(12)),
+            'user_password' => $this->cognifitPassword(),
         ]));
 
         if ($response->hasError()) {
@@ -759,6 +759,11 @@ class AdminController extends Controller
         }
 
         return 'sin detalle devuelto por el SDK.';
+    }
+
+    private function cognifitPassword(): string
+    {
+        return 'Gk'.StringHelper::randomString(10).'9#';
     }
 
     private function stringifyCognifitValue(mixed $value): string

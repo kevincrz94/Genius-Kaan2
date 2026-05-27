@@ -46,7 +46,7 @@ class CognifitService
             'user_email' => $user->email,
             'user_birthday' => $this->birthdayFor($user),
             'user_locale' => $locale,
-            'user_password' => $password ?: 'Gk@'.Str::random(24),
+            'user_password' => $this->passwordForCognifit(),
         ]));
 
         if ($response->hasError()) {
@@ -171,6 +171,11 @@ class CognifitService
         }
 
         return 'sin detalle devuelto por el SDK.';
+    }
+
+    private function passwordForCognifit(): string
+    {
+        return 'Gk'.Str::random(10).'9#';
     }
 
     private function stringifyValue(mixed $value): string
