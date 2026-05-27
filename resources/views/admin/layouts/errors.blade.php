@@ -29,6 +29,20 @@
     </script>
 @endif
 
+@if (session('warning'))
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "timeOut": 20000
+            }
+            toastr.warning("{{ session('warning') }}");
+        });
+    </script>
+@endif
+
 @if (session('errors'))
     <script>
         $(document).ready(function() {

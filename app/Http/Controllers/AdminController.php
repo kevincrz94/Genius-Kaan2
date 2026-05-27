@@ -467,7 +467,7 @@ class AdminController extends Controller
                 ->with('warning', 'Elemento creado, pero el registro en Cognifit falló: '.$th->getMessage());
         }
 
-        return redirect()->route('admin.user.management')->with('success', 'Elemento creado correctamente');
+        return redirect()->route('admin.user.management')->with('success', 'Elemento creado y registrado en Cognifit correctamente.');
     }
 
     public function usersEdit($id)
@@ -606,6 +606,8 @@ class AdminController extends Controller
         $rows = $request->rows;
 
         $count = 0;
+        $cognifitCount = 0;
+        $cognifitErrors = [];
 
         foreach ($rows as $row) {
 
@@ -639,9 +641,13 @@ class AdminController extends Controller
                 ]);
 
                 try {
-                    $this->registerCognifitUser($user, 'es', $password);
+                    $token = $this->registerCognifitUser($user, 'es', $password);
+
+                    if (filled($token)) {
+                        $cognifitCount++;
+                    }
                 } catch (Throwable $th) {
-                    //
+                    $cognifitErrors[] = $email.': '.$th->getMessage();
                 }
 
                 $count++;
@@ -649,7 +655,15 @@ class AdminController extends Controller
 
         }
 
-        return redirect()->route('admin.user.management')->with('success', $count.' elementos importados correctamente');
+        $message = $count.' elementos importados correctamente. '.$cognifitCount.' registrados en Cognifit.';
+
+        if ($cognifitErrors !== []) {
+            return redirect()
+                ->route('admin.user.management')
+                ->with('warning', $message.' Fallas Cognifit: '.implode(' | ', array_slice($cognifitErrors, 0, 5)));
+        }
+
+        return redirect()->route('admin.user.management')->with('success', $message);
 
         // } catch (\Throwable $th) {
         //     return redirect()->back()->with("error", "Something went wrong");

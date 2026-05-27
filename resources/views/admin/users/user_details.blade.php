@@ -43,7 +43,7 @@
                     <button class="btn btn-success btn-sm btn-rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#registerInGameModal{{ $info['id'] }}">
                         <i class="fa fa-user-plus"></i>
-                        Registrar en Cognifit
+                        Reintentar alta Cognifit
                     </button>
                 @endif
                 <button class="btn btn-danger btn-sm btn-rounded" type="button" data-bs-toggle="modal"
@@ -238,7 +238,7 @@
                     <div class="alert alert-info" role="alert">
                         <h4 class="alert-heading">Registrar {{ $info['name'] }}</h4>
                         <p>
-                            Confirma que deseas registrar este elemento en Cognifit.
+                            El alta en Cognifit se intenta automáticamente al crear el elemento. Usa esta acción solo para reintentar si el token quedó pendiente.
                         </p>
                     </div>
                     <div class="form-group">

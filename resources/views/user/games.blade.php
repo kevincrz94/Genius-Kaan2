@@ -57,13 +57,13 @@
                     @if (filled($user->cognifit_user_token))
                         Tu usuario está listo para iniciar sesiones de entrenamiento.
                     @else
-                        El administrador debe registrar este elemento en Cognifit antes de iniciar juegos.
+                        El sistema intentó registrar tu usuario automáticamente en Cognifit, pero no se pudo completar.
                     @endif
                 </p>
 
                 @unless (filled($user->cognifit_user_token))
                     <div class="hero-note">
-                        Solicita al administrador que abra tu ficha y use la acción “Registrar en Cognifit”.
+                        {{ $cognifitError ?: 'Solicita al administrador revisar las credenciales de Cognifit.' }}
                     </div>
                 @endunless
             </article>

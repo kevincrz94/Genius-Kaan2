@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\CognifitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class IndexController extends Controller
 {
@@ -158,10 +160,21 @@ class IndexController extends Controller
             return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
         }
 
+        $cognifitError = null;
+
+        if (! filled($user->cognifit_user_token)) {
+            try {
+                app(CognifitService::class)->registerUser($user, 'es');
+                $user->refresh();
+            } catch (Throwable $th) {
+                $cognifitError = $th->getMessage();
+            }
+        }
+
         $pageTitle = 'Genius Kaan | Juegos operativos';
         $availableGames = $this->availableGames();
 
-        return view('user.games', compact('pageTitle', 'user', 'availableGames'));
+        return view('user.games', compact('pageTitle', 'user', 'availableGames', 'cognifitError'));
     }
 
     public function launcher(Request $request)
