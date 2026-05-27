@@ -9,9 +9,10 @@
                     <div class="card customShadow">
                         <div class="card-header">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="card-title">
-                                    Agregar elemento
-                                </h4>
+                                <div>
+                                    <h4 class="card-title mb-1">Agregar elemento</h4>
+                                    <p class="text-muted mb-0">El token Cognifit se genera desde este flujo administrativo.</p>
+                                </div>
                                 <a href="{{ route('admin.user.management') }}" class="btn btn-primary">
                                     <i class="fa fa-arrow-left"></i>
                                     Volver

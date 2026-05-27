@@ -37,11 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-// API For Launching Game
-Route::post('/launch-game', [ApiController::class, 'getLaunchGame']);
-
-// API For Getting All Users
-Route::get('/get-all-users', [ApiController::class, 'getAllUsers']);
-
-// API For Uploading Files to the server
-Route::post('/store-files', [ApiController::class, 'storeFiles']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/launch-game', [ApiController::class, 'getLaunchGame']);
+    Route::get('/get-all-users', [ApiController::class, 'getAllUsers']);
+    Route::post('/store-files', [ApiController::class, 'storeFiles']);
+});

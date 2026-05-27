@@ -61,8 +61,8 @@
 
                 <div class="checklist">
                     <div class="check-item">
-                        <strong>Alta de elementos</strong>
-                        <span>Registra placa, rango, unidad, grupo operativo y area asignada.</span>
+                        <strong>Alta controlada desde admin</strong>
+                        <span>Solo el administrador registra elementos, carga Excel y genera el token Cognifit.</span>
                     </div>
                     <div class="check-item">
                         <strong>Medicion cognitiva</strong>
@@ -139,7 +139,7 @@
             <article class="card timeline-card">
                 <span class="step-badge">01</span>
                 <h3>Registrar estructura</h3>
-                <p>Da de alta elementos, unidades, grupos operativos, rango y area asignada.</p>
+                <p>El administrador da de alta elementos, unidades, grupos operativos, rango y area asignada.</p>
             </article>
             <article class="card timeline-card">
                 <span class="step-badge">02</span>
@@ -168,7 +168,7 @@
                     <div class="line-item">
                         <div>
                             <strong>Elemento</strong>
-                            <p>Ficha individual con indice operativo, categorias, historial y alertas.</p>
+                    <p>Ficha individual con indice operativo, token Cognifit, categorias, historial y alertas.</p>
                         </div>
                         <span class="line-tag">Individual</span>
                     </div>
@@ -230,8 +230,8 @@
             <span class="eyebrow">Acceso institucional</span>
             <h2>Ingresa al panel para gestionar elementos, mediciones y reportes.</h2>
             <p class="section-copy">
-                Desde el panel operativo puedes crear elementos, importar estructuras por Excel, registrar mediciones,
-                consultar alertas y revisar reportes individuales o por grupo.
+                Desde el panel operativo el administrador crea elementos, importa estructuras por Excel, genera tokens
+                Cognifit, registra mediciones, consulta alertas y revisa reportes individuales o por grupo.
             </p>
 
             <div class="cta-row">

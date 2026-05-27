@@ -34,6 +34,9 @@
                                     Importar elementos
                                 </button>
                             </div>
+                            <p class="text-muted small mb-0 mt-2">
+                                La carga administrativa crea el elemento y solicita su token Cognifit.
+                            </p>
                         </div>
                         <ul class="list-group" style="max-height:80vh; overflow-y:auto">
                             @foreach ($list as $user)
