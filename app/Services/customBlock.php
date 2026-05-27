@@ -25,9 +25,9 @@ class customBlock
         $array = [];
 
         try {
-            $clientID = env('COGNIFIT_API_KEY');
+            $clientID = config('services.cognifit.client_id');
 
-            $baseURL = env('API_BASE_URL') . '/' . $endPoint . '?client_id=' . $clientID;
+            $baseURL = config('services.cognifit.base_url') . '/' . $endPoint . '?client_id=' . $clientID;
 
             $new = new Client();
 
@@ -135,8 +135,8 @@ class customBlock
         $array = [];
 
         try {
-            $clientID = env('COGNIFIT_API_KEY');
-            $baseURL = env('API_BASE_URL') . '/' . $endPoint . '?client_id=' . $clientID . '&locales[]=en&locales[]=es';
+            $clientID = config('services.cognifit.client_id');
+            $baseURL = config('services.cognifit.base_url') . '/' . $endPoint . '?client_id=' . $clientID . '&locales[]=en&locales[]=es';
 
             $client = new Client();
             $response = $client->request($method, $baseURL);

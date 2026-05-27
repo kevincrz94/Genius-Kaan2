@@ -149,7 +149,10 @@ class AdminController extends Controller
 
         $getToken = $info['user_token'] ?? null;
         if ($getToken && $getToken != '-') {
-            $api = new \CognifitSdk\Api\UserActivity(env('COGNIFIT_API_KEY'), env('COGNIFIT_SECRET_KEY'));
+            $api = new \CognifitSdk\Api\UserActivity(
+                config('services.cognifit.client_id'),
+                config('services.cognifit.client_secret')
+            );
 
             $res = $api->getHistoricalScoreAndSkills($getToken);
             if (! $res->hasError()) {
@@ -194,8 +197,8 @@ class AdminController extends Controller
             $userPassword = 'Web@'.$request->password;
 
             $cognifitApiUserAccount = new UserAccount(
-                env('COGNIFIT_API_KEY'),
-                env('COGNIFIT_SECRET_KEY')
+                config('services.cognifit.client_id'),
+                config('services.cognifit.client_secret')
             );
 
             $response = $cognifitApiUserAccount->registration(new UserData([
@@ -239,8 +242,8 @@ class AdminController extends Controller
             $userToken = $request->user_token;
 
             $cognifitApiUserAccount = new UserAccount(
-                env('COGNIFIT_API_KEY'),
-                env('COGNIFIT_SECRET_KEY')
+                config('services.cognifit.client_id'),
+                config('services.cognifit.client_secret')
             );
             $response = $cognifitApiUserAccount->update($userToken, new UserData([
                 'user_locale' => $locale,
@@ -272,7 +275,10 @@ class AdminController extends Controller
 
         // 2. Agar token hai to Cognifit API se games ka data lein
         if ($getToken && $getToken != '-') {
-            $api = new UserActivity(env('COGNIFIT_API_KEY'), env('COGNIFIT_SECRET_KEY'));
+            $api = new UserActivity(
+                config('services.cognifit.client_id'),
+                config('services.cognifit.client_secret')
+            );
 
             // Brain games ki list
             $brainGames = customBlock::getBrainGamesData('programs/tasks', 'GET') ?? [];
@@ -362,8 +368,8 @@ class AdminController extends Controller
         $userPassword = 'Web@'.$request->password;
 
         $cognifitApiUserAccount = new UserAccount(
-            env('COGNIFIT_API_KEY'),
-            env('COGNIFIT_SECRET_KEY')
+            config('services.cognifit.client_id'),
+            config('services.cognifit.client_secret')
         );
 
         $response = $cognifitApiUserAccount->registration(new UserData([
@@ -557,8 +563,8 @@ class AdminController extends Controller
                 $userPassword = 'Web@'.$password;
 
                 $cognifitApiUserAccount = new UserAccount(
-                    env('COGNIFIT_API_KEY'),
-                    env('COGNIFIT_SECRET_KEY')
+                    config('services.cognifit.client_id'),
+                    config('services.cognifit.client_secret')
                 );
 
                 $response = $cognifitApiUserAccount->registration(new UserData([

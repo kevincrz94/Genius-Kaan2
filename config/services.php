@@ -36,8 +36,8 @@ return [
     ],
 
     'cognifit' => [
-        'client_id' => env('COGNIFIT_CLIENT_ID', env('COGNIFIT_API_KEY')),
-        'client_secret' => env('COGNIFIT_CLIENT_SECRET', env('COGNIFIT_SECRET_KEY')),
+        'client_id' => env('COGNIFIT_CLIENT_ID'),
+        'client_secret' => env('COGNIFIT_CLIENT_SECRET'),
         'hash' => env('COGNIFIT_HASH'),
         'launch_url' => env('COGNIFIT_LAUNCH_URL'),
         'base_url' => env('COGNIFIT_API_BASE_URL', 'https://api.cognifit.com'),

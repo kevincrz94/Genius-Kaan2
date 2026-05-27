@@ -65,8 +65,8 @@ class ApiController extends Controller
             if (! empty($userData['user_token'])) {
                 $tokens[] = $userData['user_token'];
                 $cognifitApiUserAccount = new UserAccount(
-                    env('COGNIFIT_API_KEY'),
-                    env('COGNIFIT_SECRET_KEY')
+                    config('services.cognifit.client_id'),
+                    config('services.cognifit.client_secret')
                 );
                 $response = $cognifitApiUserAccount->update($userData['user_token'], new UserData([
                     'user_locale' => 'es',
