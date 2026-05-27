@@ -24,14 +24,14 @@ class userExport implements FromCollection, WithHeadings
         return [
             'Nombre',
             'Correo',
-            'Contrasena',
+            'Contraseña',
             'Edad',
-            'Genero',
+            'Género',
             'Placa',
             'Rango',
             'Unidad',
             'Grupo Operativo',
-            'Area Asignada',
+            'Área Asignada',
         ];
     }
 }

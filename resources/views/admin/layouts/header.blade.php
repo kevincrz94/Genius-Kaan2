@@ -1,6 +1,5 @@
 <div class="header d-flex align-items-center justify-content-between px-4 py-2 shadow-sm bg-white">
 
-    <!-- Logo -->
     <div class="header-left d-flex align-items-center">
         <a href="{{ route('admin.dashboard') }}" class="logo d-flex align-items-center me-3">
             <img src="{{ asset('common/small-logo.png') }}" alt="Logo" class="me-2">
@@ -10,13 +9,15 @@
             <img src="{{ asset('common/small-logo.png') }}" alt="Logo" width="30" height="30">
         </a>
     </div>
-    <!-- /Logo -->
 
-    <!-- Navigation Buttons -->
     <div class="d-flex align-items-center gap-2">
         <a href="{{ route('admin.user.management') }}"
             class="btn {{ Route::is(['admin.user.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
             Elementos
+        </a>
+        <a href="{{ route('admin.catalogs.index') }}"
+            class="btn {{ Route::is(['admin.catalogs.*']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
+            Catálogos
         </a>
         <a href="{{ route('admin.metrics.index') }}"
             class="btn {{ Route::is(['admin.metrics.*']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
@@ -32,15 +33,11 @@
         </a>
     </div>
 
-    <!-- Mobile Menu Toggle -->
     <a class="mobile_btn d-md-none" id="mobile_btn">
         <i class="fa fa-bars fs-4 text-dark"></i>
     </a>
-    <!-- /Mobile Menu Toggle -->
 
-    <!-- Header Right Menu -->
     <ul class="nav user-menu align-items-center gap-2">
-        <!-- User Menu -->
         <li class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
                 <span class="user-img rounded-circle overflow-hidden me-2">
@@ -68,13 +65,10 @@
                 </a>
             </div>
         </li>
-        <!-- /User Menu -->
     </ul>
-    <!-- /Header Right Menu -->
 
 </div>
 
-<!-- Optional Custom CSS -->
 <style>
     .header {
         background-color: #ffffff;

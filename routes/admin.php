@@ -25,6 +25,14 @@ Route::prefix('admin')->group(function () {
             Route::post('/users/{user}/metrics', [AdminMetricsController::class, 'storeUserMetric'])->name('admin.metrics.user.store');
         });
 
+        Route::prefix('catalogs')->group(function () {
+            Route::get('/', [AdminController::class, 'catalogs'])->name('admin.catalogs.index');
+            Route::post('/ranks', [AdminController::class, 'storeRank'])->name('admin.catalogs.ranks.store');
+            Route::post('/units', [AdminController::class, 'storeUnit'])->name('admin.catalogs.units.store');
+            Route::post('/groups', [AdminController::class, 'storeGroup'])->name('admin.catalogs.groups.store');
+            Route::post('/areas', [AdminController::class, 'storeArea'])->name('admin.catalogs.areas.store');
+        });
+
         // User management
         Route::prefix('users')->group(function () {
 

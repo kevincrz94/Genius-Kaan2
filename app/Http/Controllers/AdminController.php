@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Exports\userExport;
 use App\Imports\UserImport;
+use App\Models\AssignmentArea;
 use App\Models\OperationalGroup;
+use App\Models\OperationalRank;
 use App\Models\SecurityUnit;
 use App\Models\User;
 use App\Services\customBlock;
@@ -75,7 +77,7 @@ class AdminController extends Controller
             }
 
             if ($passwordCheck != $adminPassword) {
-                return redirect()->back()->with('error', 'Contrasena no valida.');
+                return redirect()->back()->with('error', 'Contraseña no válida.');
             }
 
             $generateToken = StringHelper::randomString(20);
@@ -94,10 +96,10 @@ class AdminController extends Controller
 
             session()->put('admin_id', $generateToken);
 
-            return redirect()->route('admin.dashboard')->with('success', 'Sesion iniciada correctamente.');
+            return redirect()->route('admin.dashboard')->with('success', 'Sesión iniciada correctamente.');
 
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Ocurrio un error.');
+            return redirect()->back()->with('error', 'Ocurrió un error.');
         }
     }
 
@@ -105,7 +107,7 @@ class AdminController extends Controller
     {
         session()->forget('admin_id');
 
-        return redirect()->route('admin.showLogin')->with('success', 'Sesion cerrada correctamente.');
+        return redirect()->route('admin.showLogin')->with('success', 'Sesión cerrada correctamente.');
     }
 
     public function dashboard()
@@ -200,7 +202,7 @@ class AdminController extends Controller
             $userToken = $this->registerCognifitUser($user, $locale, $request->password);
 
             if (! filled($userToken)) {
-                return redirect()->back()->with('error', 'Cognifit no devolvio token de usuario.');
+                return redirect()->back()->with('error', 'Cognifit no devolvió token de usuario.');
             }
 
             return redirect()->back()->with('success', 'Elemento registrado correctamente.');
@@ -304,12 +306,97 @@ class AdminController extends Controller
     public function createUser()
     {
         $title = 'Crear elemento';
-        $units = SecurityUnit::query()->orderBy('name')->get();
-        $groups = OperationalGroup::query()->with('unit')->orderBy('name')->get();
+        $catalogs = $this->operationalCatalogs();
+        $ranks = $catalogs['ranks'];
+        $units = $catalogs['units'];
+        $groups = $catalogs['groups'];
+        $areas = $catalogs['areas'];
 
-        $data = compact('title', 'units', 'groups');
+        $data = compact('title', 'ranks', 'units', 'groups', 'areas');
 
         return view('admin.users.add')->with($data);
+    }
+
+    public function catalogs()
+    {
+        $title = 'Catálogos operativos';
+        $catalogs = $this->operationalCatalogs();
+
+        return view('admin.catalogs.index', compact('title') + $catalogs);
+    }
+
+    public function storeRank(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:120',
+            'code' => 'nullable|string|max:60',
+        ]);
+
+        OperationalRank::firstOrCreate(
+            ['name' => trim($data['name'])],
+            ['code' => filled($data['code'] ?? null) ? trim($data['code']) : null, 'active' => true]
+        );
+
+        return redirect()->route('admin.catalogs.index')->with('success', 'Rango creado correctamente.');
+    }
+
+    public function storeUnit(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:160',
+            'code' => 'nullable|string|max:60',
+            'type' => 'nullable|string|max:80',
+        ]);
+
+        SecurityUnit::firstOrCreate(
+            ['name' => trim($data['name'])],
+            [
+                'code' => filled($data['code'] ?? null) ? trim($data['code']) : null,
+                'type' => filled($data['type'] ?? null) ? trim($data['type']) : null,
+                'active' => true,
+            ]
+        );
+
+        return redirect()->route('admin.catalogs.index')->with('success', 'Unidad creada correctamente.');
+    }
+
+    public function storeGroup(Request $request)
+    {
+        $data = $request->validate([
+            'security_unit_id' => 'nullable|exists:security_units,id',
+            'name' => 'required|string|max:160',
+            'code' => 'nullable|string|max:60',
+            'shift' => 'nullable|string|max:80',
+        ]);
+
+        OperationalGroup::firstOrCreate(
+            [
+                'security_unit_id' => $data['security_unit_id'] ?? null,
+                'name' => trim($data['name']),
+            ],
+            [
+                'code' => filled($data['code'] ?? null) ? trim($data['code']) : null,
+                'shift' => filled($data['shift'] ?? null) ? trim($data['shift']) : null,
+                'active' => true,
+            ]
+        );
+
+        return redirect()->route('admin.catalogs.index')->with('success', 'Grupo operativo creado correctamente.');
+    }
+
+    public function storeArea(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:160',
+            'code' => 'nullable|string|max:60',
+        ]);
+
+        AssignmentArea::firstOrCreate(
+            ['name' => trim($data['name'])],
+            ['code' => filled($data['code'] ?? null) ? trim($data['code']) : null, 'active' => true]
+        );
+
+        return redirect()->route('admin.catalogs.index')->with('success', 'Área creada correctamente.');
     }
 
     public function addUser()
@@ -328,10 +415,10 @@ class AdminController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'badge_number' => 'nullable|string|max:80',
-            'rank' => 'nullable|string|max:120',
-            'security_unit_name' => 'nullable|string|max:160',
-            'operational_group_name' => 'nullable|string|max:160',
-            'assignment_area' => 'nullable|string|max:160',
+            'rank_id' => 'nullable|exists:operational_ranks,id',
+            'security_unit_id' => 'nullable|exists:security_units,id',
+            'operational_group_id' => 'nullable|exists:operational_groups,id',
+            'assignment_area_id' => 'nullable|exists:assignment_areas,id',
             'image' => 'nullable|image',
             'age' => 'required',
             'gender' => 'required',
@@ -346,17 +433,17 @@ class AdminController extends Controller
             $imageName = FileHelper::uploadImage($request->file('image'), 'UserImages');
         }
 
-        [$unit, $group] = $this->resolveOperationalAssignment(
-            $request->string('security_unit_name')->trim()->value(),
-            $request->string('operational_group_name')->trim()->value(),
-        );
+        $rank = OperationalRank::find($request->rank_id);
+        $unit = SecurityUnit::find($request->security_unit_id);
+        $group = OperationalGroup::find($request->operational_group_id);
+        $area = AssignmentArea::find($request->assignment_area_id);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'badge_number' => $request->badge_number,
-            'rank' => $request->rank,
-            'assignment_area' => $request->assignment_area,
+            'rank' => $rank?->name,
+            'assignment_area' => $area?->name,
             'security_unit_id' => $unit?->id,
             'operational_group_id' => $group?->id,
             'image' => $imageName,
@@ -372,12 +459,12 @@ class AdminController extends Controller
             if (! filled($userToken)) {
                 return redirect()
                     ->route('admin.user.management')
-                    ->with('warning', 'Elemento creado, pero Cognifit no devolvio token de usuario.');
+                    ->with('warning', 'Elemento creado, pero Cognifit no devolvió token de usuario.');
             }
         } catch (Throwable $th) {
             return redirect()
                 ->route('admin.user.management')
-                ->with('warning', 'Elemento creado, pero el registro en Cognifit fallo: '.$th->getMessage());
+                ->with('warning', 'Elemento creado, pero el registro en Cognifit falló: '.$th->getMessage());
         }
 
         return redirect()->route('admin.user.management')->with('success', 'Elemento creado correctamente');
@@ -440,7 +527,7 @@ class AdminController extends Controller
             return redirect()->route('admin.user.management')->with('success', 'Elemento eliminado correctamente');
 
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Ocurrio un error');
+            return redirect()->back()->with('error', 'Ocurrió un error');
         }
     }
 
@@ -495,8 +582,13 @@ class AdminController extends Controller
         }
 
         $list = session()->get('excel_data');
+        $catalogs = $this->operationalCatalogs();
+        $ranks = $catalogs['ranks'];
+        $units = $catalogs['units'];
+        $groups = $catalogs['groups'];
+        $areas = $catalogs['areas'];
 
-        $data = compact('title', 'list');
+        $data = compact('title', 'list', 'ranks', 'units', 'groups', 'areas');
 
         return view('admin.excel.view')->with($data);
     }
@@ -523,10 +615,10 @@ class AdminController extends Controller
             $gender = $row['gender'];
             $password = $row['password'];
             $badgeNumber = $row['badge_number'] ?? null;
-            $rank = $row['rank'] ?? null;
+            $rank = $this->resolveRankName($row['rank'] ?? null);
             $unitName = $row['security_unit'] ?? null;
             $groupName = $row['operational_group'] ?? null;
-            $assignmentArea = $row['assignment_area'] ?? null;
+            $assignmentArea = $this->resolveAreaName($row['assignment_area'] ?? null);
 
             if (! User::where('email', $email)->exists()) {
                 [$unit, $group] = $this->resolveOperationalAssignment($unitName, $groupName);
@@ -647,6 +739,38 @@ class AdminController extends Controller
             : null;
 
         return [$unit, $group];
+    }
+
+    private function resolveRankName(?string $rankName): ?string
+    {
+        $rankName = trim((string) $rankName);
+
+        if ($rankName === '') {
+            return null;
+        }
+
+        return OperationalRank::firstOrCreate(['name' => $rankName], ['active' => true])->name;
+    }
+
+    private function resolveAreaName(?string $areaName): ?string
+    {
+        $areaName = trim((string) $areaName);
+
+        if ($areaName === '') {
+            return null;
+        }
+
+        return AssignmentArea::firstOrCreate(['name' => $areaName], ['active' => true])->name;
+    }
+
+    private function operationalCatalogs(): array
+    {
+        return [
+            'ranks' => OperationalRank::query()->where('active', true)->orderBy('name')->get(),
+            'units' => SecurityUnit::query()->where('active', true)->orderBy('name')->get(),
+            'groups' => OperationalGroup::query()->with('unit')->where('active', true)->orderBy('name')->get(),
+            'areas' => AssignmentArea::query()->where('active', true)->orderBy('name')->get(),
+        ];
     }
 
     private function database()
