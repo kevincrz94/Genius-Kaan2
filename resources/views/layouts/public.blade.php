@@ -14,15 +14,16 @@
         rel="stylesheet">
     <style>
         :root {
-            --ink: #14213d;
-            --muted: #5d6b78;
-            --surface: rgba(255, 255, 255, 0.76);
-            --surface-strong: rgba(255, 255, 255, 0.88);
-            --line: rgba(20, 33, 61, 0.08);
-            --accent: #ef8354;
-            --accent-deep: #bf5a2d;
-            --teal: #2a9d8f;
-            --shadow: 0 28px 80px rgba(20, 33, 61, 0.12);
+            --ink: #00254c;
+            --muted: #607086;
+            --surface: rgba(255, 255, 255, 0.9);
+            --surface-strong: rgba(255, 255, 255, 0.98);
+            --line: rgba(0, 37, 76, 0.12);
+            --accent: #0d6efd;
+            --accent-deep: #00254c;
+            --teal: #145da0;
+            --gold: #c7a34b;
+            --shadow: 0 24px 70px rgba(0, 37, 76, 0.14);
         }
 
         * {
@@ -34,9 +35,9 @@
             font-family: 'Manrope', sans-serif;
             color: var(--ink);
             background:
-                radial-gradient(circle at top left, rgba(42, 157, 143, 0.18), transparent 28%),
-                radial-gradient(circle at top right, rgba(239, 131, 84, 0.22), transparent 24%),
-                linear-gradient(180deg, #f5efe7 0%, #efe6db 100%);
+                radial-gradient(circle at top left, rgba(13, 110, 253, 0.12), transparent 28%),
+                radial-gradient(circle at top right, rgba(0, 37, 76, 0.12), transparent 24%),
+                linear-gradient(180deg, #f4f7fb 0%, #e8eef6 100%);
         }
 
         body::before {
@@ -44,8 +45,8 @@
             position: fixed;
             inset: 0;
             background-image:
-                linear-gradient(rgba(20, 33, 61, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(20, 33, 61, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(0, 37, 76, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 37, 76, 0.04) 1px, transparent 1px);
             background-size: 34px 34px;
             pointer-events: none;
             opacity: 0.45;
@@ -74,9 +75,8 @@
             gap: 1rem;
             padding: 1rem 1.2rem;
             border: 1px solid var(--line);
-            border-radius: 26px;
-            background: rgba(255, 255, 255, 0.62);
-            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            background: #ffffff;
             box-shadow: var(--shadow);
         }
 
@@ -90,16 +90,10 @@
         }
 
         .brand-mark {
-            width: 2.8rem;
-            height: 2.8rem;
-            display: grid;
-            place-items: center;
-            border-radius: 18px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--teal), var(--accent));
-            box-shadow: 0 18px 42px rgba(42, 157, 143, 0.28);
+            width: 4.8rem;
+            height: 3rem;
+            display: block;
+            object-fit: contain;
         }
 
         .brand-copy small {
@@ -123,7 +117,7 @@
             justify-content: center;
             min-height: 3rem;
             padding: 0 1.2rem;
-            border-radius: 999px;
+            border-radius: 6px;
             border: 1px solid transparent;
             font-weight: 700;
             transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
@@ -135,14 +129,14 @@
 
         .btn-primary {
             color: white;
-            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-            box-shadow: 0 16px 32px rgba(191, 90, 45, 0.24);
+            background: var(--ink);
+            box-shadow: 0 16px 32px rgba(0, 37, 76, 0.22);
         }
 
         .btn-secondary {
             color: var(--ink);
-            background: rgba(20, 33, 61, 0.04);
-            border-color: rgba(20, 33, 61, 0.1);
+            background: rgba(0, 37, 76, 0.04);
+            border-color: rgba(0, 37, 76, 0.12);
         }
 
         main {
@@ -160,9 +154,8 @@
         .panel,
         .card {
             border: 1px solid var(--line);
-            border-radius: 28px;
+            border-radius: 10px;
             background: var(--surface);
-            backdrop-filter: blur(20px);
             box-shadow: var(--shadow);
         }
 
@@ -175,8 +168,8 @@
             display: grid;
             gap: 1rem;
             background:
-                radial-gradient(circle at top right, rgba(255, 183, 3, 0.22), transparent 25%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.72) 100%);
+                radial-gradient(circle at top right, rgba(13, 110, 253, 0.12), transparent 25%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.86) 100%);
         }
 
         .eyebrow {
@@ -187,7 +180,7 @@
             font-weight: 800;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: var(--accent-deep);
+            color: var(--ink);
         }
 
         .eyebrow::before {
@@ -195,8 +188,8 @@
             width: 0.68rem;
             height: 0.68rem;
             border-radius: 999px;
-            background: linear-gradient(135deg, var(--teal), var(--accent));
-            box-shadow: 0 0 0 8px rgba(239, 131, 84, 0.12);
+            background: var(--gold);
+            box-shadow: 0 0 0 8px rgba(199, 163, 75, 0.14);
         }
 
         h1,
@@ -252,8 +245,8 @@
             align-items: center;
             min-height: 2.25rem;
             padding: 0 0.9rem;
-            border-radius: 999px;
-            background: rgba(20, 33, 61, 0.06);
+            border-radius: 6px;
+            background: rgba(0, 37, 76, 0.06);
             color: var(--ink);
             font-size: 0.9rem;
             font-weight: 700;
@@ -346,8 +339,8 @@
             width: 3rem;
             height: 3rem;
             margin-bottom: 1rem;
-            border-radius: 18px;
-            background: linear-gradient(135deg, rgba(42, 157, 143, 0.18), rgba(239, 131, 84, 0.22));
+            border-radius: 8px;
+            background: rgba(0, 37, 76, 0.08);
             color: var(--ink);
             font-weight: 800;
         }
@@ -365,7 +358,7 @@
             align-items: flex-start;
             gap: 1rem;
             padding: 1rem 0;
-            border-top: 1px solid rgba(20, 33, 61, 0.08);
+            border-top: 1px solid rgba(0, 37, 76, 0.08);
         }
 
         .line-item:first-child,
@@ -396,7 +389,7 @@
             width: 100%;
             height: 0.7rem;
             border-radius: 999px;
-            background: rgba(20, 33, 61, 0.08);
+            background: rgba(0, 37, 76, 0.08);
             overflow: hidden;
         }
 
@@ -404,14 +397,14 @@
             display: block;
             height: 100%;
             border-radius: inherit;
-            background: linear-gradient(135deg, var(--teal), var(--accent));
+            background: linear-gradient(135deg, var(--ink), var(--accent));
         }
 
         .hero-note {
             margin-top: 1.4rem;
             padding: 1rem 1.1rem;
-            border-radius: 20px;
-            background: rgba(20, 33, 61, 0.05);
+            border-radius: 8px;
+            background: rgba(0, 37, 76, 0.05);
             color: var(--muted);
             line-height: 1.7;
         }
@@ -426,8 +419,8 @@
             display: grid;
             gap: 0.2rem;
             padding: 0.9rem 1rem;
-            border-radius: 20px;
-            background: rgba(20, 33, 61, 0.05);
+            border-radius: 8px;
+            background: rgba(0, 37, 76, 0.05);
         }
 
         .check-item strong {
@@ -464,8 +457,8 @@
             width: 100%;
             min-height: 3.25rem;
             padding: 0.95rem 1rem;
-            border: 1px solid rgba(20, 33, 61, 0.1);
-            border-radius: 18px;
+            border: 1px solid rgba(0, 37, 76, 0.12);
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.86);
             color: var(--ink);
             font: inherit;
@@ -542,17 +535,17 @@
         <div class="container">
             <div class="header-panel">
                 <a href="{{ route('home') }}" class="brand">
-                    <span class="brand-mark">GK</span>
+                    <img class="brand-mark" src="{{ asset('common/light-logo.png') }}" alt="Genius Kaan">
                     <span class="brand-copy">
                         Genius Kaan
-                        <small>Desarrollo cognitivo</small>
+                        <small>Aptitud cognitiva operativa</small>
                     </span>
                 </a>
 
                 <nav class="nav-actions">
                     <a href="{{ route('home') }}" class="btn btn-secondary">Inicio</a>
-                    <a href="{{ route('launcher') }}" class="btn btn-secondary">Launcher</a>
-                    <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Admin</a>
+                    <a href="{{ route('launcher') }}" class="btn btn-secondary">Sesiones</a>
+                    <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Panel</a>
                 </nav>
             </div>
         </div>
@@ -566,7 +559,7 @@
 
     <footer class="footer">
         <div class="container">
-            Genius Kaan organiza evaluacion, entrenamiento y seguimiento en una sola experiencia operativa.
+            Genius Kaan organiza evaluacion, entrenamiento y seguimiento cognitivo para fuerzas de seguridad publica.
         </div>
     </footer>
     @stack('scripts')
