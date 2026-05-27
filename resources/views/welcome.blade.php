@@ -15,8 +15,7 @@
             </p>
 
             <div class="cta-row">
-                <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Entrar al panel operativo</a>
-                <a href="{{ route('launcher') }}" class="btn btn-secondary">Preparar sesion</a>
+                <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Iniciar sesion</a>
             </div>
 
             <div class="badge-row">
@@ -61,8 +60,8 @@
 
                 <div class="checklist">
                     <div class="check-item">
-                        <strong>Alta controlada desde admin</strong>
-                        <span>Solo el administrador registra elementos, carga Excel y genera el token Cognifit.</span>
+                        <strong>Vision institucional</strong>
+                        <span>Indicadores organizados para supervisores, mandos y responsables de capacitacion.</span>
                     </div>
                     <div class="check-item">
                         <strong>Medicion cognitiva</strong>
@@ -127,7 +126,7 @@
         <div class="section-header">
             <div>
                 <span class="eyebrow">Metodo institucional</span>
-                <h2>Del registro del elemento al reporte para mando.</h2>
+                <h2>De la evaluacion al reporte para mando.</h2>
             </div>
             <p class="section-copy">
                 La operacion se organiza por unidad, grupo y categoria para que los datos puedan compararse sin perder
@@ -138,8 +137,8 @@
         <div class="grid-3">
             <article class="card timeline-card">
                 <span class="step-badge">01</span>
-                <h3>Registrar estructura</h3>
-                <p>El administrador da de alta elementos, unidades, grupos operativos, rango y area asignada.</p>
+                <h3>Evaluar capacidades</h3>
+                <p>Observa categorias cognitivas relacionadas con atencion, reaccion, memoria y decision.</p>
             </article>
             <article class="card timeline-card">
                 <span class="step-badge">02</span>
@@ -168,7 +167,7 @@
                     <div class="line-item">
                         <div>
                             <strong>Elemento</strong>
-                    <p>Ficha individual con indice operativo, token Cognifit, categorias, historial y alertas.</p>
+                            <p>Ficha individual con indice operativo, categorias, historial y alertas.</p>
                         </div>
                         <span class="line-tag">Individual</span>
                     </div>
@@ -228,15 +227,14 @@
     <section class="section">
         <article class="panel card cta-panel">
             <span class="eyebrow">Acceso institucional</span>
-            <h2>Ingresa al panel para gestionar elementos, mediciones y reportes.</h2>
+            <h2>Ingresa al panel institucional.</h2>
             <p class="section-copy">
-                Desde el panel operativo el administrador crea elementos, importa estructuras por Excel, genera tokens
-                Cognifit, registra mediciones, consulta alertas y revisa reportes individuales o por grupo.
+                El acceso esta reservado para personal autorizado. Desde el panel se consultan indicadores, alertas y
+                reportes operativos.
             </p>
 
             <div class="cta-row">
-                <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Abrir panel operativo</a>
-                <a href="{{ route('launcher') }}" class="btn btn-secondary">Configurar sesion</a>
+                <a href="{{ route('admin.showLogin') }}" class="btn btn-primary">Iniciar sesion</a>
             </div>
         </article>
     </section>
