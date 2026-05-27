@@ -25,7 +25,7 @@ class AuthApiController extends Controller
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Credenciales invalidas.'],
+                'email' => ['Credenciales inválidas.'],
             ]);
         }
 
@@ -54,7 +54,7 @@ class AuthApiController extends Controller
         }
 
         return response()->json([
-            'message' => 'Sesion cerrada correctamente.',
+            'message' => 'Sesión cerrada correctamente.',
         ]);
     }
 
