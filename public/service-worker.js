@@ -1,8 +1,12 @@
-const CACHE_NAME = 'genius-kaan-v2';
+const CACHE_NAME = 'genius-kaan-v3';
 const APP_SHELL = [
     '/icon.svg',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
     '/common/favicon.png',
-    '/manifest.webmanifest'
+    '/common/light-logo.png',
+    '/manifest.webmanifest',
+    '/offline.html'
 ];
 
 self.addEventListener('install', event => {
@@ -28,7 +32,7 @@ self.addEventListener('fetch', event => {
 
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => caches.match('/'))
+            fetch(event.request).catch(() => caches.match('/offline.html'))
         );
         return;
     }

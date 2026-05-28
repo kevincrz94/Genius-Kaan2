@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es-MX">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Genius Kaan sin conexión</title>
+    <meta name="theme-color" content="#0f172a">
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0f172a;
+            --panel: #111c32;
+            --ink: #f8fafc;
+            --muted: #94a3b8;
+            --accent: #2a9d8f;
+            --line: rgba(255, 255, 255, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Arial, sans-serif;
+        }
+
+        main {
+            width: min(480px, 100%);
+            padding: 28px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--panel);
+        }
+
+        img {
+            width: 132px;
+            height: auto;
+            display: block;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 1.6rem;
+            line-height: 1.2;
+        }
+
+        p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            margin-top: 24px;
+            padding: 0 18px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <img src="/common/light-logo.png" alt="Genius Kaan">
+        <h1>Sin conexión disponible</h1>
+        <p>La aplicación necesita conexión para iniciar sesión, sincronizar credenciales y cargar simuladores cognitivos.</p>
+        <a href="/login">Reintentar acceso</a>
+    </main>
+</body>
+
+</html>
