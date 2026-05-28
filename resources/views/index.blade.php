@@ -26,9 +26,15 @@
             box-sizing: border-box;
         }
 
+        html,
+        body {
+            height: 100%;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
+            overflow: hidden;
             font-family: 'Manrope', sans-serif;
             color: var(--ink);
             background:
@@ -48,6 +54,7 @@
         }
 
         .launcher-header {
+            min-height: 72px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -89,6 +96,8 @@
 
         .launcher-grid {
             display: block;
+            width: 100%;
+            max-width: none;
         }
 
         .info-panel {
@@ -169,13 +178,16 @@
         }
 
         #cognifit-container {
-            width: 100%;
-            height: calc(100vh - 132px);
-            min-height: calc(100vh - 132px);
+            position: fixed;
+            inset: 122px 0 0 0;
+            width: 100vw !important;
+            height: calc(100vh - 122px) !important;
+            min-height: calc(100vh - 122px);
             border: 0;
             border-radius: 0;
             overflow: hidden;
             background: #ffffff;
+            z-index: 10;
         }
 
         #cognifit-container iframe,
@@ -183,8 +195,8 @@
         #cognifit-container object,
         #cognifit-container embed {
             width: 100% !important;
-            height: calc(100vh - 132px) !important;
-            min-height: calc(100vh - 132px);
+            height: 100% !important;
+            min-height: 100%;
             display: block;
             border: 0;
         }
@@ -347,6 +359,36 @@
             return loaderPromise;
         }
 
+        function enforceCognifitFrameSize() {
+            const container = document.getElementById('cognifit-container');
+
+            if (!container) {
+                return;
+            }
+
+            container.style.setProperty('position', 'fixed', 'important');
+            container.style.setProperty('left', '0', 'important');
+            container.style.setProperty('right', '0', 'important');
+            container.style.setProperty('bottom', '0', 'important');
+            container.style.setProperty('top', '122px', 'important');
+            container.style.setProperty('width', '100vw', 'important');
+            container.style.setProperty('height', 'calc(100vh - 122px)', 'important');
+            container.style.setProperty('display', 'block', 'important');
+            container.style.setProperty('overflow', 'hidden', 'important');
+
+            const frame = container.querySelector('iframe');
+
+            if (!frame) {
+                return;
+            }
+
+            frame.style.setProperty('width', '100%', 'important');
+            frame.style.setProperty('height', '100%', 'important');
+            frame.style.setProperty('min-height', '100%', 'important');
+            frame.style.setProperty('display', 'block', 'important');
+            frame.style.setProperty('border', '0', 'important');
+        }
+
         async function startCognifitGame() {
             if (launchError) {
                 statusBox.textContent = launchError;
@@ -390,6 +432,9 @@
                     appType: appType,
                     locale: locale
                 });
+                enforceCognifitFrameSize();
+                setTimeout(enforceCognifitFrameSize, 250);
+                setTimeout(enforceCognifitFrameSize, 1000);
             } catch (error) {
                 console.error(error);
                 statusBox.textContent = error.message || 'No se pudo iniciar el juego Cognifit.';
