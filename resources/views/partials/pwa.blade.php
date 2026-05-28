@@ -1,4 +1,4 @@
-<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<link rel="manifest" href="{{ asset('manifest.json') }}">
 <meta name="application-name" content="Genius Kaan">
 <meta name="description" content="Entrenamiento y seguimiento cognitivo operativo para fuerzas de seguridad pública.">
 <meta name="theme-color" content="#0f172a">

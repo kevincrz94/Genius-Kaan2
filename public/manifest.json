@@ -1,0 +1,72 @@
+{
+    "name": "Genius Kaan",
+    "short_name": "Genius Kaan",
+    "description": "Entrenamiento y seguimiento cognitivo operativo para fuerzas de seguridad pública.",
+    "id": "/login",
+    "start_url": "/login",
+    "scope": "/",
+    "lang": "es-MX",
+    "dir": "ltr",
+    "display": "standalone",
+    "display_override": [
+        "window-controls-overlay",
+        "standalone",
+        "minimal-ui"
+    ],
+    "background_color": "#0f172a",
+    "theme_color": "#0f172a",
+    "orientation": "portrait",
+    "categories": [
+        "education",
+        "productivity",
+        "health"
+    ],
+    "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/common/favicon.png",
+            "sizes": "201x201",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Ingresar",
+            "short_name": "Login",
+            "description": "Acceso al panel operativo.",
+            "url": "/login",
+            "icons": [
+                {
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Simuladores",
+            "short_name": "Simuladores",
+            "description": "Abrir módulos de entrenamiento cognitivo.",
+            "url": "/simuladores",
+            "icons": [
+                {
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ]
+}
