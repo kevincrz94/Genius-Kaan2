@@ -300,6 +300,51 @@ class IndexController extends Controller
         return view('user.games', compact('pageTitle', 'user', 'availableGames', 'skillFilters', 'cognifitError'));
     }
 
+    public function profile()
+    {
+        $user = $this->operationalUser();
+
+        if (! $user) {
+            return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
+        }
+
+        $pageTitle = 'Genius Kaan | Perfil operativo';
+        $attentionAreas = collect($user->attention_areas ?? [])
+            ->map(fn ($area) => is_array($area) ? ($area['name'] ?? $area['label'] ?? $area['key'] ?? null) : $area)
+            ->filter()
+            ->values()
+            ->all();
+
+        $completedSessions = $user->cognitiveSessions()
+            ->where('status', 'completed');
+
+        $stats = [
+            'completed_sessions' => (clone $completedSessions)->count(),
+            'total_minutes' => (int) (clone $completedSessions)->sum('duration_minutes'),
+            'average_score' => round((float) ((clone $completedSessions)->whereNotNull('score')->avg('score') ?? 0), 1),
+            'last_session_at' => optional((clone $completedSessions)->latest('completed_at')->first()?->completed_at)->format('d/m/Y H:i'),
+        ];
+
+        $latestSessions = $user->cognitiveSessions()
+            ->where('status', 'completed')
+            ->latest('completed_at')
+            ->take(5)
+            ->get();
+
+        $skillStats = $user->cognitiveSkillScores()
+            ->latest('measured_at')
+            ->take(8)
+            ->get()
+            ->map(fn ($score) => [
+                'name' => $this->translateCognitiveSkill($score->name),
+                'score' => round((float) $score->score, 1),
+                'trend' => $score->trend,
+                'measured_at' => optional($score->measured_at)->format('d/m/Y'),
+            ]);
+
+        return view('user.profile', compact('pageTitle', 'user', 'attentionAreas', 'stats', 'latestSessions', 'skillStats'));
+    }
+
     public function launcher(Request $request)
     {
         $pageTitle = 'Genius Kaan | Preparar sesión';
@@ -609,8 +654,10 @@ class IndexController extends Controller
 
     private function availableGames(): array
     {
+        $skillCatalog = $this->cognifitSkillCatalog();
+
         $games = customBlock::getBrainGamesData('programs/tasks', 'GET')
-            ->map(function ($game): array {
+            ->map(function ($game) use ($skillCatalog): array {
                 $title = $game->assets->titles->es
                     ?? $game->assets->titles->en
                     ?? customBlock::processStringNames((string) ($game->key ?? 'Módulo'));
@@ -630,7 +677,7 @@ class IndexController extends Controller
                         ->values()
                         ->all(),
                     'skills' => collect($game->skills ?? [])
-                        ->map(fn ($skill) => customBlock::processStringNames((string) $skill))
+                        ->map(fn ($skill) => $this->cognifitSkillLabel((string) $skill, $skillCatalog))
                         ->values()
                         ->all(),
                 ];
@@ -688,8 +735,7 @@ class IndexController extends Controller
             return [];
         }
 
-        $skillCatalog = customBlock::getSDKData('skills', 'GET')
-            ->keyBy(fn ($skill) => (string) ($skill->key ?? ''));
+        $skillCatalog = $this->cognifitSkillCatalog();
 
         return $usedSkillKeys
             ->map(function (string $skillKey) use ($skillCatalog): array {
@@ -697,9 +743,7 @@ class IndexController extends Controller
 
                 return [
                     'key' => $skillKey,
-                    'label' => $skill->assets->titles->es
-                        ?? $skill->assets->titles->en
-                        ?? customBlock::processStringNames($skillKey),
+                    'label' => $this->cognifitSkillLabel($skillKey, $skillCatalog),
                     'icon' => $skill->assets->images->whiteIcon
                         ?? $skill->assets->images->icon
                         ?? null,
@@ -718,9 +762,10 @@ class IndexController extends Controller
 
                 return [
                     'key' => $key,
-                    'label' => $skill->assets->titles->es
-                        ?? $skill->assets->titles->en
-                        ?? customBlock::processStringNames($key),
+                    'label' => $this->translateCognitiveSkill(
+                        $key,
+                        $skill->assets->titles->es ?? $skill->assets->titles->en ?? null
+                    ),
                     'icon' => $skill->assets->images->whiteIcon
                         ?? $skill->assets->images->icon
                         ?? null,
@@ -743,5 +788,71 @@ class IndexController extends Controller
             ['key' => 'PLANNING', 'label' => 'Planeación', 'icon' => null],
             ['key' => 'VISUAL_PERCEPTION', 'label' => 'Percepción visual', 'icon' => null],
         ];
+    }
+
+    private function cognifitSkillCatalog()
+    {
+        return customBlock::getSDKData('skills', 'GET')
+            ->keyBy(fn ($skill) => (string) ($skill->key ?? ''));
+    }
+
+    private function cognifitSkillLabel(string $skillKey, $skillCatalog): string
+    {
+        $skill = $skillCatalog->get($skillKey);
+
+        return $this->translateCognitiveSkill(
+            $skillKey,
+            $skill->assets->titles->es ?? $skill->assets->titles->en ?? null
+        );
+    }
+
+    private function translateCognitiveSkill(string $key, ?string $label = null): string
+    {
+        $translations = [
+            'ATTENTION' => 'Atención',
+            'FOCUSED_ATTENTION' => 'Atención focalizada',
+            'DIVIDED_ATTENTION' => 'Atención dividida',
+            'SUSTAINED_ATTENTION' => 'Atención sostenida',
+            'SELECTIVE_ATTENTION' => 'Atención selectiva',
+            'WORKING_MEMORY' => 'Memoria de trabajo',
+            'SHORT_TERM_MEMORY' => 'Memoria a corto plazo',
+            'VISUAL_SHORT_TERM_MEMORY' => 'Memoria visual a corto plazo',
+            'AUDITORY_SHORT_TERM_MEMORY' => 'Memoria auditiva a corto plazo',
+            'CONTEXTUAL_MEMORY' => 'Memoria contextual',
+            'NON_VERBAL_MEMORY' => 'Memoria no verbal',
+            'NAMING' => 'Denominación',
+            'PROCESSING_SPEED' => 'Velocidad de procesamiento',
+            'RESPONSE_TIME' => 'Tiempo de respuesta',
+            'REACTION_TIME' => 'Tiempo de reacción',
+            'INHIBITION' => 'Control inhibitorio',
+            'PLANNING' => 'Planeación',
+            'COORDINATION' => 'Coordinación',
+            'EYE_HAND_COORDINATION' => 'Coordinación ojo-mano',
+            'UPDATING' => 'Actualización',
+            'SHIFTING' => 'Flexibilidad cognitiva',
+            'COGNITIVE_FLEXIBILITY' => 'Flexibilidad cognitiva',
+            'VISUAL_PERCEPTION' => 'Percepción visual',
+            'SPATIAL_PERCEPTION' => 'Percepción espacial',
+            'VISUAL_SCANNING' => 'Escaneo visual',
+            'RECOGNITION' => 'Reconocimiento',
+            'ESTIMATION' => 'Estimación',
+            'MONITORING' => 'Monitoreo',
+            'REASONING' => 'Razonamiento',
+            'LOGICAL_REASONING' => 'Razonamiento lógico',
+        ];
+
+        $normalizedKey = strtoupper(trim($key));
+
+        if (isset($translations[$normalizedKey])) {
+            return $translations[$normalizedKey];
+        }
+
+        $normalizedLabel = strtoupper(str_replace([' ', '-'], '_', trim((string) $label)));
+
+        if ($normalizedLabel !== '' && isset($translations[$normalizedLabel])) {
+            return $translations[$normalizedLabel];
+        }
+
+        return $label ?: customBlock::processStringNames($key);
     }
 }

@@ -4,13 +4,11 @@
     <section class="section">
         <div class="section-header">
             <div>
-                <span class="eyebrow">Entrenamiento operativo</span>
-                <h2>Módulos de entrenamiento operativo para {{ $user->name }}.</h2>
+                <span class="eyebrow">Bienvenido</span>
+                <h2>{{ $user->name }}</h2>
+                <p class="section-copy">Continúa tu entrenamiento cognitivo operativo.</p>
             </div>
-            <form method="post" action="{{ route('user.logout') }}">
-                @csrf
-                <button type="submit" class="btn btn-secondary">Cerrar sesión</button>
-            </form>
+            <a href="{{ route('user.profile') }}" class="btn btn-secondary">Ver perfil</a>
         </div>
 
         <div class="dashboard">
@@ -55,32 +53,20 @@
                     </div>
                 </div>
             </article>
-
-            <article class="panel card scoreboard-card">
-                <span class="eyebrow">Credencial CogniFit</span>
-                <h2>{{ filled($user->cognifit_user_token) ? 'Credencial activa.' : 'Credencial pendiente.' }}</h2>
-                <p class="section-copy">
-                    @if (filled($user->cognifit_user_token))
-                        Tu usuario está listo para iniciar sesiones de entrenamiento.
-                    @else
-                        El sistema intentó registrar tu usuario automáticamente en CogniFit, pero no se pudo completar.
-                    @endif
-                </p>
-
-                @unless (filled($user->cognifit_user_token))
-                    <x-alert type="warning">
-                        {{ $cognifitError ?: 'Solicita al administrador revisar las credenciales de CogniFit.' }}
-                    </x-alert>
-                @endunless
-            </article>
         </div>
+
+        @unless (filled($user->cognifit_user_token))
+            <x-alert type="warning">
+                {{ $cognifitError ?: 'Solicita al administrador revisar las credenciales de CogniFit.' }}
+            </x-alert>
+        @endunless
     </section>
 
     <section class="section">
         <div class="section-header">
             <div>
                 <span class="eyebrow">Módulos</span>
-                <h2>Selecciona un entrenamiento.</h2>
+                <h2>Selecciona un simulador.</h2>
             </div>
             <p class="section-copy">
                 Cada módulo se abre con tu credencial CogniFit para conservar la trazabilidad individual.
@@ -112,7 +98,7 @@
         @endif
 
         <div id="no-skill-results" class="hero-note d-none">
-            No hay mÃ³dulos disponibles para la capacidad seleccionada.
+            No hay módulos disponibles para la capacidad seleccionada.
         </div>
 
         <div class="grid-3 training-grid">
@@ -139,7 +125,14 @@
                     this.classList.add('is-active');
 
                     cards.forEach((card) => {
-                        const skillKeys = (card.dataset.skillKeys || '').split(' ').filter(Boolean);
+                        let skillKeys = [];
+
+                        try {
+                            skillKeys = JSON.parse(card.dataset.skillKeys || '[]');
+                        } catch (error) {
+                            skillKeys = [];
+                        }
+
                         const shouldShow = selectedSkill === 'all' || skillKeys.includes(selectedSkill);
 
                         card.classList.toggle('is-hidden', !shouldShow);

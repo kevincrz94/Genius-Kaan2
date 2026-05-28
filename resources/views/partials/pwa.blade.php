@@ -17,4 +17,86 @@
             navigator.serviceWorker.register('/service-worker.js').catch(function() {});
         });
     }
+
+    (function() {
+        var deferredPrompt = null;
+        var installButton = null;
+        var iosHint = null;
+        var dismissButton = null;
+
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                window.navigator.standalone === true;
+        }
+
+        function isIos() {
+            return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+        }
+
+        function isSafari() {
+            return /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(window.navigator.userAgent);
+        }
+
+        function showIosHintIfNeeded() {
+            if (!iosHint || isStandalone() || !isIos() || !isSafari()) {
+                return;
+            }
+
+            if (window.localStorage.getItem('geniusKaanIosInstallDismissed') === '1') {
+                return;
+            }
+
+            iosHint.hidden = false;
+        }
+
+        window.addEventListener('beforeinstallprompt', function(event) {
+            event.preventDefault();
+            deferredPrompt = event;
+
+            if (installButton && !isStandalone()) {
+                installButton.hidden = false;
+            }
+        });
+
+        window.addEventListener('appinstalled', function() {
+            deferredPrompt = null;
+            if (installButton) {
+                installButton.hidden = true;
+            }
+            if (iosHint) {
+                iosHint.hidden = true;
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            installButton = document.getElementById('installPwaButton');
+            iosHint = document.getElementById('iosInstallHint');
+            dismissButton = document.getElementById('dismissIosInstallHint');
+
+            if (installButton) {
+                installButton.addEventListener('click', function() {
+                    if (!deferredPrompt) {
+                        return;
+                    }
+
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.finally(function() {
+                        deferredPrompt = null;
+                        installButton.hidden = true;
+                    });
+                });
+            }
+
+            if (dismissButton) {
+                dismissButton.addEventListener('click', function() {
+                    window.localStorage.setItem('geniusKaanIosInstallDismissed', '1');
+                    if (iosHint) {
+                        iosHint.hidden = true;
+                    }
+                });
+            }
+
+            showIosHintIfNeeded();
+        });
+    })();
 </script>

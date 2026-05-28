@@ -27,7 +27,7 @@ class customBlock
         try {
             $clientID = config('services.cognifit.client_id');
 
-            $baseURL = config('services.cognifit.base_url') . '/' . $endPoint . '?client_id=' . $clientID;
+            $baseURL = config('services.cognifit.base_url') . '/' . $endPoint . '?client_id=' . $clientID . '&locales[]=en&locales[]=es';
 
             $new = new Client();
 

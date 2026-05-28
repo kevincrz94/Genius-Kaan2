@@ -10,6 +10,7 @@ Route::post('/login', [IndexController::class, 'login'])->name('user.login.submi
 Route::post('/logout', [IndexController::class, 'logout'])->name('user.logout');
 Route::get('/perfil-inicial', [IndexController::class, 'showOnboarding'])->name('user.onboarding');
 Route::post('/perfil-inicial', [IndexController::class, 'completeOnboarding'])->name('user.onboarding.submit');
+Route::get('/perfil', [IndexController::class, 'profile'])->name('user.profile');
 Route::get('/simuladores', [IndexController::class, 'games'])->name('user.games');
 Route::get('/juegos', fn () => redirect()->route('user.games'));
 

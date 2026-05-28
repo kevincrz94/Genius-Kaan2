@@ -30,11 +30,46 @@
 
                 <nav class="nav-actions">
                     <a href="{{ route('home') }}" class="btn btn-secondary">Inicio</a>
-                    <a href="{{ route('user.login') }}" class="btn btn-primary">Ingresar</a>
+                    <button id="installPwaButton" class="btn btn-secondary pwa-install-button" type="button" hidden>
+                        Instalar aplicación
+                    </button>
+                    @if (! empty($navOperationalUser))
+                        @php
+                            $navImage = $navOperationalUser->image;
+                            $navImagePath = $navImage ? public_path('UserImages/' . $navImage) : null;
+                            $navAvatar = $navImagePath && file_exists($navImagePath)
+                                ? asset('UserImages/' . $navImage)
+                                : asset('common/favicon.png');
+                        @endphp
+                        <div class="profile-menu">
+                            <button class="profile-menu-toggle" type="button" aria-expanded="false"
+                                aria-controls="profileMenuDropdown">
+                                <img src="{{ $navAvatar }}" alt="Foto de {{ $navOperationalUser->name }}">
+                                <span>{{ $navOperationalUser->name }}</span>
+                            </button>
+                            <div id="profileMenuDropdown" class="profile-menu-dropdown">
+                                <a href="{{ route('user.profile') }}">Perfil</a>
+                                <form method="post" action="{{ route('user.logout') }}">
+                                    @csrf
+                                    <button type="submit">Cerrar sesión</button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('user.login') }}" class="btn btn-primary">Ingresar</a>
+                    @endif
                 </nav>
             </div>
         </div>
     </header>
+
+    <aside id="iosInstallHint" class="pwa-install-hint" hidden>
+        <div>
+            <strong>Instalar Genius Kaan</strong>
+            <span>En iPhone o iPad: abre Safari, toca Compartir y selecciona Agregar a pantalla de inicio.</span>
+        </div>
+        <button id="dismissIosInstallHint" type="button" aria-label="Cerrar aviso">Cerrar</button>
+    </aside>
 
     <main>
         <div class="container">
