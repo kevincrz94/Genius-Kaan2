@@ -81,7 +81,7 @@
         }
 
         .site-header {
-            position: relative;
+            position: static;
             z-index: 50;
             padding: 1rem 0;
             background: rgba(244, 247, 251, 0.8);

@@ -1,6 +1,8 @@
-const CACHE_NAME = 'genius-kaan-v3';
+const CACHE_NAME = 'genius-kaan-v4';
 const APP_SHELL = [
     '/icon.svg',
+    '/css/public.css',
+    '/assets/css/custom.css',
     '/icons/icon-192.png',
     '/icons/icon-512.png',
     '/common/favicon.png',

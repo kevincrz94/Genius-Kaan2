@@ -10,51 +10,6 @@
             </div>
             <a href="{{ route('user.profile') }}" class="btn btn-secondary">Ver perfil</a>
         </div>
-
-        <div class="dashboard">
-            <article class="panel card">
-                <span class="eyebrow">Perfil</span>
-                <h2>Datos operativos.</h2>
-
-                <div class="stack-list">
-                    <div class="line-item">
-                        <div>
-                            <strong>Placa / ID</strong>
-                            <p>{{ $user->badge_number ?: 'Sin placa registrada' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Rango / cargo</strong>
-                            <p>{{ $user->rank ?: 'Sin rango registrado' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Unidad y grupo</strong>
-                            <p>
-                                {{ $user->securityUnit?->name ?: 'Sin unidad' }}
-                                /
-                                {{ $user->operationalGroup?->name ?: 'Sin grupo' }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Área asignada</strong>
-                            <p>{{ $user->assignment_area ?: 'Sin área asignada' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Estado operativo</strong>
-                            <p>{{ filled($user->cognifit_user_token) ? 'Apto para entrenamiento' : 'Requiere sincronización' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </article>
-        </div>
-
         @unless (filled($user->cognifit_user_token))
             <x-alert type="warning">
                 {{ $cognifitError ?: 'Solicita al administrador revisar las credenciales de CogniFit.' }}
