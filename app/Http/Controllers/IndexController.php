@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CognitiveSession;
+use App\Models\CognitiveSkillScore;
 use App\Models\User;
 use App\Services\CognifitService;
 use App\Services\customBlock;
@@ -201,6 +203,9 @@ class IndexController extends Controller
     {
         $pageTitle = 'Genius Kaan | Sesion cognitiva';
         $cognifitUserToken = $request->string('user_token')->trim()->value();
+        $user = filled($cognifitUserToken)
+            ? User::query()->where('cognifit_user_token', $cognifitUserToken)->first()
+            : null;
         $accessToken = null;
         $launchError = null;
 
@@ -224,10 +229,68 @@ class IndexController extends Controller
             'appType' => in_array($request->string('app_type')->trim()->value(), ['web', 'app'], true)
                 ? $request->string('app_type')->trim()->value()
                 : 'web',
+            'syncUrl' => $user ? route('cognifit.session.sync', $user) : null,
             'launchError' => $launchError,
         ];
 
         return view('index', compact('pageTitle', 'launchConfig'));
+    }
+
+    public function syncCognifitSession(Request $request, User $user)
+    {
+        if ((int) session('operational_user_id') !== (int) $user->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'game_key' => ['required', 'string', 'max:120'],
+            'status' => ['required', 'in:completed,aborted'],
+            'mode' => ['nullable', 'string', 'max:80'],
+        ]);
+
+        $playedGames = [];
+        $scores = [];
+
+        if ($validated['status'] === 'completed') {
+            try {
+                $cognifit = app(CognifitService::class);
+                $playedGames = $cognifit->playedGames($user);
+                $scores = $cognifit->historicalScores($user);
+            } catch (Throwable $th) {
+                report($th);
+            }
+        }
+
+        $latestGame = $this->latestPlayedGame($playedGames, $validated['game_key']);
+
+        $session = CognitiveSession::create([
+            'user_id' => $user->id,
+            'area' => 'cognifit',
+            'game_key' => $validated['game_key'],
+            'duration_minutes' => $this->durationFromGame($latestGame),
+            'status' => $validated['status'] === 'completed' ? 'completed' : 'cancelled',
+            'score' => $this->scoreFromGame($latestGame),
+            'started_at' => now(),
+            'completed_at' => now(),
+            'metadata' => [
+                'mode' => $validated['mode'] ?? 'gameMode',
+                'cognifit_game' => $latestGame,
+                'synced_at' => now()->toISOString(),
+            ],
+        ]);
+
+        $storedScores = $this->storeCognifitSkillScores($user, $session, $scores);
+
+        return response()->json([
+            'status' => true,
+            'message' => $validated['status'] === 'completed'
+                ? 'Resultados sincronizados.'
+                : 'Actividad cancelada registrada.',
+            'session_id' => $session->id,
+            'score' => $session->score,
+            'skill_scores' => $storedScores,
+            'played_games' => count((array) ($playedGames['historicalPlayedGames'] ?? [])),
+        ]);
     }
 
     private function cognifitAccessToken(string $cognifitUserToken): ?string
@@ -304,6 +367,104 @@ class IndexController extends Controller
         }
 
         return null;
+    }
+
+    private function latestPlayedGame(array $playedGames, string $gameKey): ?array
+    {
+        $games = collect($playedGames['historicalPlayedGames'] ?? [])
+            ->map(fn ($game) => (array) $game)
+            ->filter(fn (array $game) => strtoupper((string) ($game['key'] ?? $game['game_key'] ?? '')) === strtoupper($gameKey))
+            ->sortByDesc(fn (array $game) => $game['time'] ?? $game['date'] ?? $game['played_at'] ?? '')
+            ->values();
+
+        return $games->first();
+    }
+
+    private function scoreFromGame(?array $game): ?float
+    {
+        if (! $game) {
+            return null;
+        }
+
+        foreach (['score', 'percentage', 'accuracy', 'result'] as $key) {
+            if (isset($game[$key]) && is_numeric($game[$key])) {
+                return round(min(100, max(0, (float) $game[$key])), 2);
+            }
+        }
+
+        return null;
+    }
+
+    private function durationFromGame(?array $game): int
+    {
+        if (! $game) {
+            return 0;
+        }
+
+        foreach (['duration_minutes', 'duration', 'time_spent'] as $key) {
+            if (isset($game[$key]) && is_numeric($game[$key])) {
+                $duration = (float) $game[$key];
+
+                return (int) max(0, $duration > 180 ? round($duration / 60) : round($duration));
+            }
+        }
+
+        return 0;
+    }
+
+    private function storeCognifitSkillScores(User $user, CognitiveSession $session, array $scores): int
+    {
+        $skillScores = collect($this->extractSkillScores($scores));
+        $stored = 0;
+
+        foreach ($skillScores as $skill) {
+            $name = trim((string) ($skill['name'] ?? $skill['key'] ?? ''));
+
+            if ($name === '' || ! isset($skill['score']) || ! is_numeric($skill['score'])) {
+                continue;
+            }
+
+            CognitiveSkillScore::create([
+                'user_id' => $user->id,
+                'cognitive_session_id' => $session->id,
+                'name' => $name,
+                'score' => round(min(100, max(0, (float) $skill['score'])), 2),
+                'trend' => $skill['trend'] ?? 'stable',
+                'measured_at' => now(),
+            ]);
+
+            $stored++;
+        }
+
+        return $stored;
+    }
+
+    private function extractSkillScores(mixed $payload): array
+    {
+        if (! is_array($payload)) {
+            return [];
+        }
+
+        $scores = [];
+
+        foreach ($payload as $key => $value) {
+            if (is_array($value)) {
+                $name = $value['name'] ?? $value['key'] ?? (is_string($key) ? $key : null);
+                $score = $value['score'] ?? $value['value'] ?? $value['percentage'] ?? null;
+
+                if ($name && is_numeric($score)) {
+                    $scores[] = [
+                        'name' => $name,
+                        'score' => $score,
+                        'trend' => $value['trend'] ?? 'stable',
+                    ];
+                }
+
+                $scores = array_merge($scores, $this->extractSkillScores($value));
+            }
+        }
+
+        return $scores;
     }
 
     private function operationalUser(): ?User

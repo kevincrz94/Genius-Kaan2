@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $pageTitle }}</title>
     <link rel="icon" href="{{ asset('common/favicon.png') }}">
     @include('partials.pwa')
@@ -270,6 +271,7 @@
         $clientId = $launchConfig['clientId'] ?? '';
         $sdkVersion = $launchConfig['sdkVersion'] ?? '';
         $appType = $launchConfig['appType'] ?? 'web';
+        $syncUrl = $launchConfig['syncUrl'] ?? '';
         $launchError = $launchConfig['launchError'] ?? '';
     @endphp
 
@@ -337,6 +339,7 @@
         const sdkVersion = @json($sdkVersion);
         const locale = @json($locale);
         const appType = @json($appType);
+        const syncUrl = @json($syncUrl);
         const launchError = @json($launchError);
         const statusBox = document.getElementById('game-status');
         const button = document.getElementById('start-game-button');
@@ -387,6 +390,44 @@
             frame.style.setProperty('min-height', '100%', 'important');
             frame.style.setProperty('display', 'block', 'important');
             frame.style.setProperty('border', '0', 'important');
+        }
+
+        async function syncCognifitSession(status, mode) {
+            if (!syncUrl) {
+                statusBox.textContent = 'Actividad finalizada. No se pudo sincronizar porque falta el usuario.';
+                return;
+            }
+
+            try {
+                statusBox.textContent = 'Sincronizando resultados.';
+
+                const response = await fetch(syncUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        game_key: gameKey,
+                        status: status,
+                        mode: mode || 'gameMode'
+                    })
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok || !payload.status) {
+                    throw new Error(payload.message || 'No se pudieron sincronizar los resultados.');
+                }
+
+                statusBox.textContent = payload.score === null || payload.score === undefined
+                    ? payload.message + ' CogniFit puede tardar unos minutos en publicar puntajes.'
+                    : payload.message + ' Puntaje: ' + payload.score + '.';
+            } catch (error) {
+                console.error(error);
+                statusBox.textContent = error.message || 'No se pudieron sincronizar los resultados.';
+            }
         }
 
         async function startCognifitGame() {
@@ -454,6 +495,7 @@
             statusBox.textContent = data.status === 'completed'
                 ? 'Actividad completada.'
                 : 'Actividad cancelada.';
+            syncCognifitSession(data.status, data.mode);
         });
 
         button && button.addEventListener('click', startCognifitGame);

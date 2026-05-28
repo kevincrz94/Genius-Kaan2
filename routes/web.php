@@ -13,6 +13,7 @@ Route::get('/juegos', [IndexController::class, 'games'])->name('user.games');
 Route::get('/launcher', [IndexController::class, 'launcher'])->name('launcher');
 
 Route::get('/start-game/', [IndexController::class, 'startGame'])->name('start.game');
+Route::post('/cognifit/users/{user}/sync-session', [IndexController::class, 'syncCognifitSession'])->name('cognifit.session.sync');
 
 /***** Including Admin Routes *****/
 include('admin.php');

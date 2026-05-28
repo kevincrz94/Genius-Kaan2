@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\userExport;
 use App\Imports\UserImport;
 use App\Models\AssignmentArea;
+use App\Models\CognitiveSession;
 use App\Models\OperationalGroup;
 use App\Models\OperationalRank;
 use App\Models\SecurityUnit;
@@ -155,6 +156,12 @@ class AdminController extends Controller
         $gameData = null;
         $playedGames = [];
         $brainGames = [];
+        $localSessions = CognitiveSession::query()
+            ->where('user_id', $user->id)
+            ->latest('completed_at')
+            ->latest('id')
+            ->limit(10)
+            ->get();
 
         $getToken = $user->cognifit_user_token;
         if ($getToken && $getToken != '-') {
@@ -178,7 +185,7 @@ class AdminController extends Controller
             }
         }
 
-        $html = view('admin.users.user_details', compact('info', 'gameData', 'playedGames', 'brainGames'))->render();
+        $html = view('admin.users.user_details', compact('info', 'gameData', 'playedGames', 'brainGames', 'localSessions'))->render();
 
         return response()->json([
             'status' => true,
@@ -258,6 +265,12 @@ class AdminController extends Controller
         $info = $this->userPayload($user);
         $playedGames = [];
         $brainGames = [];
+        $localSessions = CognitiveSession::query()
+            ->where('user_id', $user->id)
+            ->latest('completed_at')
+            ->latest('id')
+            ->limit(10)
+            ->get();
         $getToken = $user->cognifit_user_token;
 
         // 2. Agar token hai to Cognifit API se games ka data lein
@@ -283,6 +296,7 @@ class AdminController extends Controller
             'info' => $info,
             'playedGames' => $playedGames,
             'brainGames' => $brainGames,
+            'localSessions' => $localSessions,
             'viewData' => customBlock::class,
         ];
 

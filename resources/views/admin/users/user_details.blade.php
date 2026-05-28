@@ -128,7 +128,7 @@
 
             <!-- Games Tab -->
             <div id="games-tab" class="tab-pane fade">
-                @if (!empty($playedGames))
+                @if (!empty($playedGames) || (($localSessions ?? collect())->isNotEmpty()))
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
                             <thead class="table-light">
@@ -139,7 +139,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (array_slice($playedGames, 0, 10) as $game)
+                                @forelse (array_slice($playedGames, 0, 10) as $game)
                                     <tr>
                                         @php
                                             $gameMeta = $brainGames->where('key', $game['key'] ?? '')->first();
@@ -149,7 +149,15 @@
                                         <td>{{ $game['score'] ?? '-' }}</td>
                                         <td>{{ \Carbon\Carbon::parse($game['time'] ?? now())->format('d M Y') }}</td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    @foreach (($localSessions ?? collect())->take(10) as $session)
+                                        <tr>
+                                            <td>{{ $session->game_key ?? 'Sesion CogniFit' }}</td>
+                                            <td>{{ $session->score ?? '-' }}</td>
+                                            <td>{{ optional($session->completed_at)->format('d M Y') ?: optional($session->created_at)->format('d M Y') }}</td>
+                                        </tr>
+                                    @endforeach
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

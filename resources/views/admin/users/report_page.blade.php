@@ -190,9 +190,19 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="3" class="text-center py-3 text-muted">Sin registros de juego.</td>
-                            </tr>
+                            @forelse(($localSessions ?? collect())->take(10) as $session)
+                                <tr>
+                                    <td>{{ $session->game_key ?? 'Sesion CogniFit' }}</td>
+                                    <td class="text-center fw-bold text-primary">{{ $session->score ?? '-' }}</td>
+                                    <td class="text-end text-muted">
+                                        {{ optional($session->completed_at)->format('d M Y') ?: optional($session->created_at)->format('d M Y') }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-center py-3 text-muted">Sin registros de juego.</td>
+                                </tr>
+                            @endforelse
                         @endforelse
                     </tbody>
                 </table>
