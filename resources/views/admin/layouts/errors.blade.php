@@ -1,60 +1,32 @@
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
-@if (session('success'))
-    <script>
-        $(document).ready(function() {
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-bottom-right",
-                "timeOut": 500000
-            }
-            toastr.success("{{ session('success') }}");
-        });
-    </script>
-@endif
+<script>
+    $(document).ready(function() {
+        toastr.options = {
+            closeButton: true,
+            progressBar: true,
+            positionClass: 'toast-bottom-right',
+            timeOut: 5000,
+            preventDuplicates: true,
+        };
 
-@if (session('error'))
-    <script>
-        $(document).ready(function() {
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-bottom-right",
-                "timeOut": 10000
-            }
-            toastr.error("{{ session('error') }}");
-        });
-    </script>
-@endif
+        @if (session('success'))
+            toastr.success(@json(session('success')));
+        @endif
 
-@if (session('warning'))
-    <script>
-        $(document).ready(function() {
-            toastr.options = {
-                "closeButton": true,
-                "progressBar": true,
-                "positionClass": "toast-bottom-right",
-                "timeOut": 20000
-            }
-            toastr.warning("{{ session('warning') }}");
-        });
-    </script>
-@endif
+        @if (session('error'))
+            toastr.error(@json(session('error')));
+        @endif
 
-@if (session('errors'))
-    <script>
-        $(document).ready(function() {
+        @if (session('warning'))
+            toastr.warning(@json(session('warning')));
+        @endif
+
+        @if ($errors->any())
             @foreach ($errors->all() as $error)
-                toastr.options = {
-                    "closeButton": true,
-                    "progressBar": true,
-                    "positionClass": "toast-bottom-right",
-                    "timeOut": 10000
-                }
-                toastr.error("{{ $error }}");
+                toastr.error(@json($error));
             @endforeach
-        });
-    </script>
-@endif
+        @endif
+    });
+</script>

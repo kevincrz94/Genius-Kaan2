@@ -1,6 +1,42 @@
 @extends('layouts.public')
 
 @section('content')
+    @php
+        $heroMetrics = [
+            ['label' => 'Índice operativo', 'value' => '0-100', 'copy' => 'Lectura consolidada de desempeño cognitivo por elemento y unidad.'],
+            ['label' => 'Categorías', 'value' => '8', 'copy' => 'Atención, reacción, memoria, control inhibitorio y toma de decisiones.'],
+            ['label' => 'Seguimiento', 'value' => '24/7', 'copy' => 'Panel disponible para mandos, coordinadores y responsables de capacitación.'],
+            ['label' => 'Reportes', 'value' => 'PDF', 'copy' => 'Informes individuales y comparativos para decisiones institucionales.'],
+        ];
+
+        $capabilities = [
+            ['title' => 'Atención sostenida', 'accent' => '#00254c', 'copy' => 'Capacidad para mantener foco durante patrullaje, monitoreo, vigilancia o tareas prolongadas.'],
+            ['title' => 'Tiempo de reacción', 'accent' => '#0d6efd', 'copy' => 'Velocidad de respuesta ante estímulos relevantes, cambios de contexto y señales de riesgo.'],
+            ['title' => 'Control inhibitorio', 'accent' => '#c7a34b', 'copy' => 'Regulación de impulsos y respuesta proporcional en escenarios de presión operativa.'],
+            ['title' => 'Toma de decisiones', 'accent' => '#145da0', 'copy' => 'Evaluación rápida de alternativas para actuar con criterio, prioridad y trazabilidad.'],
+            ['title' => 'Memoria de trabajo', 'accent' => '#4b5f7a', 'copy' => 'Retención y uso de información táctica, instrucciones, ubicaciones y protocolos.'],
+            ['title' => 'Carga mental', 'accent' => '#23395d', 'copy' => 'Seguimiento de consistencia cognitiva cuando aumenta la demanda o la fatiga.'],
+        ];
+
+        $methodSteps = [
+            ['step' => '01', 'title' => 'Evaluar capacidades', 'copy' => 'Observa categorías cognitivas relacionadas con atención, reacción, memoria y decisión.'],
+            ['step' => '02', 'title' => 'Medir desempeño', 'copy' => 'Ejecuta sesiones CogniFit o captura mediciones internas con puntajes normalizados.'],
+            ['step' => '03', 'title' => 'Tomar acción', 'copy' => 'Consulta alertas, refuerzo requerido, comparativos y reportes por elemento o unidad.'],
+        ];
+
+        $structureLevels = [
+            ['title' => 'Elemento', 'tag' => 'Individual', 'copy' => 'Ficha individual con índice operativo, categorías, historial y alertas.'],
+            ['title' => 'Grupo operativo', 'tag' => 'Grupo', 'copy' => 'Promedios y elementos con refuerzo requerido por turno, célula o patrulla.'],
+            ['title' => 'Unidad', 'tag' => 'Unidad', 'copy' => 'Comparativo institucional para detectar brechas, avances y necesidades de capacitación.'],
+        ];
+
+        $dashboardScores = [
+            ['label' => 'Índice cognitivo operativo', 'value' => 78],
+            ['label' => 'Elementos evaluados', 'value' => 68, 'display' => '126'],
+            ['label' => 'Refuerzo requerido', 'value' => 24, 'display' => '9 alertas'],
+        ];
+    @endphp
+
     <section class="hero">
         <div class="panel hero-copy">
             <span class="eyebrow">Seguridad pública</span>
@@ -15,7 +51,7 @@
             </p>
 
             <div class="cta-row">
-                <a href="{{ route('user.login') }}" class="btn btn-primary">Iniciar sesión</a>
+                <a href="{{ route('user.login') }}" class="btn btn-primary">Ingresar al panel</a>
             </div>
 
             <div class="badge-row">
@@ -28,26 +64,11 @@
 
         <div class="panel hero-board">
             <div class="metric-grid">
-                <article class="metric-card">
-                    <span>Índice operativo</span>
-                    <strong>0-100</strong>
-                    <p>Lectura consolidada de desempeño cognitivo por elemento y unidad.</p>
-                </article>
-                <article class="metric-card">
-                    <span>Categorías</span>
-                    <strong>8</strong>
-                    <p>Atención, reacción, memoria, control inhibitorio y toma de decisiones.</p>
-                </article>
-                <article class="metric-card">
-                    <span>Seguimiento</span>
-                    <strong>24/7</strong>
-                    <p>Panel disponible para mandos, coordinadores y responsables de capacitación.</p>
-                </article>
-                <article class="metric-card">
-                    <span>Reportes</span>
-                    <strong>PDF</strong>
-                    <p>Informes individuales y comparativos para decisiones institucionales.</p>
-                </article>
+                @foreach ($heroMetrics as $metric)
+                    <x-metric-card :label="$metric['label']" :value="$metric['value']">
+                        {{ $metric['copy'] }}
+                    </x-metric-card>
+                @endforeach
             </div>
 
             <article class="card session-card">
@@ -89,36 +110,11 @@
         </div>
 
         <div class="grid-3">
-            <article class="card feature-card" style="--card-accent: #00254c">
-                <div class="accent-dot"></div>
-                <h3>Atención sostenida</h3>
-                <p>Capacidad para mantener foco durante patrullaje, monitoreo, vigilancia o tareas prolongadas.</p>
-            </article>
-            <article class="card feature-card" style="--card-accent: #0d6efd">
-                <div class="accent-dot"></div>
-                <h3>Tiempo de reacción</h3>
-                <p>Velocidad de respuesta ante estímulos relevantes, cambios de contexto y señales de riesgo.</p>
-            </article>
-            <article class="card feature-card" style="--card-accent: #c7a34b">
-                <div class="accent-dot"></div>
-                <h3>Control inhibitorio</h3>
-                <p>Regulación de impulsos y respuesta proporcional en escenarios de presión operativa.</p>
-            </article>
-            <article class="card feature-card" style="--card-accent: #145da0">
-                <div class="accent-dot"></div>
-                <h3>Toma de decisiones</h3>
-                <p>Evaluación rápida de alternativas para actuar con criterio, prioridad y trazabilidad.</p>
-            </article>
-            <article class="card feature-card" style="--card-accent: #4b5f7a">
-                <div class="accent-dot"></div>
-                <h3>Memoria de trabajo</h3>
-                <p>Retención y uso de información táctica, instrucciones, ubicaciones y protocolos.</p>
-            </article>
-            <article class="card feature-card" style="--card-accent: #23395d">
-                <div class="accent-dot"></div>
-                <h3>Carga mental</h3>
-                <p>Seguimiento de consistencia cognitiva cuando aumenta la demanda o la fatiga.</p>
-            </article>
+            @foreach ($capabilities as $capability)
+                <x-feature-card :title="$capability['title']" :accent-color="$capability['accent']">
+                    {{ $capability['copy'] }}
+                </x-feature-card>
+            @endforeach
         </div>
     </section>
 
@@ -135,21 +131,13 @@
         </div>
 
         <div class="grid-3">
-            <article class="card timeline-card">
-                <span class="step-badge">01</span>
-                <h3>Evaluar capacidades</h3>
-                <p>Observa categorías cognitivas relacionadas con atención, reacción, memoria y decisión.</p>
-            </article>
-            <article class="card timeline-card">
-                <span class="step-badge">02</span>
-                <h3>Medir desempeño</h3>
-                <p>Ejecuta sesiones Cognifit o captura mediciones internas con puntajes normalizados.</p>
-            </article>
-            <article class="card timeline-card">
-                <span class="step-badge">03</span>
-                <h3>Tomar acción</h3>
-                <p>Consulta alertas, refuerzo requerido, comparativos y reportes por elemento o unidad.</p>
-            </article>
+            @foreach ($methodSteps as $step)
+                <article class="card timeline-card">
+                    <span class="step-badge">{{ $step['step'] }}</span>
+                    <h3>{{ $step['title'] }}</h3>
+                    <p>{{ $step['copy'] }}</p>
+                </article>
+            @endforeach
         </div>
     </section>
 
@@ -164,27 +152,15 @@
                 </p>
 
                 <div class="stack-list">
-                    <div class="line-item">
-                        <div>
-                            <strong>Elemento</strong>
-                            <p>Ficha individual con índice operativo, categorías, historial y alertas.</p>
+                    @foreach ($structureLevels as $level)
+                        <div class="line-item">
+                            <div>
+                                <strong>{{ $level['title'] }}</strong>
+                                <p>{{ $level['copy'] }}</p>
+                            </div>
+                            <span class="line-tag">{{ $level['tag'] }}</span>
                         </div>
-                        <span class="line-tag">Individual</span>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Grupo operativo</strong>
-                            <p>Promedios y elementos con refuerzo requerido por turno, célula o patrulla.</p>
-                        </div>
-                        <span class="line-tag">Grupo</span>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Unidad</strong>
-                            <p>Comparativo institucional para detectar brechas, avances y necesidades de capacitación.</p>
-                        </div>
-                        <span class="line-tag">Unidad</span>
-                    </div>
+                    @endforeach
                 </div>
             </article>
 
@@ -192,29 +168,13 @@
                 <span class="eyebrow">Tablero operativo</span>
                 <h2>Indicadores listos para seguimiento por mando.</h2>
 
-                <div class="score-row">
-                    <div>
-                        <span>Índice cognitivo operativo</span>
-                        <strong>78/100</strong>
-                    </div>
-                    <div class="progress-bar"><span style="width: 78%"></span></div>
-                </div>
-
-                <div class="score-row">
-                    <div>
-                        <span>Elementos evaluados</span>
-                        <strong>126</strong>
-                    </div>
-                    <div class="progress-bar"><span style="width: 68%"></span></div>
-                </div>
-
-                <div class="score-row">
-                    <div>
-                        <span>Refuerzo requerido</span>
-                        <strong>9 alertas</strong>
-                    </div>
-                    <div class="progress-bar"><span style="width: 24%"></span></div>
-                </div>
+                @foreach ($dashboardScores as $score)
+                    <x-progress-score-row
+                        :label="$score['label']"
+                        :value="$score['value']"
+                        :display="$score['display'] ?? null"
+                    />
+                @endforeach
 
                 <div class="hero-note">
                     El panel ya está orientado a elementos, unidades, grupos operativos y categorías cognitivas para
@@ -232,10 +192,6 @@
                 El acceso está reservado para personal autorizado. Desde el panel se consultan indicadores, alertas y
                 reportes operativos.
             </p>
-
-            <div class="cta-row">
-                <a href="{{ route('user.login') }}" class="btn btn-primary">Iniciar sesión</a>
-            </div>
         </article>
     </section>
 @endsection

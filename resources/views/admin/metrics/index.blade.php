@@ -8,6 +8,10 @@
                     <h3 class="mb-1">Panel de aptitud cognitiva operativa</h3>
                     <p class="text-muted mb-0">Seguimiento por elemento, unidad, grupo y categoría.</p>
                 </div>
+                <a href="{{ route('admin.metrics.comparative') }}" class="btn btn-outline-primary">
+                    <i class="fe fe-target me-1"></i>
+                    Análisis comparativo
+                </a>
             </div>
 
             <div class="card customShadow mb-3">
@@ -57,9 +61,16 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12 text-end">
-                            <a href="{{ route('admin.metrics.index') }}" class="btn btn-outline-secondary">Limpiar</a>
-                            <button class="btn btn-primary">Aplicar filtros</button>
+                        <div class="col-lg-3 d-flex align-items-end gap-2 ms-auto">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fe fe-filter"></i> Filtrar
+                            </button>
+                            @if (request()->hasAny(['security_unit_id', 'operational_group_id', 'category', 'user_id']))
+                                <a href="{{ route('admin.metrics.index') }}" class="btn btn-outline-secondary px-3"
+                                    title="Limpiar filtros" aria-label="Limpiar filtros">
+                                    <i class="fe fe-x"></i>
+                                </a>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -195,19 +206,34 @@
                         </div>
                         <div class="card-body">
                             @forelse ($riskElements->take(8) as $row)
-                                <div class="d-flex justify-content-between border-bottom py-2">
+                                @php
+                                    $scoreColor = $row['score'] < 50 ? 'bg-danger text-white' : 'bg-warning text-dark';
+                                @endphp
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
                                     <div>
                                         <strong>{{ $row['name'] }}</strong>
                                         <div class="small text-muted">{{ $row['unit'] }} / {{ $row['group'] }}</div>
                                     </div>
-                                    <span class="badge bg-warning text-dark">{{ $row['score'] }}</span>
+                                    <span class="badge {{ $scoreColor }} px-2 py-1 fs-6">
+                                        {{ $row['score'] }}
+                                    </span>
                                 </div>
                             @empty
-                                <p class="text-muted mb-0">Sin elementos en rango de refuerzo con los datos actuales.</p>
+                                <p class="text-muted mb-0">
+                                    <i class="fe fe-shield text-success me-1"></i>
+                                    Sin elementos en rango crítico.
+                                </p>
                             @endforelse
 
                             @foreach ($activeAlerts as $alert)
-                                <div class="alert alert-warning mt-3 mb-0">
+                                @php
+                                    $alertClass = match (strtolower($alert->severity)) {
+                                        'alta', 'crítica', 'critica', 'high', 'critical' => 'alert-danger',
+                                        'media', 'medium' => 'alert-warning',
+                                        default => 'alert-info',
+                                    };
+                                @endphp
+                                <div class="alert {{ $alertClass }} mt-3 mb-0">
                                     <strong>{{ $alert->title }}</strong>
                                     <div class="small">{{ $alert->description }}</div>
                                 </div>

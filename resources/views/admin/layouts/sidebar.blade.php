@@ -3,31 +3,24 @@
         <div id="sidebar-menu" class="sidebar-menu">
             <ul>
                 <li class="menu-title">
-                    <span>Main</span>
+                    <span>Navegación Operativa</span>
                 </li>
                 <li class="{{ Route::is(['admin.dashboard']) ? 'active' : '' }}">
                     <a href="{{ route('admin.dashboard') }}">
                         <i class="fe fe-home"></i>
-                        <span>
-                            Panel
-                        </span>
+                        <span>Panel</span>
                     </a>
                 </li>
                 <li class="{{ Route::is(['admin.user.management', 'admin.user.profile']) ? 'active' : '' }}">
                     <a href="{{ route('admin.user.management') }}">
                         <i class="fa-solid fa-user"></i>
-                        <span>
-                            Elementos
-                        </span>
+                        <span>Elementos</span>
                     </a>
-                </li>
                 </li>
                 <li class="{{ Route::is(['admin.skills.management']) ? 'active' : '' }}">
                     <a href="{{ route('admin.skills.management') }}">
                         <i class="fa-solid fa-brain"></i>
-                        <span>
-                            Habilidades
-                        </span>
+                        <span>Capacidades</span>
                     </a>
                 </li>
             </ul>

@@ -35,9 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users/{user}/scores', [CognifitApiController::class, 'scores']);
         Route::get('/users/{user}/played-games', [CognifitApiController::class, 'playedGames']);
     });
-});
 
-Route::middleware('auth:sanctum')->group(function () {
     Route::post('/launch-game', [ApiController::class, 'getLaunchGame']);
     Route::get('/get-all-users', [ApiController::class, 'getAllUsers']);
     Route::post('/store-files', [ApiController::class, 'storeFiles']);

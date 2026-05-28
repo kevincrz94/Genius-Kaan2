@@ -25,11 +25,11 @@
         </a>
         <a href="{{ route('admin.skills.management') }}"
             class="btn {{ Route::is(['admin.skills.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Habilidades
+            Capacidades
         </a>
         <a href="{{ route('admin.games.list') }}"
             class="btn {{ Route::is(['admin.games.list']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Juegos
+            Simuladores
         </a>
     </div>
 
@@ -56,7 +56,7 @@
                     </div>
                 </div>
                 <a class="dropdown-item px-3 py-2" href="javascript:void(0)">Configuración</a>
-                <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
+                <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
                     @csrf
                 </form>
                 <a class="dropdown-item px-3 py-2" href="javascript:void(0)"
@@ -68,34 +68,3 @@
     </ul>
 
 </div>
-
-<style>
-    .header {
-        background-color: #ffffff;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        border-bottom: 1px solid #e5e5e5;
-    }
-
-    .header .btn-outline-primary {
-        border-radius: 6px;
-        transition: all 0.3s;
-    }
-
-    .header .btn-outline-primary:hover {
-        background-color: #0d6efd;
-        color: #fff;
-        border-color: #0d6efd;
-    }
-
-    .user-menu .dropdown-menu {
-        min-width: 200px;
-    }
-
-    .user-menu .user-img img {
-        object-fit: cover;
-    }
-
-    .user-menu .dropdown-item:hover {
-        background-color: #f1f1f1;
-    }
-</style>

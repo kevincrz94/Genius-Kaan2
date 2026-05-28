@@ -3,26 +3,33 @@
 @section('section')
     @php
         $customFunction = \App\Services\customBlock::class;
+        $totalModules = count($list);
+        $firebaseConfig = array_filter(config('services.firebase_web'), fn ($value) => filled($value));
     @endphp
 
     <div class="page-wrapper">
         <div class="content container-fluid">
 
+            @if (empty($firebaseConfig))
+                <div class="alert alert-warning">
+                    Configura las variables FIREBASE_WEB_* en el archivo .env para habilitar la sincronización de simuladores.
+                </div>
+            @endif
+
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card customShadow">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                                 <div class="d-flex align-items-center flex-grow-1">
-                                    <i class="fas fa-search me-2 text-muted"></i>
-                                    <input type="text" id="gameSearch" class="form-control"
-                                        placeholder="Buscar juegos por titulo o habilidad...">
+                                    <i class="fas fa-search me-3 text-muted fs-5"></i>
+                                    <input type="text" id="moduleSearch" class="form-control border-0 bg-light py-2"
+                                        placeholder="Buscar simuladores por título o capacidad cognitiva...">
                                 </div>
-                                <div class="ms-3">
-                                    <span class="badge bg-primary" id="gameCount"
-                                        style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                                        Mostrando <span id="visibleCount">{{ count($list) }}</span> de <span
-                                            id="totalCount">{{ count($list) }}</span> juegos
+                                <div>
+                                    <span class="badge bg-primary fs-6 py-2 px-3" id="moduleCount">
+                                        Mostrando <span id="visibleCount">{{ $totalModules }}</span> de
+                                        <span id="totalCount">{{ $totalModules }}</span> simuladores
                                     </span>
                                 </div>
                             </div>
@@ -31,51 +38,58 @@
                 </div>
             </div>
 
-            <div class="row mb-3" id="noResults" style="display: none;">
+            <div class="row mb-3 d-none" id="noResults">
                 <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle me-2"></i>No se encontraron juegos con esa busqueda.
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        No se encontraron simuladores con ese criterio.
                     </div>
                 </div>
             </div>
 
-            <div class="row" id="gamesContainer">
+            <div class="row" id="modulesContainer">
                 @foreach ($list as $item)
-                    <div class="col-lg-3 game-card" data-title="{{ strtolower($item->assets->titles->es ?? $item->assets->titles->en) }}"
-                        data-skills="{{ strtolower(implode(' ', $item->skills)) }}">
-                        <div class="card customShadow">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-start gap-2 align-items-center">
-                                    <div class="d-flex justify-content-start gap-2 align-items-center">
-                                        <img class="avatar-img rounded-circle" style="width: 150px;" alt="Juego"
-                                            src="{{ $item->assets->images->icon }}">
-                                        <div>
-                                            <h4 class="card-title">{{ $item->assets->titles->es ?? $item->assets->titles->en }}</h4>
-                                            @foreach ($item->skills as $skillName)
-                                                <span class="badge badge-primary">
-                                                    {{ $customFunction::processStringNames($skillName) }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input enableGame" type="checkbox" role="switch"
-                                            id="switchCheckDefault" data-bs-id="{{ $item->key }}" required>
+                    @php
+                        $title = $item->assets->titles->es ?? $item->assets->titles->en ?? $item->key;
+                        $description = $item->assets->descriptions->es ?? $item->assets->descriptions->en ?? '';
+                        $truncated = \Illuminate\Support\Str::words($description, 18, '...');
+                        $skills = is_array($item->skills ?? null) ? $item->skills : [];
+                    @endphp
+                    <div class="col-lg-3 col-md-6 mb-4 module-card"
+                        data-title="{{ strtolower($title) }}"
+                        data-skills="{{ strtolower(implode(' ', $skills)) }}">
+                        <div class="card customShadow h-100">
+                            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <img class="module-avatar rounded-circle shadow-sm" alt="Módulo"
+                                        src="{{ $item->assets->images->icon }}">
+
+                                    <div class="form-check form-switch mt-1">
+                                        <input class="form-check-input enableModule fs-5" type="checkbox" role="switch"
+                                            data-bs-id="{{ $item->key }}" @disabled(empty($firebaseConfig))>
                                     </div>
                                 </div>
+                                <h5 class="card-title mt-3 mb-1 lh-sm module-title">
+                                    {{ $title }}
+                                </h5>
+                                <div class="d-flex flex-wrap gap-1 mt-2">
+                                    @foreach (array_slice($skills, 0, 2) as $skillName)
+                                        <span class="badge bg-light text-secondary border">
+                                            {{ $customFunction::processStringNames($skillName) }}
+                                        </span>
+                                    @endforeach
+                                </div>
                             </div>
+
                             <div class="card-body">
-                                @php
-                                    $description = $item->assets->descriptions->es ?? $item->assets->descriptions->en;
-                                    $truncated = \Illuminate\Support\Str::words($description, 20, '...');
-                                @endphp
-                                <p>
+                                <p class="text-muted small mb-0">
                                     {{ $truncated }}
-                                    @if (\Illuminate\Support\Str::wordCount($description) > 20)
-                                        <a href="javascript:void(0);" class="text-primary view-more-btn"
-                                            data-title="{{ $item->assets->titles->es ?? $item->assets->titles->en }}"
+                                    @if (\Illuminate\Support\Str::wordCount($description) > 18)
+                                        <a href="javascript:void(0);"
+                                            class="text-primary fw-bold view-more-btn text-decoration-none ms-1"
+                                            data-title="{{ $title }}"
                                             data-description="{{ $description }}">
-                                            Ver mas
+                                            Leer más
                                         </a>
                                     @endif
                                 </p>
@@ -88,46 +102,38 @@
         </div>
     </div>
 
-    <div class="modal fade" id="viewMoreModal" tabindex="-1" aria-labelledby="viewMoreModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="viewMoreModalLabel">Descripcion del juego</h5>
+    <div class="modal fade" id="viewMoreModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light border-bottom-0">
+                    <h5 class="modal-title fw-bold text-primary" id="viewMoreModalLabel">Detalle del simulador</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal-body">
-                    <p id="modalDescription"></p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <div class="modal-body p-4">
+                    <p id="modalDescription" class="text-muted mb-0 lh-lg"></p>
                 </div>
             </div>
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         $(document).ready(function() {
-            // View More Modal functionality
             $('.view-more-btn').on('click', function() {
-                var title = $(this).data('title');
-                var description = $(this).data('description');
-
-                $('#viewMoreModalLabel').text(title);
-                $('#modalDescription').text(description);
+                $('#viewMoreModalLabel').text($(this).data('title'));
+                $('#modalDescription').text($(this).data('description'));
                 $('#viewMoreModal').modal('show');
             });
 
-            // Search functionality
-            $('#gameSearch').on('keyup', function() {
-                var searchQuery = $(this).val().toLowerCase().trim();
-                var visibleCount = 0;
-                var totalCount = $('.game-card').length;
+            $('#moduleSearch').on('keyup', function() {
+                const searchQuery = $(this).val().toLowerCase().trim();
+                let visibleCount = 0;
 
-                $('.game-card').each(function() {
-                    var title = $(this).data('title');
-                    var skills = $(this).data('skills');
+                $('.module-card').each(function() {
+                    const title = $(this).data('title');
+                    const skills = $(this).data('skills');
 
-                    // Check if search query matches title or skills
                     if (title.includes(searchQuery) || skills.includes(searchQuery)) {
                         $(this).show();
                         visibleCount++;
@@ -136,98 +142,69 @@
                     }
                 });
 
-                // Update count badge
                 $('#visibleCount').text(visibleCount);
 
-                // Change badge color based on filter status
-                var badge = $('#gameCount');
-                if (searchQuery === '') {
-                    badge.removeClass('bg-info bg-warning').addClass('bg-primary');
-                } else if (visibleCount === 0) {
-                    badge.removeClass('bg-primary bg-info').addClass('bg-warning');
-                } else {
-                    badge.removeClass('bg-primary bg-warning').addClass('bg-info');
-                }
+                const badge = $('#moduleCount');
+                badge.removeClass('bg-primary bg-info bg-warning text-dark');
 
-                // Show/hide "no results" message
-                if (visibleCount === 0) {
-                    $('#noResults').show();
+                if (searchQuery === '') {
+                    badge.addClass('bg-primary');
+                    $('#noResults').addClass('d-none');
+                } else if (visibleCount === 0) {
+                    badge.addClass('bg-warning text-dark');
+                    $('#noResults').removeClass('d-none');
                 } else {
-                    $('#noResults').hide();
+                    badge.addClass('bg-info text-dark');
+                    $('#noResults').addClass('d-none');
                 }
             });
         });
     </script>
 
-    <script type="module">
-        import {
-            initializeApp
-        } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-        import {
-            getAnalytics
-        } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
-        import {
-            getDatabase,
-            ref,
-            onValue,
-            set,
-            push,
-            remove
-        } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+    @if (! empty($firebaseConfig))
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+            import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDWyXth9kde5FAaA_hGAPsFq9CHCIzR8wc",
-            authDomain: "impulse-9f2b2.firebaseapp.com",
-            databaseURL: "https://impulse-9f2b2-default-rtdb.firebaseio.com",
-            projectId: "impulse-9f2b2",
-            storageBucket: "impulse-9f2b2.firebasestorage.app",
-            messagingSenderId: "881922859246",
-            appId: "1:881922859246:web:cfe6d67e494055d84453ff",
-            measurementId: "G-GYV0KE70ED"
-        };
+            const firebaseConfig = @json($firebaseConfig);
+            const app = initializeApp(firebaseConfig);
+            const db = getDatabase(app);
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getDatabase(app);
+            document.addEventListener('DOMContentLoaded', function() {
+                const listModules = document.querySelectorAll('.enableModule');
+                const disabledModulesRef = ref(db, 'disabledGames');
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const listGames = document.querySelectorAll(".enableGame");
+                onValue(disabledModulesRef, (snapshot) => {
+                    listModules.forEach((el) => el.checked = true);
 
-            // Reference to disabledGames in Firebase
-            const disabledGamesRef = ref(db, "disabledGames");
+                    snapshot.forEach((childSnapshot) => {
+                        const childKey = childSnapshot.key;
+                        listModules.forEach((el) => {
+                            if (el.dataset.bsId === childKey) {
+                                el.checked = false;
+                            }
+                        });
+                    });
+                });
 
-            // Load initial state from Firebase
-            onValue(disabledGamesRef, (snapshot) => {
-                // First, reset all checkboxes
-                listGames.forEach(el => el.checked = true);
+                listModules.forEach((el) => {
+                    el.addEventListener('change', () => {
+                        const moduleKey = el.dataset.bsId;
+                        const moduleRef = ref(db, `disabledGames/${moduleKey}`);
 
-                snapshot.forEach((childSnapshot) => {
-                    const childKey = childSnapshot.key;
-                    listGames.forEach(el => {
-                        if (el.dataset.bsId === childKey) {
-                            el.checked = false; // disable checkbox
+                        if (!el.checked) {
+                            set(moduleRef, moduleKey)
+                                .then(() => toastr.warning('Simulador deshabilitado en la plataforma.'))
+                                .catch(() => toastr.error('Error de conexión con Firebase.'));
+                            return;
                         }
+
+                        remove(moduleRef)
+                            .then(() => toastr.success('Simulador habilitado correctamente.'))
+                            .catch(() => toastr.error('Error de conexión con Firebase.'));
                     });
                 });
             });
-
-            // Add toggle event listener for each checkbox
-            listGames.forEach(el => {
-                el.addEventListener("change", () => {
-                    const gameKey = el.dataset.bsId;
-                    const gameRef = ref(db, `disabledGames/${gameKey}`);
-
-                    if (!el.checked) {
-                        // If unchecked, add to Firebase
-                        set(gameRef, gameKey);
-                    } else {
-                        // If checked, remove from Firebase
-                        remove(gameRef);
-                    }
-                });
-            });
-        });
-    </script>
-@endsection
+        </script>
+    @endif
+@endpush

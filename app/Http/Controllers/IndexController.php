@@ -212,7 +212,7 @@ class IndexController extends Controller
             }
         }
 
-        $pageTitle = 'Genius Kaan | Juegos operativos';
+        $pageTitle = 'Genius Kaan | Módulos operativos';
         $availableGames = $this->availableGames();
 
         return view('user.games', compact('pageTitle', 'user', 'availableGames', 'cognifitError'));
@@ -225,8 +225,8 @@ class IndexController extends Controller
         $availableGames = $this->availableGames();
 
         $sessionDefaults = [
-            'participant' => $request->string('participant')->trim()->value() ?: 'Paciente demo',
-            'goal' => $request->string('goal')->trim()->value() ?: 'Fortalecer atencion y memoria funcional',
+            'participant' => $request->string('participant')->trim()->value() ?: 'Elemento demo',
+            'goal' => $request->string('goal')->trim()->value() ?: 'Fortalecer atención y memoria funcional',
             'user_token' => $request->string('user_token')->trim()->value(),
             'game_key' => strtoupper($request->string('game_key')->trim()->value() ?: 'THE_BLUE_SHAPE'),
             'locale' => $request->string('locale')->trim()->value() ?: 'es',
@@ -237,7 +237,7 @@ class IndexController extends Controller
 
     public function startGame(Request $request)
     {
-        $pageTitle = 'Genius Kaan | Sesion cognitiva';
+        $pageTitle = 'Genius Kaan | Sesión cognitiva';
         $cognifitUserToken = $request->string('user_token')->trim()->value();
         $user = filled($cognifitUserToken)
             ? User::query()->where('cognifit_user_token', $cognifitUserToken)->first()
@@ -254,13 +254,13 @@ class IndexController extends Controller
         }
 
         $launchConfig = [
-            'participant' => $request->string('participant')->trim()->value() ?: 'Paciente',
-            'goal' => $request->string('goal')->trim()->value() ?: 'Entrenamiento cognitivo personalizado',
+            'participant' => $request->string('participant')->trim()->value() ?: 'Elemento operativo',
+            'goal' => $request->string('goal')->trim()->value() ?: 'Entrenamiento cognitivo operativo',
             'gameKey' => strtoupper($request->string('game_key')->trim()->value()),
             'userToken' => $accessToken,
             'locale' => $request->string('locale')->trim()->value() ?: 'es',
             'image' => $request->string('image')->trim()->value(),
-            'clientId' => config('services.cognifit.client_id') ?: '2cc41d68527b1b5eb49ee8ce8d802468',
+            'clientId' => config('services.cognifit.client_id'),
             'sdkVersion' => $this->cognifitSdkVersion(),
             'appType' => in_array($request->string('app_type')->trim()->value(), ['web', 'app'], true)
                 ? $request->string('app_type')->trim()->value()
@@ -332,7 +332,7 @@ class IndexController extends Controller
     private function cognifitAccessToken(string $cognifitUserToken): ?string
     {
         if (! filled(config('services.cognifit.client_id')) || ! filled(config('services.cognifit.client_secret'))) {
-            throw new \RuntimeException('Faltan credenciales de Cognifit en .env.');
+            throw new \RuntimeException('Faltan credenciales de CogniFit en .env.');
         }
 
         $api = new UserAccessToken(
@@ -343,13 +343,13 @@ class IndexController extends Controller
         $response = $api->issue($cognifitUserToken);
 
         if ($response->hasError()) {
-            throw new \RuntimeException('Cognifit no pudo emitir access token para el usuario.');
+            throw new \RuntimeException('CogniFit no pudo emitir access token para el usuario.');
         }
 
         $accessToken = $response->get('access_token');
 
         if (! filled($accessToken)) {
-            throw new \RuntimeException('Cognifit no devolvio access token.');
+            throw new \RuntimeException('CogniFit no devolvió access token.');
         }
 
         return $accessToken;
@@ -531,11 +531,11 @@ class IndexController extends Controller
             ->map(function ($game): array {
                 $title = $game->assets->titles->es
                     ?? $game->assets->titles->en
-                    ?? customBlock::processStringNames((string) ($game->key ?? 'Juego'));
+                    ?? customBlock::processStringNames((string) ($game->key ?? 'Módulo'));
 
                 $description = $game->assets->descriptions->es
                     ?? $game->assets->descriptions->en
-                    ?? 'Entrenamiento cognitivo Cognifit.';
+                    ?? 'Entrenamiento cognitivo CogniFit.';
 
                 return [
                     'key' => (string) ($game->key ?? ''),

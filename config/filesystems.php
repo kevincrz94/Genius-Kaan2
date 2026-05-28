@@ -38,6 +38,14 @@ return [
             'report' => false,
         ],
 
+        'officer_profiles' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/officer-profiles'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

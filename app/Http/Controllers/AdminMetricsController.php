@@ -9,14 +9,15 @@ use App\Models\OperationalMetricSnapshot;
 use App\Models\SecurityUnit;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class AdminMetricsController extends Controller
 {
     private const CATEGORIES = [
-        'atencion_sostenida' => 'Atencion sostenida',
-        'atencion_dividida' => 'Atencion dividida',
-        'tiempo_reaccion' => 'Tiempo de reaccion',
+        'atencion_sostenida' => 'Atención sostenida',
+        'atencion_dividida' => 'Atención dividida',
+        'tiempo_reaccion' => 'Tiempo de reacción',
         'memoria_trabajo' => 'Memoria de trabajo',
         'control_inhibitorio' => 'Control inhibitorio',
         'toma_decisiones' => 'Toma de decisiones',
@@ -26,7 +27,7 @@ class AdminMetricsController extends Controller
 
     public function index(Request $request)
     {
-        $title = 'Metricas operativas';
+        $title = 'Métricas operativas';
         $filters = $request->only(['security_unit_id', 'operational_group_id', 'category', 'user_id']);
 
         $units = SecurityUnit::query()->orderBy('name')->get();
@@ -70,7 +71,7 @@ class AdminMetricsController extends Controller
 
     public function user(User $user)
     {
-        $title = 'Metricas del elemento';
+        $title = 'Métricas del elemento';
         $user->load(['securityUnit', 'operationalGroup']);
 
         $metrics = OperationalMetricSnapshot::query()
@@ -99,6 +100,55 @@ class AdminMetricsController extends Controller
         ))->with('categories', self::CATEGORIES);
     }
 
+    public function comparative(Request $request)
+    {
+        $title = 'Análisis de brechas cognitivas';
+        $users = User::query()
+            ->with(['securityUnit', 'operationalGroup'])
+            ->where('role', 'user')
+            ->orderBy('name')
+            ->get();
+
+        $selectedUser = $request->filled('user_id')
+            ? $users->firstWhere('id', (int) $request->input('user_id'))
+            : $users->first();
+
+        $comparison = $request->string('comparison')->trim()->value() ?: 'unit';
+
+        $userMetrics = $selectedUser
+            ? $this->metricsForUser($selectedUser)
+            : collect();
+        $baselineMetrics = $selectedUser
+            ? $this->baselineMetrics($selectedUser, $comparison)
+            : collect();
+
+        $userScores = $this->categoryScores($userMetrics);
+        $baselineScores = $comparison === 'optimal'
+            ? array_fill_keys(array_keys(self::CATEGORIES), 85)
+            : $this->categoryScores($baselineMetrics);
+
+        $radarLabels = array_values(self::CATEGORIES);
+        $radarUserData = array_map(fn ($key) => $userScores[$key] ?? 0, array_keys(self::CATEGORIES));
+        $radarBaselineData = array_map(fn ($key) => $baselineScores[$key] ?? 0, array_keys(self::CATEGORIES));
+        $trendData = $this->timelineScores($userMetrics);
+        $insights = $this->tacticalInsights($userScores, $baselineScores, $selectedUser);
+
+        return view('admin.metrics.comparative', compact(
+            'title',
+            'users',
+            'selectedUser',
+            'comparison',
+            'radarLabels',
+            'radarUserData',
+            'radarBaselineData',
+            'trendData',
+            'insights'
+        ))->with([
+            'categories' => self::CATEGORIES,
+            'comparisonLabel' => $this->comparisonLabel($selectedUser, $comparison),
+        ]);
+    }
+
     public function storeUserMetric(Request $request, User $user)
     {
         $validated = $request->validate([
@@ -124,7 +174,7 @@ class AdminMetricsController extends Controller
 
         return redirect()
             ->route('admin.metrics.user', $user)
-            ->with('success', 'Metrica registrada correctamente.');
+            ->with('success', 'Métrica registrada correctamente.');
     }
 
     private function filteredMetrics(array $filters)
@@ -146,6 +196,38 @@ class AdminMetricsController extends Controller
             ->when($filters['operational_group_id'] ?? null, fn ($query, $id) => $query->where('operational_group_id', $id))
             ->when($filters['category'] ?? null, fn ($query, $category) => $query->where('category', $category))
             ->when($filters['user_id'] ?? null, fn ($query, $id) => $query->where('user_id', $id));
+    }
+
+    private function metricsForUser(User $user): Collection
+    {
+        $metrics = OperationalMetricSnapshot::query()
+            ->with(['user.securityUnit', 'user.operationalGroup', 'unit', 'group'])
+            ->where('user_id', $user->id)
+            ->latest('measured_at')
+            ->get();
+
+        return $metrics->isNotEmpty()
+            ? $metrics
+            : $this->fallbackMetrics(['user_id' => $user->id]);
+    }
+
+    private function baselineMetrics(User $user, string $comparison): Collection
+    {
+        if ($comparison === 'optimal') {
+            return collect();
+        }
+
+        $filters = match ($comparison) {
+            'group' => ['operational_group_id' => $user->operational_group_id],
+            'global' => [],
+            default => ['security_unit_id' => $user->security_unit_id],
+        };
+
+        $metrics = $this->filteredMetrics(array_filter($filters))->get();
+
+        return $metrics->isNotEmpty()
+            ? $metrics
+            : $this->fallbackMetrics(array_filter($filters));
     }
 
     private function fallbackMetrics(array $filters): Collection
@@ -245,6 +327,66 @@ class AdminMetricsController extends Controller
             ->values();
     }
 
+    private function categoryScores(Collection $metrics): array
+    {
+        return $metrics
+            ->groupBy('category')
+            ->map(fn ($items) => round((float) $items->avg('score'), 2))
+            ->all();
+    }
+
+    private function timelineScores(Collection $metrics): array
+    {
+        $months = collect(range(5, 0))
+            ->map(fn ($offset) => now()->subMonths($offset)->format('Y-m'));
+
+        $scores = $metrics
+            ->filter(fn ($metric) => filled($metric->measured_at))
+            ->groupBy(fn ($metric) => Carbon::parse($metric->measured_at)->format('Y-m'))
+            ->map(fn ($items) => round((float) $items->avg('score'), 2));
+
+        return [
+            'labels' => $months->map(fn ($month) => Carbon::createFromFormat('Y-m', $month)->format('M Y'))->values()->all(),
+            'scores' => $months->map(fn ($month) => $scores[$month] ?? null)->values()->all(),
+        ];
+    }
+
+    private function comparisonLabel(?User $user, string $comparison): string
+    {
+        return match ($comparison) {
+            'group' => 'Promedio del grupo '.($user?->operationalGroup?->name ?: 'operativo'),
+            'global' => 'Promedio global de la agencia',
+            'optimal' => 'Estándar óptimo requerido',
+            default => 'Promedio de la unidad '.($user?->securityUnit?->name ?: 'operativa'),
+        };
+    }
+
+    private function tacticalInsights(array $userScores, array $baselineScores, ?User $user): array
+    {
+        $diffs = collect(self::CATEGORIES)
+            ->map(function ($label, $key) use ($userScores, $baselineScores) {
+                return [
+                    'key' => $key,
+                    'label' => $label,
+                    'diff' => round(($userScores[$key] ?? 0) - ($baselineScores[$key] ?? 0), 2),
+                ];
+            });
+
+        $weakness = $diffs->sortBy('diff')->first();
+        $strength = $diffs->sortByDesc('diff')->first();
+        $riskLevel = ($weakness['diff'] ?? 0) <= -15 ? 'alto' : ((($weakness['diff'] ?? 0) <= -8) ? 'moderado' : 'controlado');
+
+        return [
+            'weakness' => $weakness,
+            'strength' => $strength,
+            'risk_level' => $riskLevel,
+            'recommendation' => $riskLevel === 'alto'
+                ? 'Programar refuerzo cognitivo antes de asignaciones de alto impacto.'
+                : 'Mantener seguimiento periódico y entrenamiento focalizado en la categoría con mayor brecha.',
+            'assignment' => $user?->assignment_area ?: 'No especificada',
+        ];
+    }
+
     private function elementRanking(Collection $metrics): Collection
     {
         return $metrics
@@ -285,7 +427,7 @@ class AdminMetricsController extends Controller
     private function levelFor(float $score): string
     {
         return match (true) {
-            $score >= 85 => 'optimo',
+            $score >= 85 => 'óptimo',
             $score >= 70 => 'adecuado',
             $score >= 60 => 'seguimiento',
             $score >= 45 => 'refuerzo',

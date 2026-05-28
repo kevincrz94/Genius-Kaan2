@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8">
@@ -23,6 +23,7 @@
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+    @stack('styles')
 
     <!-- jQuery -->
     <script src="{{ asset('assets/js/jquery-3.7.1.min.js') }}"></script>
@@ -33,7 +34,6 @@
     <!-- Datatables JS -->
     <script src="{{ asset('assets/plugins/datatables/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatables/datatables.min.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     @include('admin.layouts.errors')
 
@@ -70,7 +70,8 @@
 
     <!-- Custom JS -->
     <script src="{{ asset('assets/js/script.js') }}"></script>
-@yield('scripts')
+    @yield('scripts')
+    @stack('scripts')
 </body>
 
 </html>

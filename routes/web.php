@@ -8,7 +8,8 @@ Route::get('/', [IndexController::class, 'home'])->name('home');
 Route::get('/login', [IndexController::class, 'showLogin'])->name('user.login');
 Route::post('/login', [IndexController::class, 'login'])->name('user.login.submit');
 Route::post('/logout', [IndexController::class, 'logout'])->name('user.logout');
-Route::get('/juegos', [IndexController::class, 'games'])->name('user.games');
+Route::get('/simuladores', [IndexController::class, 'games'])->name('user.games');
+Route::get('/juegos', fn () => redirect()->route('user.games'));
 
 Route::get('/launcher', [IndexController::class, 'launcher'])->name('launcher');
 
@@ -16,5 +17,5 @@ Route::get('/start-game/', [IndexController::class, 'startGame'])->name('start.g
 Route::post('/cognifit/users/{user}/sync-session', [IndexController::class, 'syncCognifitSession'])->name('cognifit.session.sync');
 
 /***** Including Admin Routes *****/
-include('admin.php');
+require __DIR__.'/admin.php';
 /***** End Including Admin Routes *****/

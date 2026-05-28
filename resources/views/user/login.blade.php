@@ -9,8 +9,8 @@
                 <span class="highlight">entorno Genius Kaan</span>.
             </h1>
             <p class="lead">
-                Usa el correo y la contraseña asignados. El sistema abrirá el panel administrativo o los juegos
-                Cognifit según el perfil autorizado.
+                Usa el correo y la contraseña asignados. El sistema abrirá el panel administrativo o los módulos
+                CogniFit según el perfil autorizado.
             </p>
 
             <div class="badge-row">
@@ -25,21 +25,21 @@
             <h2>Acceso unificado.</h2>
 
             @if (session('error'))
-                <div class="hero-note" style="color:#8a1f11;background:rgba(220,53,69,.08);">
+                <x-alert type="error">
                     {{ session('error') }}
-                </div>
+                </x-alert>
             @endif
 
             @if (session('success'))
-                <div class="hero-note">
+                <x-alert type="success">
                     {{ session('success') }}
-                </div>
+                </x-alert>
             @endif
 
             @if ($errors->any())
-                <div class="hero-note" style="color:#8a1f11;background:rgba(220,53,69,.08);">
+                <x-alert type="error">
                     {{ $errors->first() }}
-                </div>
+                </x-alert>
             @endif
 
             <form method="post" action="{{ route('user.login.submit') }}">
@@ -53,8 +53,14 @@
 
                     <div class="field field-full">
                         <label for="password">Contraseña</label>
-                        <input id="password" class="input" type="password" name="password" required
-                            autocomplete="current-password">
+                        <div class="password-field">
+                            <input id="password" class="input" type="password" name="password" required
+                                autocomplete="current-password">
+                            <button type="button" class="password-toggle" data-password-toggle="password"
+                                aria-label="Mostrar contraseña" aria-pressed="false">
+                                Ver
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -62,7 +68,30 @@
                     <button type="submit" class="btn btn-primary">Ingresar</button>
                     <a href="{{ route('home') }}" class="btn btn-secondary">Volver</a>
                 </div>
+
+                <p class="helper-copy access-help">
+                    ¿Sin acceso? Solicita validación a tu mando inmediato.
+                </p>
             </form>
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const input = document.getElementById(button.dataset.passwordToggle);
+                if (!input) {
+                    return;
+                }
+
+                const isVisible = input.type === 'text';
+                input.type = isVisible ? 'password' : 'text';
+                button.textContent = isVisible ? 'Ver' : 'Ocultar';
+                button.setAttribute('aria-label', isVisible ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                button.setAttribute('aria-pressed', String(!isVisible));
+            });
+        });
+    </script>
+@endpush

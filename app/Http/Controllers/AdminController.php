@@ -6,7 +6,10 @@ use App\Exports\userExport;
 use App\Imports\UserImport;
 use App\Models\AssignmentArea;
 use App\Models\CognitiveSession;
+use App\Models\CognitiveSkillScore;
+use App\Models\OperationalAlert;
 use App\Models\OperationalGroup;
+use App\Models\OperationalMetricSnapshot;
 use App\Models\OperationalRank;
 use App\Models\SecurityUnit;
 use App\Models\User;
@@ -18,6 +21,7 @@ use CognifitSdk\Api\UserAccount;
 use CognifitSdk\Api\UserActivity;
 use CognifitSdk\Lib\UserData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 // Top par
 use Maatwebsite\Excel\Facades\Excel;
 use Throwable;
@@ -56,12 +60,76 @@ class AdminController extends Controller
 
     public function dashboard()
     {
-        return redirect()->route('admin.user.management');
+        $title = 'Panel de mando';
+
+        $list = User::query()
+            ->where('role', 'user')
+            ->latest('id')
+            ->get();
+
+        $totalElements = $list->count();
+        $syncedTokens = $list->filter(fn (User $user) => filled($user->cognifit_user_token))->count();
+        $syncPercentage = $totalElements > 0 ? (int) round(($syncedTokens / $totalElements) * 100) : 0;
+
+        $globalIndex = Schema::hasTable('operational_metric_snapshots')
+            ? OperationalMetricSnapshot::query()->avg('score')
+            : null;
+        $globalIndex ??= Schema::hasTable('cognitive_skill_scores')
+            ? CognitiveSkillScore::query()->avg('score')
+            : null;
+        $globalIndex ??= Schema::hasTable('cognitive_sessions')
+            ? CognitiveSession::query()->whereNotNull('score')->avg('score')
+            : null;
+        $globalIndex ??= 0;
+        $globalIndex = (int) round((float) $globalIndex);
+
+        $activeAlertCount = Schema::hasTable('operational_alerts')
+            ? OperationalAlert::query()
+                ->whereNull('resolved_at')
+                ->count()
+            : 0;
+
+        $lowMetricUsers = Schema::hasTable('operational_metric_snapshots')
+            ? OperationalMetricSnapshot::query()
+                ->whereNotNull('user_id')
+                ->where(function ($query) {
+                    $query->where('score', '<', 60)
+                        ->orWhereIn('level', ['critico', 'crítico', 'refuerzo', 'alerta']);
+                })
+                ->distinct('user_id')
+                ->count('user_id')
+            : 0;
+
+        $alertCount = max($activeAlertCount, $lowMetricUsers);
+        $alertProgress = $totalElements > 0 ? min(100, (int) round(($alertCount / $totalElements) * 100)) : 0;
+
+        $unitCount = Schema::hasTable('security_units') ? SecurityUnit::query()->count() : 0;
+        $groupCount = Schema::hasTable('operational_groups') ? OperationalGroup::query()->count() : 0;
+        $recentSessions = Schema::hasTable('cognitive_sessions')
+            ? CognitiveSession::query()
+                ->whereNotNull('completed_at')
+                ->where('completed_at', '>=', now()->subDays(30))
+                ->count()
+            : 0;
+
+        return view('admin.index', compact(
+            'title',
+            'list',
+            'alertCount',
+            'alertProgress',
+            'globalIndex',
+            'syncPercentage',
+            'syncedTokens',
+            'totalElements',
+            'unitCount',
+            'groupCount',
+            'recentSessions'
+        ));
     }
 
     public function skillManagement()
     {
-        $title = 'Skill Management';
+        $title = 'Capacidades cognitivas';
 
         $endPoint = 'skills';
         $method = 'GET';
@@ -96,9 +164,12 @@ class AdminController extends Controller
         }
 
         $info = $this->userPayload($user);
+        $goals = $this->normalizedUserInterest($info, 'goals');
+        $areas = $this->normalizedUserInterest($info, 'areas');
         $gameData = null;
         $playedGames = [];
         $brainGames = [];
+        $brainGameTitles = [];
         $localSessions = CognitiveSession::query()
             ->where('user_id', $user->id)
             ->latest('completed_at')
@@ -120,6 +191,7 @@ class AdminController extends Controller
 
             // Brain games
             $brainGames = CustomBlock::getBrainGamesData('programs/tasks', 'GET') ?? [];
+            $brainGameTitles = $this->brainGameTitles($brainGames);
 
             $res2 = $api->getPlayedGames($getToken);
             if (! $res2->hasError()) {
@@ -128,7 +200,16 @@ class AdminController extends Controller
             }
         }
 
-        $html = view('admin.users.user_details', compact('info', 'gameData', 'playedGames', 'brainGames', 'localSessions'))->render();
+        $html = view('admin.users.user_details', compact(
+            'info',
+            'goals',
+            'areas',
+            'gameData',
+            'playedGames',
+            'brainGames',
+            'brainGameTitles',
+            'localSessions'
+        ))->render();
 
         return response()->json([
             'status' => true,
@@ -136,23 +217,22 @@ class AdminController extends Controller
         ]);
     }
 
-    public function registerUserInGame(Request $request)
+    public function registerUserInGame(Request $request, $id = null)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'locale' => 'required',
         ]);
 
         try {
 
-            $userID = $request->user_id;
+            $userID = $id ?: $request->user_id;
             $locale = $request->locale;
 
             $user = User::findOrFail($userID);
             $userToken = $this->registerCognifitUser($user, $locale, $request->password);
 
             if (! filled($userToken)) {
-                return redirect()->back()->with('error', 'Cognifit no devolvió token de usuario.');
+                return redirect()->back()->with('error', 'CogniFit no devolvió token de usuario.');
             }
 
             return redirect()->back()->with('success', 'Elemento registrado correctamente.');
@@ -162,7 +242,7 @@ class AdminController extends Controller
         }
     }
 
-    public function updateGameLocale(Request $request)
+    public function updateGameLocale(Request $request, $id = null)
     {
         $request->validate([
             'locale' => 'required',
@@ -206,8 +286,11 @@ class AdminController extends Controller
         }
 
         $info = $this->userPayload($user);
+        $goals = $this->normalizedUserInterest($info, 'goals');
+        $areas = $this->normalizedUserInterest($info, 'areas');
         $playedGames = [];
         $brainGames = [];
+        $brainGameTitles = [];
         $localSessions = CognitiveSession::query()
             ->where('user_id', $user->id)
             ->latest('completed_at')
@@ -225,6 +308,7 @@ class AdminController extends Controller
 
             // Brain games ki list
             $brainGames = customBlock::getBrainGamesData('programs/tasks', 'GET') ?? [];
+            $brainGameTitles = $this->brainGameTitles($brainGames);
 
             // Played games ka historical data
             $res2 = $api->getPlayedGames($getToken);
@@ -237,10 +321,15 @@ class AdminController extends Controller
         // 3. Data array prepare karein view ke liye
         $data = [
             'info' => $info,
+            'goals' => $goals,
+            'areas' => $areas,
             'playedGames' => $playedGames,
             'brainGames' => $brainGames,
+            'brainGameTitles' => $brainGameTitles,
             'localSessions' => $localSessions,
             'viewData' => customBlock::class,
+            'issuedAt' => now(),
+            'folio' => strtoupper(uniqid('GK-')),
         ];
 
         // // 4. Download PDF check
@@ -255,9 +344,7 @@ class AdminController extends Controller
 
     public function usersIndex()
     {
-        $users = User::all();
-
-        return view('admin.users.showall', compact('users'));
+        return redirect()->route('admin.user.management');
     }
 
     public function createUser()
@@ -422,23 +509,20 @@ class AdminController extends Controller
             if (! filled($userToken)) {
                 return redirect()
                     ->route('admin.user.management')
-                    ->with('warning', 'Elemento creado, pero Cognifit no devolvió token de usuario.');
+                    ->with('warning', 'Elemento creado, pero CogniFit no devolvió token de usuario.');
             }
         } catch (Throwable $th) {
             return redirect()
                 ->route('admin.user.management')
-                ->with('warning', 'Elemento creado, pero el registro en Cognifit falló: '.$th->getMessage());
+                ->with('warning', 'Elemento creado, pero el registro en CogniFit falló: '.$th->getMessage());
         }
 
-        return redirect()->route('admin.user.management')->with('success', 'Elemento creado y registrado en Cognifit correctamente.');
+        return redirect()->route('admin.user.management')->with('success', 'Elemento creado y registrado en CogniFit correctamente.');
     }
 
     public function usersEdit($id)
     {
-        $user = User::findOrFail($id);
-        $users = User::all();
-
-        return view('admin.users.showall', compact('users', 'user'));
+        return redirect()->route('admin.user.management');
     }
 
     public function usersUpdate(Request $request, $id)
@@ -553,7 +637,7 @@ class AdminController extends Controller
 
         $data = compact('title', 'list', 'ranks', 'units', 'groups', 'areas');
 
-        return view('admin.excel.view')->with($data);
+        return view('admin.excel.import_preview')->with($data);
     }
 
     public function storeExcelData(Request $request)
@@ -581,10 +665,22 @@ class AdminController extends Controller
             $gender = trim((string) ($row['gender'] ?? ''));
             $password = trim((string) ($row['password'] ?? ''));
             $badgeNumber = trim((string) ($row['badge_number'] ?? '')) ?: null;
-            $rank = $this->resolveRankName($row['rank'] ?? null);
-            $unitName = trim((string) ($row['security_unit'] ?? '')) ?: null;
-            $groupName = trim((string) ($row['operational_group'] ?? '')) ?: null;
-            $assignmentArea = $this->resolveAreaName($row['assignment_area'] ?? null);
+            $rank = $this->resolveRankNameById($row['rank_id'] ?? null)
+                ?? $this->resolveRankName($row['rank'] ?? null);
+            $unit = $this->resolveUnitById($row['security_unit_id'] ?? null);
+            $group = $this->resolveGroupById($row['operational_group_id'] ?? null);
+            $assignmentArea = $this->resolveAreaNameById($row['assignment_area_id'] ?? null)
+                ?? $this->resolveAreaName($row['assignment_area'] ?? null);
+
+            if (! $unit || ! $group) {
+                [$resolvedUnit, $resolvedGroup] = $this->resolveOperationalAssignment(
+                    $row['security_unit'] ?? null,
+                    $row['operational_group'] ?? null
+                );
+
+                $unit ??= $resolvedUnit;
+                $group ??= $resolvedGroup;
+            }
 
             if (
                 $name === '' ||
@@ -597,8 +693,6 @@ class AdminController extends Controller
             }
 
             if (! User::where('email', $email)->exists()) {
-                [$unit, $group] = $this->resolveOperationalAssignment($unitName, $groupName);
-
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
@@ -632,7 +726,7 @@ class AdminController extends Controller
 
         }
 
-        $message = $count.' elementos importados correctamente. '.$cognifitCount.' registrados en Cognifit.';
+        $message = $count.' elementos importados correctamente. '.$cognifitCount.' registrados en CogniFit.';
 
         if ($skipped > 0) {
             $message .= ' '.$skipped.' filas omitidas por nombre/correo/contraseña incompletos, correo inválido o correo duplicado.';
@@ -641,7 +735,7 @@ class AdminController extends Controller
         if ($cognifitErrors !== []) {
             return redirect()
                 ->route('admin.user.management')
-                ->with('warning', $message.' Fallas Cognifit: '.implode(' | ', array_slice($cognifitErrors, 0, 5)));
+                ->with('warning', $message.' Fallas CogniFit: '.implode(' | ', array_slice($cognifitErrors, 0, 5)));
         }
 
         return redirect()->route('admin.user.management')->with('success', $message);
@@ -679,6 +773,41 @@ class AdminController extends Controller
         ];
     }
 
+    private function normalizedUserInterest(array $info, string $key): array
+    {
+        $items = $info['userIntrest'][$key] ?? [];
+
+        if (! is_array($items)) {
+            return [];
+        }
+
+        return array_values($items);
+    }
+
+    private function brainGameTitles(mixed $brainGames): array
+    {
+        $titles = [];
+
+        foreach ($brainGames ?? [] as $game) {
+            $key = is_array($game) ? ($game['key'] ?? null) : ($game->key ?? null);
+
+            if (! $key) {
+                continue;
+            }
+
+            $spanishTitle = is_array($game)
+                ? data_get($game, 'assets.titles.es')
+                : ($game->assets->titles->es ?? null);
+            $englishTitle = is_array($game)
+                ? data_get($game, 'assets.titles.en')
+                : ($game->assets->titles->en ?? null);
+
+            $titles[$key] = $spanishTitle ?? $englishTitle ?? $key;
+        }
+
+        return $titles;
+    }
+
     private function registerCognifitUser(User $user, string $locale = 'es', ?string $password = null): ?string
     {
         if (filled($user->cognifit_user_token)) {
@@ -703,7 +832,7 @@ class AdminController extends Controller
         ]));
 
         if ($response->hasError()) {
-            throw new \RuntimeException('Cognifit rechazó el registro del usuario: '.$this->cognifitErrorDetail($response));
+            throw new \RuntimeException('CogniFit rechazó el registro del usuario: '.$this->cognifitErrorDetail($response));
         }
 
 
@@ -799,6 +928,42 @@ class AdminController extends Controller
             : null;
 
         return [$unit, $group];
+    }
+
+    private function resolveRankNameById(mixed $rankId): ?string
+    {
+        if (! filled($rankId)) {
+            return null;
+        }
+
+        return OperationalRank::query()->find($rankId)?->name;
+    }
+
+    private function resolveUnitById(mixed $unitId): ?SecurityUnit
+    {
+        if (! filled($unitId)) {
+            return null;
+        }
+
+        return SecurityUnit::query()->find($unitId);
+    }
+
+    private function resolveGroupById(mixed $groupId): ?OperationalGroup
+    {
+        if (! filled($groupId)) {
+            return null;
+        }
+
+        return OperationalGroup::query()->find($groupId);
+    }
+
+    private function resolveAreaNameById(mixed $areaId): ?string
+    {
+        if (! filled($areaId)) {
+            return null;
+        }
+
+        return AssignmentArea::query()->find($areaId)?->name;
     }
 
     private function resolveRankName(?string $rankName): ?string

@@ -4553,4 +4553,177 @@ table.table-inbox tbody tr.checked {
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px !important;
 }
 
+.header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.header .btn-outline-primary {
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.header .btn-outline-primary:hover {
+  background-color: #0d6efd;
+  color: #ffffff;
+  border-color: #0d6efd;
+}
+
+.user-menu .dropdown-menu {
+  min-width: 200px;
+}
+
+.user-menu .user-img img {
+  object-fit: cover;
+}
+
+.user-menu .dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+.user-item {
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.user-item:hover {
+  background: #f5f5f5;
+}
+
+.user-item.active {
+  background: #007bff !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.user-list-scroll {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.report-document {
+  border-top: 6px solid #00254c;
+  position: relative;
+}
+
+.report-official-header {
+  border-bottom: 2px solid #eeeeee;
+  padding-bottom: 15px;
+}
+
+.report-logo {
+  max-height: 50px;
+  width: auto;
+}
+
+.report-title {
+  color: #00254c;
+  letter-spacing: 1px;
+}
+
+.report-page {
+  background-color: #f8f9fa;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.report-card {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+}
+
+.report-section-title {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  font-weight: 700;
+  color: #333333;
+  border-left: 4px solid #00254c;
+  padding-left: 10px;
+}
+
+.metrics-chart-box {
+  width: 100%;
+  max-width: 560px;
+  height: 460px;
+}
+
+.metrics-trend-box {
+  width: 100%;
+  height: 280px;
+}
+
+.module-avatar {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+}
+
+.module-title {
+  min-height: 2.5rem;
+}
+
+.import-preview-table {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.import-preview-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.capability-index-col {
+  width: 60px;
+}
+
+.capability-icon-col {
+  width: 80px;
+}
+
+.capability-icon {
+  background-color: #00254c;
+  padding: 5px;
+}
+
+.catalog-table-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.catalog-table-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.catalog-code-col {
+  width: 100px;
+}
+
+.catalog-code-col-sm {
+  width: 80px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .report-page {
+    background-color: #ffffff;
+    padding: 0;
+  }
+
+  .report-card {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+}
+
 /*# sourceMappingURL=custom.css.map */

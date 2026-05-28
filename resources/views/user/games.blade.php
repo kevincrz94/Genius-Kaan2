@@ -5,7 +5,7 @@
         <div class="section-header">
             <div>
                 <span class="eyebrow">Entrenamiento operativo</span>
-                <h2>Juegos disponibles para {{ $user->name }}.</h2>
+                <h2>Módulos de entrenamiento operativo para {{ $user->name }}.</h2>
             </div>
             <form method="post" action="{{ route('user.logout') }}">
                 @csrf
@@ -47,24 +47,30 @@
                             <p>{{ $user->assignment_area ?: 'Sin área asignada' }}</p>
                         </div>
                     </div>
+                    <div class="line-item">
+                        <div>
+                            <strong>Estado operativo</strong>
+                            <p>{{ filled($user->cognifit_user_token) ? 'Apto para entrenamiento' : 'Requiere sincronización' }}</p>
+                        </div>
+                    </div>
                 </div>
             </article>
 
             <article class="panel card scoreboard-card">
-                <span class="eyebrow">Estado Cognifit</span>
-                <h2>{{ filled($user->cognifit_user_token) ? 'Token activo.' : 'Token pendiente.' }}</h2>
+                <span class="eyebrow">Credencial CogniFit</span>
+                <h2>{{ filled($user->cognifit_user_token) ? 'Credencial activa.' : 'Credencial pendiente.' }}</h2>
                 <p class="section-copy">
                     @if (filled($user->cognifit_user_token))
                         Tu usuario está listo para iniciar sesiones de entrenamiento.
                     @else
-                        El sistema intentó registrar tu usuario automáticamente en Cognifit, pero no se pudo completar.
+                        El sistema intentó registrar tu usuario automáticamente en CogniFit, pero no se pudo completar.
                     @endif
                 </p>
 
                 @unless (filled($user->cognifit_user_token))
-                    <div class="hero-note">
-                        {{ $cognifitError ?: 'Solicita al administrador revisar las credenciales de Cognifit.' }}
-                    </div>
+                    <x-alert type="warning">
+                        {{ $cognifitError ?: 'Solicita al administrador revisar las credenciales de CogniFit.' }}
+                    </x-alert>
                 @endunless
             </article>
         </div>
@@ -73,50 +79,17 @@
     <section class="section">
         <div class="section-header">
             <div>
-                <span class="eyebrow">Biblioteca</span>
+                <span class="eyebrow">Módulos</span>
                 <h2>Selecciona un entrenamiento.</h2>
             </div>
             <p class="section-copy">
-                Cada sesión se abre con tu token Cognifit para conservar la trazabilidad individual.
+                Cada módulo se abre con tu credencial CogniFit para conservar la trazabilidad individual.
             </p>
         </div>
 
         <div class="grid-3">
             @foreach ($availableGames as $game)
-                <article class="card feature-card">
-                    @if (! empty($game['image']))
-                        <img src="{{ $game['image'] }}" alt="{{ $game['title'] }}"
-                            style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:1rem;">
-                    @endif
-                    <div class="accent-dot" style="--card-accent: #00254c"></div>
-                    <h3>{{ $game['title'] }}</h3>
-                    <p>{{ \Illuminate\Support\Str::words($game['focus'], 24, '...') }}</p>
-
-                    @if (! empty($game['skills']))
-                        <div class="badge-row">
-                            @foreach (array_slice($game['skills'], 0, 3) as $skill)
-                                <span class="soft-chip">{{ $skill }}</span>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <div class="cta-row">
-                        @if (filled($user->cognifit_user_token))
-                            <a class="btn btn-primary" href="{{ route('start.game', [
-                                'participant' => $user->name,
-                                'goal' => $game['focus'],
-                                'locale' => $user->cognifit_locale ?: 'es',
-                                'user_token' => $user->cognifit_user_token,
-                                'game_key' => $game['key'],
-                                'image' => $game['image'] ?? '',
-                            ]) }}">
-                                Iniciar
-                            </a>
-                        @else
-                            <span class="soft-chip">Requiere token</span>
-                        @endif
-                    </div>
-                </article>
+                <x-training-card :game="$game" :user="$user" />
             @endforeach
         </div>
     </section>

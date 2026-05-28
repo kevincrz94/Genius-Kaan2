@@ -8,7 +8,6 @@
     <div class="page-wrapper">
         <div class="content container-fluid">
             <div class="row">
-
                 <div class="col-lg-3">
                     <div class="card customShadow">
                         <div class="card-header">
@@ -23,7 +22,7 @@
                             </div>
                         </div>
                         <div class="card-body px-2 py-2">
-                            <div class="d-flex justify-content-between align-items center">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
                                 <a href="{{ route('admin.download.excel') }}" class="btn btn-primary btn-rounded">
                                     <i class="fa-solid fa-file-excel"></i>
                                     Descargar plantilla
@@ -35,26 +34,25 @@
                                 </button>
                             </div>
                             <p class="text-muted small mb-0 mt-2">
-                                La carga administrativa crea el elemento y solicita su token Cognifit.
+                                La carga administrativa crea el elemento y solicita su token CogniFit.
                             </p>
                         </div>
-                        <ul class="list-group" style="max-height:80vh; overflow-y:auto">
+                        <ul class="list-group user-list-scroll">
                             @foreach ($list as $user)
                                 <li class="list-group-item d-flex align-items-center user-item"
-                                    data-id="{{ $viewData::printData($user, 'id') }}" style="cursor:pointer">
+                                    data-id="{{ $viewData::printData($user, 'id') }}">
                                     @php
                                         $image = $viewData::printData($user, 'image');
                                         $path = $image != '-' ? public_path('UserImages/' . $image) : null;
                                     @endphp
                                     <img src="{{ $path && file_exists($path) ? asset('UserImages/' . $image) : asset('common/favicon.png') }}"
-                                        class="avatar avatar-sm rounded-circle me-2">
-                                    <span>{{ $viewData::printData($user, 'name') }}</span>
-                                    <br>
-                                    <span>{{ $viewData::printData($user, 'email') }}</span>
-                                    <br>
-                                    <small>Perfil: {{ str_replace('_', ' ', $viewData::printData($user, 'role')) }}</small>
-                                    <br>
-                                    <small>{{ $viewData::printData($user, 'unit') }} / {{ $viewData::printData($user, 'badge_number') }}</small>
+                                        class="avatar avatar-sm rounded-circle me-2" alt="Elemento">
+                                    <div>
+                                        <strong>{{ $viewData::printData($user, 'name') }}</strong>
+                                        <span class="d-block text-muted small">{{ $viewData::printData($user, 'email') }}</span>
+                                        <small class="d-block">Perfil: {{ str_replace('_', ' ', $viewData::printData($user, 'role')) }}</small>
+                                        <small class="d-block">{{ $viewData::printData($user, 'unit') }} / {{ $viewData::printData($user, 'badge_number') }}</small>
+                                    </div>
                                 </li>
                             @endforeach
                         </ul>
@@ -72,11 +70,11 @@
         </div>
     </div>
 
-    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Importar elementos</h1>
+                    <h1 class="modal-title fs-5" id="importModalLabel">Importar elementos</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <form action="{{ route('admin.upload.excel') }}" method="post" target="_blank"
@@ -84,8 +82,9 @@
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="">Archivo Excel</label>
-                            <input type="file" class="form-control" name="file" accept="excel/*" required>
+                            <label for="file">Archivo Excel</label>
+                            <input id="file" type="file" class="form-control" name="file" accept=".xlsx,.xls,.csv"
+                                required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -100,64 +99,33 @@
     </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
         $(document).ready(function() {
             $(".user-item").on('click', function() {
-                let userId = $(this).data("id");
+                const userId = $(this).data("id");
 
-                // Active class
                 $(".user-item").removeClass("active bg-primary text-white");
                 $(this).addClass("active bg-primary text-white");
 
-                // Loading spinner
                 $("#user-details").html(`
                     <div class="text-center py-5">
-                    <div class="spinner-border text-primary" style="width:3rem;height:3rem;"></div>
-                </div>
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
                 `);
 
-                // YE LINE SABSE IMPORTANT HAI – AB 100% SAHI HAI
                 $.get("/admin/users/" + userId, function(res) {
                     if (res.status === true) {
                         $("#user-details").html(res.html);
-                    } else {
-                        $("#user-details").html(
-                            '<div class="alert alert-danger">Elemento no encontrado</div>');
+                        return;
                     }
+
+                    $("#user-details").html('<div class="alert alert-danger">Elemento no encontrado.</div>');
                 }).fail(function(xhr) {
                     console.log(xhr.responseText);
-                    $("#user-details").html(
-                        '<div class="alert alert-danger">Error al cargar el detalle.</div>'
-                    );
+                    $("#user-details").html('<div class="alert alert-danger">Error al cargar el detalle.</div>');
                 });
             });
-
-            // Pehla user automatically load kar do
-            // if ($(".user-item").length > 0) {
-            //     $(".user-item").first().click();
-            // }
         });
     </script>
-
-    <style>
-        .user-item {
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .user-item:hover {
-            background: #f5f5f5;
-        }
-
-        .user-item.active {
-            background: #007bff !important;
-            color: white !important;
-            font-weight: 600;
-        }
-
-        .user-item.active img {
-            /* filter: brightness(0) invert(1); */
-        }
-    </style>
-@endsection
+@endpush

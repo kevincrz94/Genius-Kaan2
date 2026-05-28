@@ -10,7 +10,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h4 class="card-title mb-1">Agregar elemento</h4>
-                                    <p class="text-muted mb-0">El token Cognifit se genera desde este flujo administrativo.</p>
+                                    <p class="text-muted mb-0">El token CogniFit se genera desde este flujo administrativo.</p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <a href="{{ route('admin.catalogs.index') }}" class="btn btn-outline-primary">

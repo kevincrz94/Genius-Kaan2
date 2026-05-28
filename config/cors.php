@@ -2,7 +2,7 @@
 
 $allowedOrigins = array_filter(array_map(
     'trim',
-    explode(',', env('CORS_ALLOWED_ORIGINS', '*')),
+    explode(',', env('CORS_ALLOWED_ORIGINS', 'https://genius-kaan.ceuniv.edu.mx')),
 ));
 
 return [

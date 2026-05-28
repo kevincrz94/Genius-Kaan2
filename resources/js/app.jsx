@@ -1,182 +1,152 @@
+import './bootstrap';
 import React, {useEffect, useRef, useState} from 'react';
 import ReactDOM from 'react-dom/client';
 import {CognifitSdk} from '@cognifit/launcher-js-sdk';
-import {
-  CognifitSdkConfig,
-} from '@cognifit/launcher-js-sdk/lib/lib/cognifit.sdk.config';
+import {CognifitSdkConfig} from '@cognifit/launcher-js-sdk/lib/lib/cognifit.sdk.config';
 
-const DEFAULT_CLIENT_ID = '2cc41d68527b1b5eb49ee8ce8d802468';
-const rootElement = document.getElementById ('app');
+const rootElement = document.getElementById('app');
 
-const statusCopy = {
-  loading: {badge: 'Conectando', title: 'Preparando la sesion'},
-  ready: {badge: 'En curso', title: 'Entrenamiento activo'},
-  completed: {badge: 'Completado', title: 'Sesion finalizada'},
-  error: {badge: 'Error', title: 'No fue posible iniciar'},
-  missing: {badge: 'Pendiente', title: 'Faltan parametros'},
+const fallbackConfig = {
+  participant: 'Elemento',
+  goal: 'Evaluación cognitiva táctica',
+  gameKey: '',
+  userToken: '',
+  locale: 'es',
+  clientId: '',
 };
 
-function readLaunchConfig () {
+const statusCopy = {
+  loading: {badge: 'Conectando', title: 'Preparando simulador'},
+  ready: {badge: 'En curso', title: 'Evaluación activa'},
+  completed: {badge: 'Completado', title: 'Módulo finalizado'},
+  error: {badge: 'Error', title: 'Falla de conexión'},
+  missing: {badge: 'Pendiente', title: 'Parámetros incompletos'},
+};
+
+function readLaunchConfig() {
   if (!rootElement?.dataset.launchConfig) {
-    return {
-      participant: 'Paciente',
-      goal: 'Entrenamiento cognitivo personalizado',
-      gameKey: '',
-      userToken: '',
-      locale: 'es',
-      clientId: DEFAULT_CLIENT_ID,
-    };
+    return fallbackConfig;
   }
 
   try {
-    const parsed = JSON.parse (rootElement.dataset.launchConfig);
+    const parsed = JSON.parse(rootElement.dataset.launchConfig);
 
     return {
-      participant: parsed.participant || 'Paciente',
-      goal: parsed.goal || 'Entrenamiento cognitivo personalizado',
+      participant: parsed.participant || 'Elemento operativo',
+      goal: parsed.goal || fallbackConfig.goal,
       gameKey: parsed.gameKey || '',
       userToken: parsed.userToken || '',
       locale: parsed.locale || 'es',
-      clientId: parsed.clientId || DEFAULT_CLIENT_ID,
+      clientId: parsed.clientId || '',
     };
   } catch (error) {
-    console.error ('Launch config parse error:', error);
-
-    return {
-      participant: 'Paciente',
-      goal: 'Entrenamiento cognitivo personalizado',
-      gameKey: '',
-      userToken: '',
-      locale: 'es',
-      clientId: DEFAULT_CLIENT_ID,
-    };
+    console.error('Launch config parse error:', error);
+    return fallbackConfig;
   }
 }
 
-const launchConfig = readLaunchConfig ();
+const launchConfig = readLaunchConfig();
 
-function maskToken (token) {
-  if (!token) return 'Sin token';
+function maskToken(token) {
+  if (!token) return 'Sin credencial';
   if (token.length <= 12) return token;
 
-  return `${token.slice (0, 6)}...${token.slice (-4)}`;
+  return `${token.slice(0, 6)}...${token.slice(-4)}`;
 }
 
-function App () {
-  const containerRef = useRef (null);
-  const [status, setStatus] = useState (
-    launchConfig.userToken && launchConfig.gameKey ? 'loading' : 'missing'
-  );
-  const [message, setMessage] = useState (
-    launchConfig.userToken && launchConfig.gameKey
-      ? 'Conectando con Cognifit y preparando el entorno de juego.'
-      : 'Completa user_token y game_key desde el configurador antes de iniciar.'
+function App() {
+  const containerRef = useRef(null);
+  const canLaunch = launchConfig.userToken && launchConfig.gameKey && launchConfig.clientId;
+  const [status, setStatus] = useState(canLaunch ? 'loading' : 'missing');
+  const [message, setMessage] = useState(
+    canLaunch
+      ? 'Conectando con CogniFit y asegurando el entorno de evaluación.'
+      : 'Credenciales de acceso insuficientes. Solicite revisión al mando.'
   );
 
-  useEffect (() => {
+  useEffect(() => {
     let sdkInstance;
-    let gameSubscription;
+    let moduleSubscription;
     let disposed = false;
 
-    const loadGame = async () => {
+    const loadModule = async () => {
       if (!containerRef.current) return;
 
       if (!launchConfig.userToken || !launchConfig.gameKey) {
-        setStatus ('missing');
-        setMessage (
-          'La sesion necesita un user_token valido y una clave de juego.'
-        );
+        setStatus('missing');
+        setMessage('La sesión requiere credencial de elemento y clave de simulador válida.');
         return;
       }
 
       if (!launchConfig.clientId) {
-        setStatus ('error');
-        setMessage (
-          'No se encontro COGNIFIT_CLIENT_ID. Define la variable y vuelve a intentar.'
-        );
+        setStatus('error');
+        setMessage('Error de configuración institucional: Client ID no detectado.');
         return;
       }
 
       try {
-        setStatus ('loading');
-        setMessage (
-          'Cargando el motor de entrenamiento y sincronizando la sesion.'
-        );
+        setStatus('loading');
+        setMessage('Cargando motor de evaluación y sincronizando la sesión.');
 
-        const config = new CognifitSdkConfig (
+        const config = new CognifitSdkConfig(
           containerRef.current.id,
           launchConfig.clientId,
           launchConfig.userToken,
           {
             sandbox: false,
             appType: 'web',
-            theme: 'light',
+            theme: 'dark',
             showResults: true,
             isFullscreenEnabled: true,
             scale: 100,
           }
         );
 
-        sdkInstance = new CognifitSdk ();
-        await sdkInstance.init (config);
+        sdkInstance = new CognifitSdk();
+        await sdkInstance.init(config);
 
         if (disposed) return;
 
-        setStatus ('ready');
-        setMessage (
-          'La sesion esta activa. Mantener foco y evitar interrupciones mejora la lectura del progreso.'
-        );
+        setStatus('ready');
+        setMessage('Sesión activa. Mantenga el foco visual y evite distracciones externas.');
 
-        gameSubscription = sdkInstance.start ('GAME', launchConfig.gameKey).subscribe ({
+        moduleSubscription = sdkInstance.start('GAME', launchConfig.gameKey).subscribe({
           next: response => {
-            if (response.isEvent ()) {
-              console.log ('Cognifit event:', response.eventPayload.getValues ());
+            if (response.isEvent()) {
+              console.log('CogniFit event:', response.eventPayload.getValues());
             }
           },
           complete: () => {
             if (disposed) return;
-
-            setStatus ('completed');
-            setMessage (
-              'La sesion termino. Puedes volver al panel y revisar los resultados registrados.'
-            );
+            setStatus('completed');
+            setMessage('Evaluación finalizada. Los datos han sido enviados al panel de mando.');
           },
           error: reason => {
-            console.error ('Game error:', reason);
-
+            console.error('Module error:', reason);
             if (disposed) return;
-
-            setStatus ('error');
-            setMessage (
-              reason?.message ||
-                'El juego no pudo iniciarse. Revisa token, client id y clave de juego.'
-            );
+            setStatus('error');
+            setMessage(reason?.message || 'El simulador fue interrumpido. Verifique su conexión.');
           },
         });
       } catch (error) {
-        console.error ('SDK initialization error:', error);
-
+        console.error('SDK initialization error:', error);
         if (disposed) return;
-
-        setStatus ('error');
-        setMessage (
-          error?.message ||
-            'La integracion no pudo conectarse con Cognifit. Revisa la configuracion.'
-        );
+        setStatus('error');
+        setMessage(error?.message || 'La plataforma no pudo enlazar con los servidores de evaluación.');
       }
     };
 
-    loadGame ();
+    loadModule();
 
     return () => {
       disposed = true;
 
-      if (typeof gameSubscription?.unsubscribe === 'function') {
-        gameSubscription.unsubscribe ();
+      if (typeof moduleSubscription?.unsubscribe === 'function') {
+        moduleSubscription.unsubscribe();
       }
 
       if (typeof sdkInstance?.destroy === 'function') {
-        sdkInstance.destroy ();
+        sdkInstance.destroy();
       }
     };
   }, []);
@@ -188,12 +158,15 @@ function App () {
       <style>{`
         :root {
           color-scheme: dark;
-          --bg: #0f172a;
-          --ink: #e2e8f0;
+          --bg: #0b1120;
+          --ink: #f8fafc;
           --muted: #94a3b8;
-          --line: rgba(148, 163, 184, 0.16);
-          --panel: rgba(15, 23, 42, 0.78);
-          --shadow: 0 30px 80px rgba(15, 23, 42, 0.45);
+          --line: rgba(255, 255, 255, 0.1);
+          --panel: rgba(15, 23, 42, 0.9);
+          --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+          --accent-blue: #145da0;
+          --accent-deep: #00254c;
+          --accent-gold: #c7a34b;
         }
 
         * { box-sizing: border-box; }
@@ -201,53 +174,19 @@ function App () {
         body {
           margin: 0;
           font-family: 'Manrope', sans-serif;
-          background:
-            radial-gradient(circle at top left, rgba(251, 146, 60, 0.22), transparent 32%),
-            radial-gradient(circle at right, rgba(14, 165, 233, 0.18), transparent 26%),
-            linear-gradient(180deg, #0f172a 0%, #111827 100%);
+          background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
           color: var(--ink);
         }
 
-        a {
-          color: inherit;
-          text-decoration: none;
-        }
+        a { color: inherit; text-decoration: none; }
 
         .launcher-page {
-          position: relative;
           min-height: 100vh;
-          overflow: hidden;
           padding: 2rem;
-        }
-
-        .ambient {
-          position: absolute;
-          border-radius: 999px;
-          filter: blur(40px);
-          opacity: 0.55;
-          pointer-events: none;
-        }
-
-        .ambient-left {
-          width: 22rem;
-          height: 22rem;
-          top: -6rem;
-          left: -7rem;
-          background: rgba(249, 115, 22, 0.22);
-        }
-
-        .ambient-right {
-          width: 18rem;
-          height: 18rem;
-          bottom: 2rem;
-          right: -4rem;
-          background: rgba(14, 165, 233, 0.18);
         }
 
         .launcher-header,
         .launcher-grid {
-          position: relative;
-          z-index: 1;
           width: min(1320px, 100%);
           margin: 0 auto;
         }
@@ -257,33 +196,32 @@ function App () {
           justify-content: space-between;
           align-items: flex-start;
           gap: 1rem;
-          margin-bottom: 1.5rem;
+          margin-bottom: 2rem;
         }
 
         .launcher-header h1 {
           margin: 0.4rem 0 0;
           font-family: 'Space Grotesk', sans-serif;
-          font-size: clamp(2rem, 3.8vw, 3.4rem);
-          line-height: 1.05;
-          letter-spacing: -0.04em;
+          font-size: clamp(1.8rem, 3.5vw, 3rem);
+          line-height: 1.1;
         }
 
         .launcher-header p {
           max-width: 42rem;
           margin: 0.85rem 0 0;
           color: var(--muted);
-          line-height: 1.8;
+          line-height: 1.6;
         }
 
         .kicker {
           display: inline-flex;
           align-items: center;
           gap: 0.55rem;
-          font-size: 0.82rem;
+          font-size: 0.85rem;
           font-weight: 800;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          color: #fdba74;
+          color: var(--accent-gold);
         }
 
         .kicker::before {
@@ -291,62 +229,50 @@ function App () {
           width: 0.7rem;
           height: 0.7rem;
           border-radius: 999px;
-          background: linear-gradient(135deg, #fb923c, #f97316);
-          box-shadow: 0 0 0 8px rgba(249, 115, 22, 0.12);
+          background: var(--accent-gold);
+          box-shadow: 0 0 0 6px rgba(199, 163, 75, 0.15);
         }
 
         .status-pill {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-width: 8rem;
-          padding: 0.85rem 1rem;
-          border-radius: 999px;
+          min-width: 9rem;
+          padding: 0.7rem 1.2rem;
+          border-radius: 6px;
           border: 1px solid var(--line);
-          background: rgba(15, 23, 42, 0.62);
-          font-size: 0.82rem;
-          font-weight: 800;
-          letter-spacing: 0.1em;
+          background: rgba(15, 23, 42, 0.8);
+          font-size: 0.85rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          backdrop-filter: blur(18px);
         }
 
         .status-ready,
-        .status-completed {
-          color: #86efac;
-        }
-
-        .status-loading {
-          color: #fdba74;
-        }
-
+        .status-completed { border-left: 4px solid #10b981; }
+        .status-loading { border-left: 4px solid var(--accent-gold); }
         .status-error,
-        .status-missing {
-          color: #fca5a5;
-        }
+        .status-missing { border-left: 4px solid #ef4444; }
 
         .launcher-grid {
           display: grid;
-          grid-template-columns: 360px minmax(0, 1fr);
-          gap: 1rem;
+          grid-template-columns: 320px minmax(0, 1fr);
+          gap: 1.5rem;
         }
 
         .info-panel,
         .experience-panel {
           border: 1px solid var(--line);
-          border-radius: 28px;
+          border-radius: 12px;
           background: var(--panel);
-          backdrop-filter: blur(18px);
           box-shadow: var(--shadow);
         }
 
-        .info-panel {
-          padding: 1.4rem;
-        }
+        .info-panel { padding: 1.5rem; }
 
         .panel-block + .panel-block {
-          margin-top: 1rem;
-          padding-top: 1rem;
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
           border-top: 1px solid var(--line);
         }
 
@@ -354,213 +280,166 @@ function App () {
         .experience-header h2 {
           margin: 0;
           font-family: 'Space Grotesk', sans-serif;
-          font-size: 1.2rem;
-          letter-spacing: -0.03em;
+          font-size: 1.1rem;
+          color: #fff;
         }
 
         .meta-list {
           display: grid;
-          gap: 0.85rem;
+          gap: 0.8rem;
           margin-top: 1rem;
         }
 
         .meta-item {
-          padding: 1rem;
-          border-radius: 20px;
-          background: rgba(15, 23, 42, 0.55);
-          border: 1px solid rgba(148, 163, 184, 0.12);
+          padding: 0.8rem 1rem;
+          border-radius: 8px;
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .meta-item span {
           display: block;
           color: var(--muted);
-          font-size: 0.82rem;
+          font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 0.08em;
         }
 
         .meta-item strong {
           display: block;
-          margin-top: 0.4rem;
-          font-size: 1rem;
-          word-break: break-word;
+          margin-top: 0.2rem;
+          font-size: 0.95rem;
+          word-break: break-all;
         }
 
         .tips {
           margin: 1rem 0 0;
-          padding-left: 1.15rem;
+          padding-left: 1.2rem;
           color: var(--muted);
-          line-height: 1.8;
+          line-height: 1.6;
+          font-size: 0.9rem;
         }
 
-        .tips li + li {
-          margin-top: 0.5rem;
-        }
+        .tips li + li { margin-top: 0.6rem; }
 
-        .action-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.75rem;
-          margin-top: 1.25rem;
-        }
+        .action-row { margin-top: 2rem; }
 
         .text-link {
-          display: inline-flex;
+          display: flex;
           align-items: center;
           justify-content: center;
+          width: 100%;
           min-height: 3rem;
-          padding: 0 1rem;
-          border-radius: 999px;
+          border-radius: 6px;
           border: 1px solid var(--line);
-          background: rgba(255, 255, 255, 0.04);
+          background: rgba(255, 255, 255, 0.05);
           font-weight: 700;
+          transition: background 0.2s ease;
         }
 
-        .experience-panel {
-          padding: 1rem;
-        }
+        .text-link:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .experience-panel { padding: 1.5rem; }
 
         .experience-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           gap: 1rem;
-          margin-bottom: 1rem;
-          padding: 0.6rem 0.35rem 0;
+          margin-bottom: 1.5rem;
         }
 
         .experience-header p {
-          max-width: 30rem;
+          max-width: 32rem;
           margin: 0;
           color: var(--muted);
-          line-height: 1.8;
+          font-size: 0.95rem;
         }
 
         .experience-surface {
           position: relative;
-          min-height: 70vh;
-          border-radius: 24px;
+          min-height: 65vh;
+          border-radius: 8px;
           overflow: hidden;
-          border: 1px solid rgba(148, 163, 184, 0.16);
-          background:
-            linear-gradient(180deg, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.32)),
-            rgba(255, 255, 255, 0.02);
+          background: #000;
+          border: 1px solid var(--line);
         }
 
-        .game-canvas {
-          width: 100%;
-          height: 70vh;
-          background: rgba(15, 23, 42, 0.96);
-        }
-
-        .game-canvas.is-hidden {
-          opacity: 0;
-          pointer-events: none;
-        }
+        .game-canvas { width: 100%; height: 65vh; }
+        .game-canvas.is-hidden { opacity: 0; pointer-events: none; }
 
         .overlay-card {
           position: absolute;
-          inset: 1rem;
+          inset: 0;
           z-index: 2;
           display: grid;
           place-items: center;
           padding: 2rem;
           text-align: center;
-          border-radius: 20px;
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(148, 163, 184, 0.12);
+          background: rgba(11, 17, 32, 0.9);
         }
 
         .overlay-card strong {
           display: block;
-          margin-bottom: 0.65rem;
+          margin-bottom: 0.5rem;
           font-family: 'Space Grotesk', sans-serif;
-          font-size: 1.4rem;
-          letter-spacing: -0.03em;
+          font-size: 1.3rem;
+          color: #fff;
         }
 
         .overlay-card p {
-          max-width: 28rem;
-          margin: 0;
+          max-width: 26rem;
+          margin: 0 auto;
           color: var(--muted);
-          line-height: 1.8;
         }
 
         @media (max-width: 1024px) {
-          .launcher-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .experience-header {
-            flex-direction: column;
-          }
-        }
-
-        @media (max-width: 720px) {
-          .launcher-page {
-            padding: 1rem;
-          }
-
-          .launcher-header {
-            flex-direction: column;
-          }
-
-          .game-canvas,
-          .experience-surface {
-            min-height: 62vh;
-            height: 62vh;
-          }
+          .launcher-grid { grid-template-columns: 1fr; }
+          .experience-header { flex-direction: column; }
         }
       `}</style>
 
-      <div className="ambient ambient-left" />
-      <div className="ambient ambient-right" />
-
       <header className="launcher-header">
         <div>
-          <span className="kicker">Genius Kaan session</span>
+          <span className="kicker">Sesión operativa</span>
           <h1>{launchConfig.participant}</h1>
           <p>{launchConfig.goal}</p>
         </div>
-
         <div className={`status-pill status-${status}`}>{currentStatus.badge}</div>
       </header>
 
       <main className="launcher-grid">
         <aside className="info-panel">
           <section className="panel-block">
-            <h2>Contexto de la sesion</h2>
+            <h2>Parámetros técnicos</h2>
             <div className="meta-list">
               <div className="meta-item">
-                <span>Juego</span>
+                <span>Simulador</span>
                 <strong>{launchConfig.gameKey || 'Pendiente'}</strong>
               </div>
               <div className="meta-item">
-                <span>Token</span>
-                <strong>{maskToken (launchConfig.userToken)}</strong>
+                <span>Credencial</span>
+                <strong>{maskToken(launchConfig.userToken)}</strong>
               </div>
               <div className="meta-item">
                 <span>Idioma</span>
-                <strong>{launchConfig.locale.toUpperCase ()}</strong>
+                <strong>{launchConfig.locale.toUpperCase()}</strong>
               </div>
             </div>
           </section>
 
           <section className="panel-block">
-            <h2>Buenas practicas</h2>
+            <h2>Directrices operativas</h2>
             <ul className="tips">
-              <li>Definir una meta puntual antes de iniciar mejora la lectura del progreso.</li>
-              <li>Usar sesiones cortas y consistentes facilita adherencia y comparacion.</li>
-              <li>Registrar resultados despues de cada bloque ayuda a ajustar dificultad.</li>
+              <li>Asegure un entorno libre de interrupciones para garantizar precisión en la métrica.</li>
+              <li>Concéntrese exclusivamente en los estímulos visuales y auditivos en pantalla.</li>
+              <li>Al finalizar, el puntaje se sincronizará con el panel de mando.</li>
             </ul>
           </section>
 
           <div className="action-row">
-            <a className="text-link" href="/launcher">
-              Editar parametros
-            </a>
-            <a className="text-link" href="/admin/login">
-              Ir al panel
+            <a className="text-link" href="/admin/dashboard">
+              Cancelar y volver al panel
             </a>
           </div>
         </aside>
@@ -568,7 +447,7 @@ function App () {
         <section className="experience-panel">
           <div className="experience-header">
             <div>
-              <span className="kicker">Estado actual</span>
+              <span className="kicker">Estado de sincronización</span>
               <h2>{currentStatus.title}</h2>
             </div>
             <p>{message}</p>
@@ -587,9 +466,7 @@ function App () {
             <div
               id="cognifitContainer"
               ref={containerRef}
-              className={`game-canvas ${
-                status === 'missing' || status === 'error' ? 'is-hidden' : ''
-              }`}
+              className={`game-canvas ${status === 'missing' || status === 'error' ? 'is-hidden' : ''}`}
             />
           </div>
         </section>
@@ -599,5 +476,5 @@ function App () {
 }
 
 if (rootElement) {
-  ReactDOM.createRoot (rootElement).render (<App />);
+  ReactDOM.createRoot(rootElement).render(<App />);
 }

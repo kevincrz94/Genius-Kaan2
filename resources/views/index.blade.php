@@ -223,7 +223,7 @@
         }
 
         #cognifit-button::after {
-            content: 'Iniciar juego';
+            content: 'Iniciar módulo';
             display: grid;
             place-items: center;
             min-height: inherit;
@@ -282,17 +282,17 @@
                 <h1>{{ $participant }}</h1>
                 <p>{{ $goal }}</p>
             </div>
-            <a class="btn" href="{{ route('user.games') }}">Volver a juegos</a>
+            <a class="btn" href="{{ route('user.games') }}">Volver a módulos</a>
         </header>
 
         <main class="launcher-grid">
             <aside class="panel info-panel">
                 <span class="kicker">Sesión</span>
-                <h2>Contexto del juego</h2>
+                <h2>Contexto del módulo</h2>
 
                 <div class="meta">
                     <div class="meta-item">
-                        <span>Juego</span>
+                        <span>Simulador</span>
                         <strong>{{ $gameKey ?: 'Pendiente' }}</strong>
                     </div>
                     <div class="meta-item">
@@ -306,19 +306,19 @@
                 </div>
 
                 <div class="btn-row">
-                    <button id="start-game-button" class="btn btn-primary" type="button">Iniciar juego</button>
-                    <a class="btn" href="{{ route('user.games') }}">Volver a juegos</a>
+                    <button id="start-game-button" class="btn btn-primary" type="button">Iniciar módulo</button>
+                    <a class="btn" href="{{ route('user.games') }}">Volver a módulos</a>
                 </div>
             </aside>
 
             <section class="panel game-panel">
-                <div id="game-status" class="status">Preparando juego Cognifit.</div>
+                <div id="game-status" class="status">Preparando módulo CogniFit.</div>
                 <div id="cognifit-loader-button">
                     <button id="cognifit-button" type="button"
                         @if ($image) style="background-image: url('{{ $image }}');" @endif
                         onclick="startCognifitGame();"></button>
                     <span id="pMoreGames">
-                        Más juegos en <a href="https://www.cognifit.com" target="_blank" rel="noopener">cognifit.com</a>
+                        Más módulos en <a href="https://www.cognifit.com" target="_blank" rel="noopener">cognifit.com</a>
                     </span>
                 </div>
                 <div id="cognifit-container"></div>
@@ -355,7 +355,7 @@
                 script.src = `https://js.cognifit.com/${version}/html5Loader.js`;
                 script.async = true;
                 script.onload = resolve;
-                script.onerror = () => reject(new Error('No se pudo cargar html5Loader.js de Cognifit.'));
+                script.onerror = () => reject(new Error('No se pudo cargar html5Loader.js de CogniFit.'));
                 document.head.appendChild(script);
             });
 
@@ -437,35 +437,35 @@
             }
 
             if (!gameKey) {
-                statusBox.textContent = 'No se recibió la clave del juego.';
+                statusBox.textContent = 'No se recibió la clave del módulo.';
                 return;
             }
 
             if (!clientId) {
-                statusBox.textContent = 'No se recibio el Client ID de Cognifit.';
+                statusBox.textContent = 'No se recibió el Client ID de CogniFit.';
                 return;
             }
 
             if (!userToken) {
-                statusBox.textContent = 'No se recibio el User Token de Cognifit.';
+                statusBox.textContent = 'No se recibió el User Token de CogniFit.';
                 return;
             }
 
             if (!sdkVersion) {
-                statusBox.textContent = 'No se pudo resolver la version del SDK de Cognifit.';
+                statusBox.textContent = 'No se pudo resolver la versión del SDK de CogniFit.';
                 return;
             }
 
             try {
-                statusBox.textContent = 'Cargando SDK de Cognifit.';
+                statusBox.textContent = 'Cargando SDK de CogniFit.';
                 await loadCognifitLoader(sdkVersion);
 
                 if (!window.HTML5JS || typeof window.HTML5JS.loadMode !== 'function') {
-                    statusBox.textContent = 'No se pudo cargar el launcher autenticado de Cognifit.';
+                    statusBox.textContent = 'No se pudo cargar el launcher autenticado de CogniFit.';
                     return;
                 }
 
-                statusBox.textContent = 'Cargando juego ' + gameKey + '.';
+                statusBox.textContent = 'Cargando módulo ' + gameKey + '.';
                 document.getElementById('cognifit-loader-button').style.display = 'none';
                 window.HTML5JS.loadMode(sdkVersion, 'gameMode', gameKey, 'cognifit-container', {
                     clientId: clientId,
@@ -478,7 +478,7 @@
                 setTimeout(enforceCognifitFrameSize, 1000);
             } catch (error) {
                 console.error(error);
-                statusBox.textContent = error.message || 'No se pudo iniciar el juego Cognifit.';
+                statusBox.textContent = error.message || 'No se pudo iniciar el módulo CogniFit.';
             }
         }
 
