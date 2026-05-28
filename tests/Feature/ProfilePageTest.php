@@ -27,14 +27,14 @@ it('shows the operational profile overview with a single page heading', function
         ->assertSee('Resumen del perfil.')
         ->assertSee('Consulta tus datos, avance cognitivo y asignación operativa.')
         ->assertSee('Identidad y asignación.')
-        ->assertSee('Continúa tu entrenamiento.')
         ->assertSee('Kevin Cruz')
         ->assertSee('Inspector')
         ->assertSee('ID GK-01')
         ->assertSee('Correo institucional')
         ->assertSee('<h2 class="profile-overview-title">Resumen del perfil.</h2>', false)
         ->assertSee('<h2 class="profile-summary-name">Kevin Cruz</h2>', false)
-        ->assertDontSee('<h2 class="profile-overview-title">Kevin Cruz</h2>', false);
+        ->assertDontSee('<h2 class="profile-overview-title">Kevin Cruz</h2>', false)
+        ->assertDontSee('Ir a simuladores');
 
     expect(substr_count($response->getContent(), $email))->toBe(1);
 });

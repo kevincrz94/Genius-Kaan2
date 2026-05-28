@@ -152,7 +152,7 @@ class IndexController extends Controller
             if ($user->isAdmin()) {
                 session()->put('admin_id', $user->id);
                 session()->put('admin_role', $user->role);
-                session()->forget('operational_user_id');
+                session()->put('operational_user_id', $user->id);
 
                 return redirect()->route('admin.dashboard');
             }
@@ -187,7 +187,7 @@ class IndexController extends Controller
 
         session()->put('operational_user_id', $user->id);
 
-        if (! filled($user->onboarding_completed_at)) {
+        if (! $user->isAdmin() && ! filled($user->onboarding_completed_at)) {
             return redirect()->route('user.onboarding');
         }
 
@@ -200,6 +200,10 @@ class IndexController extends Controller
 
         if (! $user) {
             return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
+        }
+
+        if ($user->isAdmin()) {
+            return redirect()->route('user.games');
         }
 
         if (filled($user->onboarding_completed_at)) {
@@ -280,7 +284,7 @@ class IndexController extends Controller
             return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
         }
 
-        if (! filled($user->onboarding_completed_at)) {
+        if (! $user->isAdmin() && ! filled($user->onboarding_completed_at)) {
             return redirect()->route('user.onboarding');
         }
 
@@ -704,14 +708,25 @@ class IndexController extends Controller
     {
         $userId = session('operational_user_id');
 
+        if (! $userId && session()->has('admin_id') && in_array(session('admin_role'), ['admin', 'super_admin'], true)) {
+            $adminId = session('admin_id');
+            $userId = is_numeric($adminId) ? (int) $adminId : null;
+        }
+
         if (! $userId) {
             return null;
         }
 
-        return User::query()
+        $user = User::query()
             ->with(['securityUnit', 'operationalGroup'])
             ->where('status', 1)
             ->find($userId);
+
+        if ($user && ! session('operational_user_id')) {
+            session()->put('operational_user_id', $user->id);
+        }
+
+        return $user;
     }
 
     private function availableGames(): array

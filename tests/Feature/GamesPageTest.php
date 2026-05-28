@@ -79,3 +79,26 @@ it('renders pending credential messaging when Cognifit access is missing', funct
         ->toContain('Credencial pendiente de asignación')
         ->toContain('Error de prueba CogniFit');
 });
+
+it('allows an admin session to access the simulator portal', function () {
+    $user = User::factory()->create([
+        'name' => 'Admin Operativo',
+        'role' => 'admin',
+        'status' => 1,
+        'onboarding_completed_at' => null,
+        'cognifit_user_token' => 'token-admin-123',
+        'cognifit_locale' => 'es',
+    ]);
+
+    $response = $this->withSession([
+        'admin_id' => $user->id,
+        'admin_role' => 'admin',
+    ])->get(route('user.games'));
+
+    $response
+        ->assertOk()
+        ->assertSee('Simuladores disponibles.')
+        ->assertSee('Admin Operativo')
+        ->assertSee('Acceso CogniFit listo')
+        ->assertSessionHas('operational_user_id', $user->id);
+});

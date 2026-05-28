@@ -169,6 +169,18 @@
             box-shadow: 0 10px 24px rgba(0, 37, 76, 0.18);
         }
 
+        :root[data-theme='dark'] .brand-mark {
+            background: transparent;
+            box-shadow: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme='light']) .brand-mark {
+                background: transparent;
+                box-shadow: none;
+            }
+        }
+
         .brand-copy small {
             display: block;
             color: var(--muted);
@@ -445,16 +457,14 @@
             border-top: 0;
         }
 
-        .profile-hero-grid,
-        .profile-support-dashboard {
+        .profile-hero-grid {
             align-items: stretch;
         }
 
         .profile-summary-card,
         .profile-context-card,
         .profile-skill-card,
-        .profile-history-card,
-        .profile-next-step-card {
+        .profile-history-card {
             padding: 1.4rem;
         }
 
@@ -522,8 +532,7 @@
             line-height: 1.45;
         }
 
-        .profile-context-card,
-        .profile-next-step-card {
+        .profile-context-card {
             display: grid;
             gap: 1rem;
             align-content: start;
@@ -592,37 +601,15 @@
             color: var(--muted);
         }
 
-        .profile-next-step-card {
-            background:
-                radial-gradient(circle at top right, rgba(13, 110, 253, 0.14), transparent 34%),
-                linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.9) 100%);
-        }
-
-        .profile-next-step-card .cta-row {
-            margin-top: 0.25rem;
-        }
-
         :root[data-theme='dark'] .profile-meta-chip,
         :root[data-theme='dark'] .profile-history-badge-muted {
             background: rgba(232, 241, 255, 0.06);
-        }
-
-        :root[data-theme='dark'] .profile-next-step-card {
-            background:
-                radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 34%),
-                linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.94) 100%);
         }
 
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme='light']) .profile-meta-chip,
             :root:not([data-theme='light']) .profile-history-badge-muted {
                 background: rgba(232, 241, 255, 0.06);
-            }
-
-            :root:not([data-theme='light']) .profile-next-step-card {
-                background:
-                    radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 34%),
-                    linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.94) 100%);
             }
         }
 

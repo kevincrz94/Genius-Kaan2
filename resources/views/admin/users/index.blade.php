@@ -153,24 +153,16 @@
                                         </td>
                                         <td><span class="badge {{ $statusInfo['class'] }}">{{ $statusInfo['label'] }}</span></td>
                                         <td class="text-end">
-                                            <div class="btn-group">
-                                                <a href="{{ route('admin.user.report', ['id' => $user['id']]) }}" target="_blank"
-                                                    class="btn btn-sm btn-outline-primary" title="Reporte">
-                                                    <i class="fa fa-file-pdf"></i>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ route('admin.user.profile', ['id' => $user['id']]) }}"
+                                                    class="btn btn-outline-primary">
+                                                    <i class="fa fa-user me-1"></i>
+                                                    Perfil
                                                 </a>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
-                                                    data-bs-target="#editUserModal{{ $user['id'] }}" title="Editar">
-                                                    <i class="fa fa-pen"></i>
-                                                </button>
-                                                @if (($user['role'] ?? 'user') === 'user' && ! filled($user['cognifit_user_token'] ?? null))
-                                                    <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
-                                                        data-bs-target="#syncCognifitModal{{ $user['id'] }}" title="Sincronizar CogniFit">
-                                                        <i class="fa fa-link"></i>
-                                                    </button>
-                                                @endif
                                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
                                                     data-bs-target="#deleteUserModal{{ $user['id'] }}" title="Eliminar">
-                                                    <i class="fa fa-trash"></i>
+                                                    <i class="fa fa-trash me-1"></i>
+                                                    Eliminar
                                                 </button>
                                             </div>
                                         </td>
@@ -199,56 +191,6 @@
     ])
 
     @foreach ($list as $user)
-        @include('admin.users.partials.user-form-modal', [
-            'modalId' => 'editUserModal' . $user['id'],
-            'title' => 'Modificar elemento',
-            'action' => route('admin.users.update', ['id' => $user['id']]),
-            'method' => 'PUT',
-            'user' => $user,
-            'ranks' => $ranks,
-            'units' => $units,
-            'groups' => $groups,
-            'areas' => $areas,
-            'roleLabels' => $roleLabels,
-            'genderLabels' => $genderLabels,
-        ])
-
-        @if (($user['role'] ?? 'user') === 'user' && ! filled($user['cognifit_user_token'] ?? null))
-            <div class="modal fade" id="syncCognifitModal{{ $user['id'] }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Sincronizar CogniFit</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                        </div>
-                        <form action="{{ route('admin.register.user.game', ['id' => $user['id']]) }}" method="post">
-                            @csrf
-                            <div class="modal-body">
-                                <p class="text-muted">
-                                    Se solicitará a CogniFit la credencial de entrenamiento para
-                                    <strong>{{ $user['name'] }}</strong>.
-                                </p>
-                                <div class="form-group mb-0">
-                                    <label for="syncLocale{{ $user['id'] }}">Idioma de la evaluación</label>
-                                    <select id="syncLocale{{ $user['id'] }}" name="locale" class="form-control" required>
-                                        <option value="es" selected>Español</option>
-                                        <option value="en">Inglés</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fa fa-link me-1"></i>
-                                    Sincronizar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        @endif
-
         <div class="modal fade" id="deleteUserModal{{ $user['id'] }}" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">

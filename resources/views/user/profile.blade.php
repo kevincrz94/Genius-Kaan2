@@ -200,31 +200,20 @@
     </section>
 
     <section class="section">
-        <div class="dashboard profile-support-dashboard">
-            <article class="panel card">
-                <span class="eyebrow">Áreas de refuerzo</span>
-                <h2>Capacidades seleccionadas.</h2>
-                <p class="section-copy">Estas áreas guían la recomendación de módulos y el seguimiento cognitivo.</p>
+        <article class="panel card">
+            <span class="eyebrow">Áreas de refuerzo</span>
+            <h2>Capacidades seleccionadas.</h2>
+            <p class="section-copy">Estas áreas guían la recomendación de módulos y el seguimiento cognitivo.</p>
 
-                @if ($attentionAreas)
-                    <div class="profile-chip-list">
-                        @foreach ($attentionAreas as $area)
-                            <span>{{ $area }}</span>
-                        @endforeach
-                    </div>
-                @else
-                    <p class="section-copy">Sin áreas de atención seleccionadas.</p>
-                @endif
-            </article>
-
-            <article class="panel card profile-next-step-card">
-                <span class="eyebrow">Siguiente paso</span>
-                <h2>Continúa tu entrenamiento.</h2>
-                <p class="section-copy">Vuelve al catálogo de simuladores para iniciar una nueva sesión con tu perfil actual.</p>
-                <div class="cta-row">
-                    <a href="{{ route('user.games') }}" class="btn btn-primary">Ir a simuladores</a>
+            @if ($attentionAreas)
+                <div class="profile-chip-list">
+                    @foreach ($attentionAreas as $area)
+                        <span>{{ $area }}</span>
+                    @endforeach
                 </div>
-            </article>
-        </div>
+            @else
+                <p class="section-copy">Sin áreas de atención seleccionadas.</p>
+            @endif
+        </article>
     </section>
 @endsection

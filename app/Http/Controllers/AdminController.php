@@ -162,12 +162,12 @@ class AdminController extends Controller
         $user = User::find($id);
 
         if (! $user) {
-            return response()->json(['status' => false, 'message' => 'Elemento no encontrado']);
+            abort(404, 'Elemento no encontrado');
         }
 
         $info = $this->userPayload($user);
         $goals = $this->normalizedUserInterest($info, 'goals');
-        $areas = $this->normalizedUserInterest($info, 'areas');
+        $interestAreas = $this->normalizedUserInterest($info, 'areas');
         $gameData = null;
         $playedGames = [];
         $brainGames = [];
@@ -202,21 +202,34 @@ class AdminController extends Controller
             }
         }
 
-        $html = view('admin.users.user_details', compact(
+        $catalogs = $this->operationalCatalogs();
+        $catalogAreas = $catalogs['areas'];
+        $title = 'Perfil del elemento';
+        $roleLabels = [
+            'user' => 'Usuario operativo',
+            'admin' => 'Administrador',
+            'super_admin' => 'Superusuario',
+        ];
+        $genderLabels = [
+            'male' => 'Masculino',
+            'female' => 'Femenino',
+            'other' => 'Otro',
+        ];
+
+        return view('admin.users.profile', compact(
+            'title',
             'info',
             'goals',
-            'areas',
+            'interestAreas',
             'gameData',
             'playedGames',
             'brainGames',
             'brainGameTitles',
-            'localSessions'
-        ))->render();
-
-        return response()->json([
-            'status' => true,
-            'html' => $html,
-        ]);
+            'localSessions',
+            'catalogAreas',
+            'roleLabels',
+            'genderLabels'
+        ) + $catalogs);
     }
 
     public function registerUserInGame(Request $request, $id = null)
@@ -1045,4 +1058,3 @@ class AdminController extends Controller
         return $this->database ?: null;
     }
 }
-

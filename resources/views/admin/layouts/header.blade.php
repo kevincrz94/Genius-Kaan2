@@ -46,11 +46,14 @@
                     <div class="avatar avatar-sm me-2">
                         <img src="{{ asset('common/favicon.png') }}" alt="Administrador" class="rounded-circle">
                     </div>
-                    <div class="user-text">
-                        <h6 class="mb-0 fw-semibold">Admin</h6>
-                        <small class="text-muted">Administrador</small>
-                    </div>
+                <div class="user-text">
+                    <h6 class="mb-0 fw-semibold">Admin</h6>
+                    <small class="text-muted">Administrador</small>
                 </div>
+            </div>
+                @if (session('operational_user_id') || is_numeric(session('admin_id')))
+                    <a class="dropdown-item px-3 py-2" href="{{ route('user.games') }}">Abrir simuladores</a>
+                @endif
                 <a class="dropdown-item px-3 py-2" href="javascript:void(0)">Configuración</a>
                 <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="d-none">
                     @csrf
