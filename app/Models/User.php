@@ -24,6 +24,7 @@ class User extends Authenticatable
         'badge_number',
         'rank',
         'assignment_area',
+        'attention_areas',
         'security_unit_id',
         'operational_group_id',
         'image',
@@ -35,6 +36,8 @@ class User extends Authenticatable
         'cognifit_user_token',
         'cognifit_locale',
         'cognifit_registered_at',
+        'password_changed_at',
+        'onboarding_completed_at',
         'created_at',
     ];
 
@@ -60,7 +63,10 @@ class User extends Authenticatable
             'password' => 'hashed',
             'age' => 'integer',
             'status' => 'integer',
+            'attention_areas' => 'array',
             'cognifit_registered_at' => 'datetime',
+            'password_changed_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
         ];
     }
 

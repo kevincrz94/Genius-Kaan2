@@ -790,6 +790,7 @@ class AdminController extends Controller
             'operational_group_id' => $user->operational_group_id,
             'assignment_area' => $user->assignment_area,
             'assignment_area_id' => AssignmentArea::query()->where('name', $user->assignment_area)->value('id'),
+            'attention_areas' => $user->attention_areas ?? [],
             'status' => $user->status,
             'role' => $user->role ?? 'user',
             'user_token' => $user->cognifit_user_token,
@@ -798,7 +799,7 @@ class AdminController extends Controller
             'cognifit_registered_at' => optional($user->cognifit_registered_at)->toDateTimeString(),
             'created_at' => optional($user->created_at)->toDateTimeString(),
             'userIntrest' => [
-                'goals' => [],
+                'goals' => $user->attention_areas ?? [],
                 'areas' => [],
             ],
         ];

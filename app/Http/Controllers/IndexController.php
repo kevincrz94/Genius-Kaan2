@@ -7,6 +7,7 @@ use App\Models\CognitiveSkillScore;
 use App\Models\User;
 use App\Services\CognifitService;
 use App\Services\customBlock;
+use App\Services\FileHelper;
 use CognifitSdk\Api\UserAccessToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -158,6 +159,10 @@ class IndexController extends Controller
             session()->forget('admin_id');
             session()->forget('admin_role');
 
+            if (! filled($user->onboarding_completed_at)) {
+                return redirect()->route('user.onboarding');
+            }
+
             return redirect()->route('user.games');
         }
 
@@ -180,7 +185,79 @@ class IndexController extends Controller
 
         session()->put('operational_user_id', $user->id);
 
+        if (! filled($user->onboarding_completed_at)) {
+            return redirect()->route('user.onboarding');
+        }
+
         return redirect()->route('user.games');
+    }
+
+    public function showOnboarding()
+    {
+        $user = $this->operationalUser();
+
+        if (! $user) {
+            return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
+        }
+
+        if (filled($user->onboarding_completed_at)) {
+            return redirect()->route('user.games');
+        }
+
+        $pageTitle = 'Genius Kaan | Verificación inicial';
+        $attentionAreas = $this->attentionAreaOptions();
+
+        return view('user.onboarding', compact('pageTitle', 'user', 'attentionAreas'));
+    }
+
+    public function completeOnboarding(Request $request)
+    {
+        $user = $this->operationalUser();
+
+        if (! $user) {
+            return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
+        }
+
+        $validated = $request->validate([
+            'change_password' => ['required', 'in:yes,no'],
+            'password' => ['nullable', 'required_if:change_password,yes', 'string', 'min:8', 'confirmed'],
+            'age' => ['required', 'integer', 'min:18', 'max:120'],
+            'gender' => ['required', 'in:male,female,other'],
+            'image' => ['nullable', 'image', 'max:4096'],
+            'attention_areas' => ['nullable', 'array'],
+            'attention_areas.*' => ['string', 'max:120'],
+        ]);
+
+        $attentionOptions = collect($this->attentionAreaOptions())->keyBy('key');
+        $selectedAreas = collect($validated['attention_areas'] ?? [])
+            ->filter(fn (string $key) => $attentionOptions->has($key))
+            ->map(fn (string $key) => [
+                'key' => $key,
+                'name' => $attentionOptions[$key]['label'],
+            ])
+            ->values()
+            ->all();
+
+        $payload = [
+            'age' => $validated['age'],
+            'gender' => $validated['gender'],
+            'attention_areas' => $selectedAreas,
+            'onboarding_completed_at' => now(),
+        ];
+
+        if (($validated['change_password'] ?? 'no') === 'yes') {
+            $payload['password'] = $validated['password'];
+            $payload['password_changed_at'] = now();
+        }
+
+        if ($request->hasFile('image')) {
+            FileHelper::createDirectory(public_path('UserImages'));
+            $payload['image'] = FileHelper::uploadImage($request->file('image'), 'UserImages');
+        }
+
+        $user->update($payload);
+
+        return redirect()->route('user.games')->with('success', 'Perfil verificado correctamente.');
     }
 
     public function logout()
@@ -199,6 +276,10 @@ class IndexController extends Controller
 
         if (! $user) {
             return redirect()->route('user.login')->with('error', 'Inicia sesión para continuar.');
+        }
+
+        if (! filled($user->onboarding_completed_at)) {
+            return redirect()->route('user.onboarding');
         }
 
         $cognifitError = null;
@@ -627,5 +708,40 @@ class IndexController extends Controller
             ->sortBy('label')
             ->values()
             ->all();
+    }
+
+    private function attentionAreaOptions(): array
+    {
+        $skills = customBlock::getSDKData('skills', 'GET')
+            ->map(function ($skill): array {
+                $key = (string) ($skill->key ?? '');
+
+                return [
+                    'key' => $key,
+                    'label' => $skill->assets->titles->es
+                        ?? $skill->assets->titles->en
+                        ?? customBlock::processStringNames($key),
+                    'icon' => $skill->assets->images->whiteIcon
+                        ?? $skill->assets->images->icon
+                        ?? null,
+                ];
+            })
+            ->filter(fn (array $skill) => $skill['key'] !== '')
+            ->sortBy('label')
+            ->values()
+            ->all();
+
+        if ($skills !== []) {
+            return $skills;
+        }
+
+        return [
+            ['key' => 'ATTENTION', 'label' => 'Atención sostenida', 'icon' => null],
+            ['key' => 'REACTION_TIME', 'label' => 'Tiempo de reacción', 'icon' => null],
+            ['key' => 'WORKING_MEMORY', 'label' => 'Memoria de trabajo', 'icon' => null],
+            ['key' => 'INHIBITION', 'label' => 'Control inhibitorio', 'icon' => null],
+            ['key' => 'PLANNING', 'label' => 'Planeación', 'icon' => null],
+            ['key' => 'VISUAL_PERCEPTION', 'label' => 'Percepción visual', 'icon' => null],
+        ];
     }
 }
