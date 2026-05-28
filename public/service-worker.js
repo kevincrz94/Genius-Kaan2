@@ -7,12 +7,16 @@ const APP_SHELL = [
     '/common/light-logo.png',
     '/manifest.json',
     '/manifest.webmanifest',
-    '/offline.html'
+    '/offline.html',
+    '/screenshots/desktop-dashboard.png',
+    '/screenshots/mobile-simulators.png'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
+        caches.open(CACHE_NAME).then(cache => Promise.all(
+            APP_SHELL.map(url => cache.add(url).catch(() => null))
+        ))
     );
     self.skipWaiting();
 });
@@ -48,6 +52,6 @@ self.addEventListener('fetch', event => {
             caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
 
             return response;
-        }))
+        }).catch(() => cached))
     );
 });

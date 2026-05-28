@@ -9,17 +9,44 @@
     "dir": "ltr",
     "display": "standalone",
     "display_override": [
+        "tabbed",
         "window-controls-overlay",
         "standalone",
         "minimal-ui"
     ],
+    "edge_side_panel": {
+        "preferred_width": 420
+    },
     "background_color": "#0f172a",
     "theme_color": "#0f172a",
     "orientation": "portrait",
+    "prefer_related_applications": false,
+    "launch_handler": {
+        "client_mode": [
+            "navigate-existing",
+            "auto"
+        ]
+    },
     "categories": [
         "education",
         "productivity",
         "health"
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop-dashboard.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Panel operativo de aptitud cognitiva"
+        },
+        {
+            "src": "/screenshots/mobile-simulators.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Simuladores cognitivos para elementos operativos"
+        }
     ],
     "icons": [
         {
