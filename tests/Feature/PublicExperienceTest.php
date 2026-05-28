@@ -28,5 +28,7 @@ it('shows the launcher shell page', function () {
         ->assertOk()
         ->assertSee('Sesión cognitiva')
         ->assertSee('JavaScript')
-        ->assertSee('test-sdk-version');
+        ->assertSee('test-sdk-version')
+        ->assertSee('window.location.replace(returnUrl)', false)
+        ->assertSee(url('/simuladores'));
 });

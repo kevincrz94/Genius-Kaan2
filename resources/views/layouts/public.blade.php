@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $pageTitle ?? 'Genius Kaan' }}</title>
     <link rel="icon" href="{{ asset('common/favicon.png') }}">
+    <script>
+        (function() {
+            try {
+                const theme = window.localStorage.getItem('geniusKaanTheme');
+
+                if (theme === 'light' || theme === 'dark') {
+                    document.documentElement.dataset.theme = theme;
+                }
+            } catch (error) {
+                // Ignore storage access failures and fall back to system theme.
+            }
+        })();
+    </script>
     @include('partials.pwa')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +43,10 @@
 
                 <nav class="nav-actions">
                     <a href="{{ route('home') }}" class="btn btn-secondary">Inicio</a>
+                    <button id="themeToggleButton" class="btn btn-secondary theme-toggle" type="button"
+                        aria-pressed="false">
+                        Modo oscuro
+                    </button>
                     <button id="installPwaButton" class="btn btn-secondary pwa-install-button" type="button" hidden>
                         Instalar aplicación
                     </button>
@@ -82,6 +99,67 @@
             Genius Kaan organiza evaluación, entrenamiento y seguimiento cognitivo para fuerzas de seguridad pública.
         </div>
     </footer>
+    <script>
+        (function() {
+            const storageKey = 'geniusKaanTheme';
+            const root = document.documentElement;
+            const toggle = document.getElementById('themeToggleButton');
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+            function storedTheme() {
+                const theme = root.dataset.theme;
+                return theme === 'light' || theme === 'dark' ? theme : null;
+            }
+
+            function activeTheme() {
+                return storedTheme() ?? (mediaQuery.matches ? 'dark' : 'light');
+            }
+
+            function refreshToggleLabel() {
+                if (!toggle) {
+                    return;
+                }
+
+                const darkMode = activeTheme() === 'dark';
+
+                toggle.textContent = darkMode ? 'Modo claro' : 'Modo oscuro';
+                toggle.setAttribute('aria-pressed', String(darkMode));
+                toggle.setAttribute('aria-label', darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+            }
+
+            if (toggle) {
+                toggle.addEventListener('click', function() {
+                    const nextTheme = activeTheme() === 'dark' ? 'light' : 'dark';
+
+                    root.dataset.theme = nextTheme;
+
+                    try {
+                        window.localStorage.setItem(storageKey, nextTheme);
+                    } catch (error) {
+                        // Ignore storage access failures and keep the current page theme.
+                    }
+
+                    refreshToggleLabel();
+                });
+            }
+
+            if (typeof mediaQuery.addEventListener === 'function') {
+                mediaQuery.addEventListener('change', function() {
+                    if (!storedTheme()) {
+                        refreshToggleLabel();
+                    }
+                });
+            } else if (typeof mediaQuery.addListener === 'function') {
+                mediaQuery.addListener(function() {
+                    if (!storedTheme()) {
+                        refreshToggleLabel();
+                    }
+                });
+            }
+
+            refreshToggleLabel();
+        })();
+    </script>
     @stack('scripts')
 </body>
 

@@ -391,6 +391,7 @@ class IndexController extends Controller
             'image' => $request->string('image')->trim()->value(),
             'clientId' => config('services.cognifit.client_id'),
             'sdkVersion' => $this->cognifitSdkVersion(),
+            'returnUrl' => $this->launcherReturnUrl($request),
             'appType' => in_array($request->string('app_type')->trim()->value(), ['web', 'app'], true)
                 ? $request->string('app_type')->trim()->value()
                 : 'web',
@@ -486,6 +487,32 @@ class IndexController extends Controller
         }
 
         return $accessToken;
+    }
+
+    private function launcherReturnUrl(Request $request): string
+    {
+        $fallback = route('user.games');
+        $returnUrl = trim($request->string('return_url')->value());
+
+        if ($returnUrl === '') {
+            return $fallback;
+        }
+
+        if (str_starts_with($returnUrl, '/')) {
+            return url($returnUrl);
+        }
+
+        $parsedReturnUrl = parse_url($returnUrl);
+        $parsedFallback = parse_url($fallback);
+
+        if (
+            in_array($parsedReturnUrl['scheme'] ?? '', ['http', 'https'], true)
+            && ($parsedReturnUrl['host'] ?? null) === ($parsedFallback['host'] ?? null)
+        ) {
+            return $returnUrl;
+        }
+
+        return $fallback;
     }
 
     private function cognifitSdkVersion(): ?string

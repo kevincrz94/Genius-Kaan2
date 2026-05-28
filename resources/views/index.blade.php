@@ -270,6 +270,7 @@
         $image = $launchConfig['image'] ?? '';
         $clientId = $launchConfig['clientId'] ?? '';
         $sdkVersion = $launchConfig['sdkVersion'] ?? '';
+        $returnUrl = $launchConfig['returnUrl'] ?? route('user.games');
         $appType = $launchConfig['appType'] ?? 'web';
         $syncUrl = $launchConfig['syncUrl'] ?? '';
         $launchError = $launchConfig['launchError'] ?? '';
@@ -337,6 +338,7 @@
         const userToken = @json($userToken);
         const clientId = @json($clientId);
         const sdkVersion = @json($sdkVersion);
+        const returnUrl = @json($returnUrl);
         const locale = @json($locale);
         const appType = @json($appType);
         const syncUrl = @json($syncUrl);
@@ -344,6 +346,7 @@
         const statusBox = document.getElementById('game-status');
         const button = document.getElementById('start-game-button');
         let loaderPromise = null;
+        let redirectTimer = null;
 
         function loadCognifitLoader(version) {
             if (loaderPromise) {
@@ -392,10 +395,30 @@
             frame.style.setProperty('border', '0', 'important');
         }
 
+        function scheduleReturnToGames(message, delay = 1600) {
+            if (message) {
+                statusBox.textContent = message;
+            }
+
+            if (!returnUrl) {
+                return;
+            }
+
+            if (redirectTimer) {
+                window.clearTimeout(redirectTimer);
+            }
+
+            redirectTimer = window.setTimeout(() => {
+                window.location.replace(returnUrl);
+            }, delay);
+        }
+
         async function syncCognifitSession(status, mode) {
             if (!syncUrl) {
-                statusBox.textContent = 'Actividad finalizada. No se pudo sincronizar porque falta el usuario.';
-                return;
+                return {
+                    ok: false,
+                    message: 'Actividad finalizada. No se pudo sincronizar porque falta el usuario.'
+                };
             }
 
             try {
@@ -422,12 +445,19 @@
                     throw new Error(payload.message || 'No se pudieron sincronizar los resultados.');
                 }
 
-                statusBox.textContent = payload.score === null || payload.score === undefined
-                    ? payload.message + ' CogniFit puede tardar unos minutos en publicar puntajes.'
-                    : payload.message + ' Puntaje: ' + payload.score + '.';
+                return {
+                    ok: true,
+                    message: payload.score === null || payload.score === undefined
+                        ? payload.message + ' CogniFit puede tardar unos minutos en publicar puntajes.'
+                        : payload.message + ' Puntaje: ' + payload.score + '.'
+                };
             } catch (error) {
                 console.error(error);
-                statusBox.textContent = error.message || 'No se pudieron sincronizar los resultados.';
+
+                return {
+                    ok: false,
+                    message: error.message || 'No se pudieron sincronizar los resultados.'
+                };
             }
         }
 
@@ -483,7 +513,7 @@
             }
         }
 
-        window.addEventListener('message', function(event) {
+        window.addEventListener('message', async function(event) {
             const data = event.data || {};
 
             if (data.status !== 'completed' && data.status !== 'aborted') {
@@ -496,7 +526,16 @@
             statusBox.textContent = data.status === 'completed'
                 ? 'Actividad completada.'
                 : 'Actividad cancelada.';
-            syncCognifitSession(data.status, data.mode);
+
+            const syncResult = await syncCognifitSession(data.status, data.mode);
+            const fallbackMessage = data.status === 'completed'
+                ? 'Actividad completada. Regresando al listado de juegos.'
+                : 'Actividad cancelada. Regresando al listado de juegos.';
+            const syncMessage = syncResult && syncResult.message
+                ? syncResult.message + ' Regresando al listado de juegos.'
+                : fallbackMessage;
+
+            scheduleReturnToGames(syncMessage, syncResult && syncResult.ok ? 1800 : 1200);
         });
 
         button && button.addEventListener('click', startCognifitGame);

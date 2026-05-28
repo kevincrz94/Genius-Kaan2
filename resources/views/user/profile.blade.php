@@ -5,67 +5,115 @@
         $image = $user->image;
         $imagePath = $image ? public_path('UserImages/' . $image) : null;
         $avatar = $imagePath && file_exists($imagePath) ? asset('UserImages/' . $image) : asset('common/favicon.png');
+        $genderLabel = match ($user->gender) {
+            'male' => 'Masculino',
+            'female' => 'Femenino',
+            'other' => 'Otro',
+            default => 'Sin dato registrado',
+        };
+        $identitySummary = collect([
+            $user->rank,
+            $user->badge_number ? 'ID ' . $user->badge_number : null,
+            $user->securityUnit?->name,
+        ])->filter()->implode(' · ');
+        $personalFacts = [
+            [
+                'label' => 'Correo institucional',
+                'value' => $user->email,
+            ],
+            [
+                'label' => 'Edad',
+                'value' => $user->age ?: 'Sin edad registrada',
+            ],
+            [
+                'label' => 'Sexo',
+                'value' => $genderLabel,
+            ],
+        ];
+        $operationalFacts = [
+            [
+                'label' => 'Placa / ID',
+                'value' => $user->badge_number ?: 'Sin placa registrada',
+            ],
+            [
+                'label' => 'Rango / cargo',
+                'value' => $user->rank ?: 'Sin rango registrado',
+            ],
+            [
+                'label' => 'Unidad',
+                'value' => $user->securityUnit?->name ?: 'Sin unidad',
+            ],
+            [
+                'label' => 'Grupo operativo',
+                'value' => $user->operationalGroup?->name ?: 'Sin grupo',
+            ],
+            [
+                'label' => 'Área asignada',
+                'value' => $user->assignment_area ?: 'Sin área asignada',
+            ],
+            [
+                'label' => 'Último registro',
+                'value' => $stats['last_session_at'] ?: 'Sin registro',
+            ],
+        ];
     @endphp
 
     <section class="section">
         <div class="section-header">
             <div>
                 <span class="eyebrow">Perfil operativo</span>
-                <h2>{{ $user->name }}</h2>
+                <h2 class="profile-overview-title">Resumen del perfil.</h2>
+                <p class="section-copy">Consulta tus datos, avance cognitivo y asignación operativa.</p>
             </div>
             <a href="{{ route('user.games') }}" class="btn btn-secondary">Volver a simuladores</a>
         </div>
 
-        <div class="dashboard">
+        <div class="dashboard profile-hero-grid">
             <article class="panel card profile-summary-card">
-                <img class="profile-avatar-large" src="{{ $avatar }}" alt="Foto de {{ $user->name }}">
-                <h2>{{ $user->name }}</h2>
-                <p class="section-copy">{{ $user->email }}</p>
-                <div class="profile-status">
-                    {{ filled($user->onboarding_completed_at) ? 'Perfil verificado' : 'Verificación pendiente' }}
+                <div class="profile-summary-head">
+                    <img class="profile-avatar-large" src="{{ $avatar }}" alt="Foto de {{ $user->name }}">
+
+                    <div class="profile-summary-copy">
+                        <h2 class="profile-summary-name">{{ $user->name }}</h2>
+
+                        @if ($identitySummary !== '')
+                            <p class="key-copy">{{ $identitySummary }}</p>
+                        @endif
+
+                        <div class="profile-status">
+                            {{ filled($user->onboarding_completed_at) ? 'Perfil verificado' : 'Verificación pendiente' }}
+                        </div>
+                    </div>
+                </div>
+
+                <p class="section-copy profile-summary-note">
+                    {{ filled($user->onboarding_completed_at)
+                        ? 'Tu cuenta está lista para entrenamiento, seguimiento y evaluación cognitiva.'
+                        : 'Completa tu verificación para mantener el seguimiento operativo al día.' }}
+                </p>
+
+                <div class="profile-summary-meta">
+                    @foreach ($personalFacts as $fact)
+                        <div class="profile-meta-chip">
+                            <span>{{ $fact['label'] }}</span>
+                            <strong>{{ $fact['value'] }}</strong>
+                        </div>
+                    @endforeach
                 </div>
             </article>
 
-            <article class="panel card">
-                <span class="eyebrow">Datos personales</span>
-                <h2>Información registrada.</h2>
+            <article class="panel card profile-context-card">
+                <span class="eyebrow">Ficha operativa</span>
+                <h2>Identidad y asignación.</h2>
+                <p class="section-copy">Estos datos controlan la trazabilidad institucional de tu actividad.</p>
 
-                <div class="stack-list">
-                    <div class="line-item">
-                        <div>
-                            <strong>Edad</strong>
-                            <p>{{ $user->age ?: 'Sin edad registrada' }}</p>
+                <div class="profile-key-grid">
+                    @foreach ($operationalFacts as $fact)
+                        <div class="profile-key-item">
+                            <span>{{ $fact['label'] }}</span>
+                            <strong>{{ $fact['value'] }}</strong>
                         </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Sexo</strong>
-                            <p>
-                                @switch($user->gender)
-                                    @case('male')
-                                        Masculino
-                                    @break
-
-                                    @case('female')
-                                        Femenino
-                                    @break
-
-                                    @case('other')
-                                        Otro
-                                    @break
-
-                                    @default
-                                        Sin dato registrado
-                                @endswitch
-                            </p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Correo</strong>
-                            <p>{{ $user->email }}</p>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </article>
         </div>
@@ -74,8 +122,9 @@
     <section class="section">
         <div class="section-header">
             <div>
-                <span class="eyebrow">Estadísticas</span>
-                <h2>Resumen de entrenamiento.</h2>
+                <span class="eyebrow">Actividad cognitiva</span>
+                <h2>Rendimiento reciente.</h2>
+                <p class="section-copy">Indicadores consolidados y sesiones registradas para este perfil.</p>
             </div>
         </div>
 
@@ -93,13 +142,13 @@
                 <strong>{{ $stats['average_score'] ?: '0' }}/100</strong>
             </article>
             <article class="profile-stat-card">
-                <span>Última sesión</span>
+                <span>Último registro</span>
                 <strong>{{ $stats['last_session_at'] ?: 'Sin registro' }}</strong>
             </article>
         </div>
 
         <div class="dashboard profile-metrics-dashboard">
-            <article class="panel card">
+            <article class="panel card profile-skill-card">
                 <span class="eyebrow">Capacidades medidas</span>
                 <h2>Últimos puntajes.</h2>
 
@@ -119,75 +168,43 @@
                 @endforelse
             </article>
 
-            <article class="panel card">
+            <article class="panel card profile-history-card">
                 <span class="eyebrow">Historial reciente</span>
                 <h2>Últimos simuladores.</h2>
 
-                <div class="stack-list">
-                    @forelse ($latestSessions as $session)
-                        <div class="line-item">
-                            <div>
-                                <strong>{{ $session->game_key ?: 'Simulador cognitivo' }}</strong>
-                                <p>
-                                    {{ optional($session->completed_at)->format('d/m/Y H:i') ?: 'Sin fecha' }}
-                                    · {{ $session->duration_minutes }} min
-                                    @if (filled($session->score))
-                                        · {{ round((float) $session->score, 1) }}/100
-                                    @endif
-                                </p>
+                @if ($latestSessions->isNotEmpty())
+                    <div class="profile-history-list">
+                        @foreach ($latestSessions as $session)
+                            <div class="profile-history-item">
+                                <div class="profile-history-copy">
+                                    <strong>{{ $session->game_key ?: 'Simulador cognitivo' }}</strong>
+                                    <p>
+                                        {{ optional($session->completed_at)->format('d/m/Y H:i') ?: 'Sin fecha' }}
+                                        · {{ $session->duration_minutes }} min
+                                    </p>
+                                </div>
+
+                                @if (filled($session->score))
+                                    <span class="profile-history-badge">{{ round((float) $session->score, 1) }}/100</span>
+                                @else
+                                    <span class="profile-history-badge profile-history-badge-muted">Sin puntaje</span>
+                                @endif
                             </div>
-                        </div>
-                    @empty
-                        <p class="section-copy">Sin sesiones completadas todavía.</p>
-                    @endforelse
-                </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="section-copy">Sin sesiones completadas todavía.</p>
+                @endif
             </article>
         </div>
     </section>
 
     <section class="section">
-        <div class="dashboard">
-            <article class="panel card">
-                <span class="eyebrow">Asignación institucional</span>
-                <h2>Datos operativos.</h2>
-
-                <div class="stack-list">
-                    <div class="line-item">
-                        <div>
-                            <strong>Placa / ID</strong>
-                            <p>{{ $user->badge_number ?: 'Sin placa registrada' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Rango / cargo</strong>
-                            <p>{{ $user->rank ?: 'Sin rango registrado' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Unidad</strong>
-                            <p>{{ $user->securityUnit?->name ?: 'Sin unidad' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Grupo operativo</strong>
-                            <p>{{ $user->operationalGroup?->name ?: 'Sin grupo' }}</p>
-                        </div>
-                    </div>
-                    <div class="line-item">
-                        <div>
-                            <strong>Área asignada</strong>
-                            <p>{{ $user->assignment_area ?: 'Sin área asignada' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </article>
-
+        <div class="dashboard profile-support-dashboard">
             <article class="panel card">
                 <span class="eyebrow">Áreas de refuerzo</span>
                 <h2>Capacidades seleccionadas.</h2>
+                <p class="section-copy">Estas áreas guían la recomendación de módulos y el seguimiento cognitivo.</p>
 
                 @if ($attentionAreas)
                     <div class="profile-chip-list">
@@ -198,6 +215,15 @@
                 @else
                     <p class="section-copy">Sin áreas de atención seleccionadas.</p>
                 @endif
+            </article>
+
+            <article class="panel card profile-next-step-card">
+                <span class="eyebrow">Siguiente paso</span>
+                <h2>Continúa tu entrenamiento.</h2>
+                <p class="section-copy">Vuelve al catálogo de simuladores para iniciar una nueva sesión con tu perfil actual.</p>
+                <div class="cta-row">
+                    <a href="{{ route('user.games') }}" class="btn btn-primary">Ir a simuladores</a>
+                </div>
             </article>
         </div>
     </section>
