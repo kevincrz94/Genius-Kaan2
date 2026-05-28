@@ -579,6 +579,64 @@
             margin-bottom: 1rem;
         }
 
+        .training-card.is-hidden {
+            display: none;
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        .skill-filter-panel {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            padding: 0.9rem;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .skill-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 3rem;
+            padding: 0.45rem 0.85rem;
+            border: 1px solid rgba(0, 37, 76, 0.1);
+            border-radius: 6px;
+            background: var(--surface-strong);
+            color: var(--ink);
+            font: inherit;
+            font-weight: 800;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .skill-filter:hover,
+        .skill-filter.is-active {
+            border-color: rgba(0, 37, 76, 0.28);
+            background: var(--ink);
+            color: white;
+        }
+
+        .skill-filter-icon {
+            display: inline-grid;
+            place-items: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 6px;
+            background: var(--accent);
+            color: white;
+            flex: 0 0 auto;
+        }
+
+        .skill-filter-icon img {
+            width: 1.2rem;
+            height: 1.2rem;
+            object-fit: contain;
+        }
+
         .key-copy {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 0.9rem;

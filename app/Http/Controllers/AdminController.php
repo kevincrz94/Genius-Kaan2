@@ -143,14 +143,16 @@ class AdminController extends Controller
 
     public function userManagement()
     {
-        $title = 'Gestion de elementos';
+        $title = 'Gestión de elementos';
+        $catalogs = $this->operationalCatalogs();
 
         $list = User::query()
+            ->with(['securityUnit', 'operationalGroup'])
             ->latest('id')
             ->get()
             ->map(fn (User $user) => $this->userPayload($user));
 
-        $data = compact('title', 'list');
+        $data = compact('title', 'list') + $catalogs;
 
         return view('admin.users.index')->with($data);
     }
@@ -529,39 +531,65 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // ... validation aur image handling ...
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'age' => $request->age,
-            'gender' => $request->gender,
-            // password agar hai to
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'badge_number' => 'nullable|string|max:80',
+            'rank_id' => 'nullable|exists:operational_ranks,id',
+            'security_unit_id' => 'nullable|exists:security_units,id',
+            'operational_group_id' => 'nullable|exists:operational_groups,id',
+            'assignment_area_id' => 'nullable|exists:assignment_areas,id',
+            'image' => 'nullable|image',
+            'age' => 'nullable|integer|min:1|max:120',
+            'gender' => 'nullable|in:male,female,other',
+            'role' => 'required|in:user,admin,super_admin',
+            'status' => 'required|in:0,1,2',
+            'password' => 'nullable|string|min:8',
+            'confirm_password' => 'nullable|same:password',
         ]);
 
-        if ($request->hasFile('image')) {
-            // old image delete + new upload
-            $imageName = time().'_'.$request->image->getClientOriginalName();
-            $request->image->move(public_path('profiles'), $imageName);
-            $user->image = $imageName;
-            $user->save();
+        $rank = OperationalRank::find($request->rank_id);
+        $unit = SecurityUnit::find($request->security_unit_id);
+        $group = OperationalGroup::find($request->operational_group_id);
+        $area = AssignmentArea::find($request->assignment_area_id);
+
+        $payload = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'badge_number' => $request->badge_number,
+            'rank' => $rank?->name,
+            'assignment_area' => $area?->name,
+            'security_unit_id' => $unit?->id,
+            'operational_group_id' => $group?->id,
+            'age' => $request->filled('age') ? $request->age : null,
+            'gender' => $request->filled('gender') ? $request->gender : null,
+            'status' => (int) $request->status,
+            'role' => $request->role,
+        ];
+
+        if ($request->filled('password')) {
+            $payload['password'] = $request->password;
         }
 
-        // Firebase mein UID ke naam se update karo
-        $firebaseUid = $user->id; // ya jo bhi tum use kar rahe ho
+        if ($request->hasFile('image')) {
+            FileHelper::createDirectory(public_path('UserImages'));
+            $payload['image'] = FileHelper::uploadImage($request->file('image'), 'UserImages');
+        }
+
+        $user->update($payload);
 
         if ($this->database()) {
-            $this->database()->getReference('users/'.$firebaseUid)->update([
+            $this->database()->getReference('users/'.$user->id)->update([
                 'name' => $user->name,
                 'email' => $user->email,
-                'image' => $user->image ?? $user->getOriginal('image'),
+                'image' => $user->image,
                 'age' => $user->age,
                 'gender' => $user->gender,
                 'status' => $user->status,
             ]);
         }
 
-        return redirect()->route('admin.users')->with('success', 'Elemento actualizado correctamente');
+        return redirect()->route('admin.user.management')->with('success', 'Elemento actualizado correctamente.');
     }
 
     // Delete User
@@ -580,12 +608,11 @@ class AdminController extends Controller
 
     public function listGames()
     {
-        $title = 'List Games';
-
-        $endPoint = 'programs/tasks';
-        $method = 'GET';
-
-        $list = customBlock::getSDKData($endPoint, $method, $locales = 'en');
+        $title = 'Simuladores CogniFit';
+        $list = customBlock::getBrainGamesData('programs/tasks', 'GET')
+            ->filter(fn ($game) => filled($game->key ?? null))
+            ->sortBy(fn ($game) => $game->assets->titles->es ?? $game->assets->titles->en ?? $game->key)
+            ->values();
 
         $data = compact('title', 'list');
 
@@ -756,9 +783,13 @@ class AdminController extends Controller
             'gender' => $user->gender,
             'badge_number' => $user->badge_number,
             'rank' => $user->rank,
+            'rank_id' => OperationalRank::query()->where('name', $user->rank)->value('id'),
             'unit' => $user->securityUnit?->name,
+            'security_unit_id' => $user->security_unit_id,
             'operational_group' => $user->operationalGroup?->name,
+            'operational_group_id' => $user->operational_group_id,
             'assignment_area' => $user->assignment_area,
+            'assignment_area_id' => AssignmentArea::query()->where('name', $user->assignment_area)->value('id'),
             'status' => $user->status,
             'role' => $user->role ?? 'user',
             'user_token' => $user->cognifit_user_token,

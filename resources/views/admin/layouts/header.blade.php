@@ -1,16 +1,16 @@
-<div class="header d-flex align-items-center justify-content-between px-4 py-2 shadow-sm bg-white">
+<div class="header admin-header d-flex align-items-center justify-content-between px-4 py-2 shadow-sm bg-white">
 
-    <div class="header-left d-flex align-items-center">
-        <a href="{{ route('admin.dashboard') }}" class="logo d-flex align-items-center me-3">
-            <img src="{{ asset('common/small-logo.png') }}" alt="Logo" class="me-2">
-            <span class="fw-bold fs-5 text-dark">Panel operativo</span>
+    <div class="header-left admin-header-left d-flex align-items-center">
+        <a href="{{ route('admin.dashboard') }}" class="logo admin-brand d-flex align-items-center me-3">
+            <img src="{{ asset('common/small-logo.png') }}" alt="Logo" class="admin-brand-logo me-2">
+            <span class="admin-brand-title fw-bold fs-5 text-dark">Panel operativo</span>
         </a>
         <a href="{{ route('admin.dashboard') }}" class="logo logo-small d-none">
             <img src="{{ asset('common/small-logo.png') }}" alt="Logo" width="30" height="30">
         </a>
     </div>
 
-    <div class="d-flex align-items-center gap-2">
+    <div class="admin-main-nav d-flex align-items-center gap-2">
         <a href="{{ route('admin.user.management') }}"
             class="btn {{ Route::is(['admin.user.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
             Elementos
@@ -22,10 +22,6 @@
         <a href="{{ route('admin.metrics.index') }}"
             class="btn {{ Route::is(['admin.metrics.*']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
             Métricas
-        </a>
-        <a href="{{ route('admin.skills.management') }}"
-            class="btn {{ Route::is(['admin.skills.management']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">
-            Capacidades
         </a>
         <a href="{{ route('admin.games.list') }}"
             class="btn {{ Route::is(['admin.games.list']) ? 'btn-primary' : 'btn-outline-primary' }} px-4 py-2 fw-semibold">

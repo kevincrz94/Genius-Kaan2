@@ -49,6 +49,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/{id}/report', [AdminController::class, 'userReport'])->name('admin.user.report');
             Route::post('/{id}/register-cognifit', [AdminController::class, 'registerUserInGame'])->name('admin.register.user.game');
             Route::put('/{id}/locale', [AdminController::class, 'updateGameLocale'])->name('admin.update.game.locale');
+            Route::put('/{id}', [AdminController::class, 'usersUpdate'])->name('admin.users.update');
             Route::delete('/{id}', [AdminController::class, 'usersDestroy'])->name('admin.users.destroy');
             Route::get('/{id}', [AdminController::class, 'userProfile'])->name('admin.user.profile');
         });

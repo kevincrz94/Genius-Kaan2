@@ -214,8 +214,9 @@ class IndexController extends Controller
 
         $pageTitle = 'Genius Kaan | Módulos operativos';
         $availableGames = $this->availableGames();
+        $skillFilters = $this->skillFilters($availableGames);
 
-        return view('user.games', compact('pageTitle', 'user', 'availableGames', 'cognifitError'));
+        return view('user.games', compact('pageTitle', 'user', 'availableGames', 'skillFilters', 'cognifitError'));
     }
 
     public function launcher(Request $request)
@@ -542,6 +543,11 @@ class IndexController extends Controller
                     'title' => $title,
                     'focus' => $description,
                     'image' => $game->assets->images->icon ?? null,
+                    'skill_keys' => collect($game->skills ?? [])
+                        ->map(fn ($skill) => (string) $skill)
+                        ->filter()
+                        ->values()
+                        ->all(),
                     'skills' => collect($game->skills ?? [])
                         ->map(fn ($skill) => customBlock::processStringNames((string) $skill))
                         ->values()
@@ -562,22 +568,64 @@ class IndexController extends Controller
                 'key' => 'THE_BLUE_SHAPE',
                 'title' => 'The Blue Shape',
                 'focus' => 'Atención selectiva y velocidad de respuesta.',
+                'skill_keys' => [],
+                'skills' => [],
             ],
             [
                 'key' => 'MAHJONG',
                 'title' => 'Mahjong',
                 'focus' => 'Memoria visual, estrategia y reconocimiento de patrones.',
+                'skill_keys' => [],
+                'skills' => [],
             ],
             [
                 'key' => 'PIT_STOP',
                 'title' => 'Pit Stop',
                 'focus' => 'Planificación, alternancia mental y control ejecutivo.',
+                'skill_keys' => [],
+                'skills' => [],
             ],
             [
                 'key' => 'FROGGY_CROSSING',
                 'title' => 'Froggy Crossing',
                 'focus' => 'Coordinación, anticipación y gestión de impulsos.',
+                'skill_keys' => [],
+                'skills' => [],
             ],
         ];
+    }
+
+    private function skillFilters(array $games): array
+    {
+        $usedSkillKeys = collect($games)
+            ->flatMap(fn (array $game) => $game['skill_keys'] ?? [])
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($usedSkillKeys->isEmpty()) {
+            return [];
+        }
+
+        $skillCatalog = customBlock::getSDKData('skills', 'GET')
+            ->keyBy(fn ($skill) => (string) ($skill->key ?? ''));
+
+        return $usedSkillKeys
+            ->map(function (string $skillKey) use ($skillCatalog): array {
+                $skill = $skillCatalog->get($skillKey);
+
+                return [
+                    'key' => $skillKey,
+                    'label' => $skill->assets->titles->es
+                        ?? $skill->assets->titles->en
+                        ?? customBlock::processStringNames($skillKey),
+                    'icon' => $skill->assets->images->whiteIcon
+                        ?? $skill->assets->images->icon
+                        ?? null,
+                ];
+            })
+            ->sortBy('label')
+            ->values()
+            ->all();
     }
 }

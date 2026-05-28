@@ -87,10 +87,71 @@
             </p>
         </div>
 
-        <div class="grid-3">
+        @if (! empty($skillFilters))
+            <div class="skill-filter-panel card" aria-label="Filtros por capacidad cognitiva">
+                <button type="button" class="skill-filter is-active" data-skill-filter="all">
+                    <span class="skill-filter-icon" aria-hidden="true">
+                        <span>GK</span>
+                    </span>
+                    <span>Todas</span>
+                </button>
+
+                @foreach ($skillFilters as $skill)
+                    <button type="button" class="skill-filter" data-skill-filter="{{ $skill['key'] }}">
+                        <span class="skill-filter-icon" aria-hidden="true">
+                            @if (! empty($skill['icon']))
+                                <img src="{{ $skill['icon'] }}" alt="">
+                            @else
+                                <span>{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($skill['label'], 0, 1)) }}</span>
+                            @endif
+                        </span>
+                        <span>{{ $skill['label'] }}</span>
+                    </button>
+                @endforeach
+            </div>
+        @endif
+
+        <div id="no-skill-results" class="hero-note d-none">
+            No hay mÃ³dulos disponibles para la capacidad seleccionada.
+        </div>
+
+        <div class="grid-3 training-grid">
             @foreach ($availableGames as $game)
                 <x-training-card :game="$game" :user="$user" />
             @endforeach
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('[data-skill-filter]');
+            const cards = document.querySelectorAll('.training-card');
+            const emptyState = document.getElementById('no-skill-results');
+
+            buttons.forEach((button) => {
+                button.addEventListener('click', function() {
+                    const selectedSkill = this.dataset.skillFilter;
+                    let visibleCount = 0;
+
+                    buttons.forEach((item) => item.classList.remove('is-active'));
+                    this.classList.add('is-active');
+
+                    cards.forEach((card) => {
+                        const skillKeys = (card.dataset.skillKeys || '').split(' ').filter(Boolean);
+                        const shouldShow = selectedSkill === 'all' || skillKeys.includes(selectedSkill);
+
+                        card.classList.toggle('is-hidden', !shouldShow);
+
+                        if (shouldShow) {
+                            visibleCount++;
+                        }
+                    });
+
+                    emptyState && emptyState.classList.toggle('d-none', visibleCount > 0);
+                });
+            });
+        });
+    </script>
+@endpush

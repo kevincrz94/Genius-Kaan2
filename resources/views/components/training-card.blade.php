@@ -3,7 +3,10 @@
     'user',
 ])
 
-<article {{ $attributes->merge(['class' => 'card feature-card training-card']) }}>
+<article {{ $attributes->merge([
+    'class' => 'card feature-card training-card',
+    'data-skill-keys' => implode(' ', $game['skill_keys'] ?? []),
+]) }}>
     @if (! empty($game['image']))
         <img class="training-card-image" src="{{ $game['image'] }}" alt="{{ $game['title'] }}">
     @endif
