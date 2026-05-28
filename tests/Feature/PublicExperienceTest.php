@@ -20,11 +20,13 @@ it('shows the launcher setup page', function () {
 
 it('shows the launcher shell page', function () {
     $this->withoutVite();
+    config()->set('services.cognifit.sdk_version', 'test-sdk-version');
 
     $response = $this->get('/start-game');
 
     $response
         ->assertOk()
-        ->assertSee('Sesion cognitiva')
-        ->assertSee('JavaScript');
+        ->assertSee('Sesión cognitiva')
+        ->assertSee('JavaScript')
+        ->assertSee('test-sdk-version');
 });

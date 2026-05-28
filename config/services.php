@@ -41,6 +41,7 @@ return [
         'hash' => env('COGNIFIT_HASH'),
         'launch_url' => env('COGNIFIT_LAUNCH_URL'),
         'base_url' => env('COGNIFIT_API_BASE_URL', 'https://api.cognifit.com'),
+        'sdk_version' => env('COGNIFIT_SDK_VERSION'),
     ],
 
     'firebase_web' => [

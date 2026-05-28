@@ -403,6 +403,7 @@
 
                 const response = await fetch(syncUrl, {
                     method: 'POST',
+                    credentials: 'same-origin',
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
@@ -415,7 +416,7 @@
                     })
                 });
 
-                const payload = await response.json();
+                const payload = await response.json().catch(() => ({}));
 
                 if (!response.ok || !payload.status) {
                     throw new Error(payload.message || 'No se pudieron sincronizar los resultados.');

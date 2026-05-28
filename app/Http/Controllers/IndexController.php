@@ -10,8 +10,10 @@ use App\Services\customBlock;
 use App\Services\FileHelper;
 use CognifitSdk\Api\UserAccessToken;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use Throwable;
 
 class IndexController extends Controller
@@ -392,7 +394,9 @@ class IndexController extends Controller
             'appType' => in_array($request->string('app_type')->trim()->value(), ['web', 'app'], true)
                 ? $request->string('app_type')->trim()->value()
                 : 'web',
-            'syncUrl' => $user ? route('cognifit.session.sync', $user) : null,
+            'syncUrl' => $user
+                ? URL::temporarySignedRoute('cognifit.session.sync', now()->addMinutes(30), ['user' => $user])
+                : null,
             'launchError' => $launchError,
         ];
 
@@ -401,7 +405,9 @@ class IndexController extends Controller
 
     public function syncCognifitSession(Request $request, User $user)
     {
-        if ((int) session('operational_user_id') !== (int) $user->id) {
+        $hasOperationalSession = (int) session('operational_user_id') === (int) $user->id;
+
+        if (! $hasOperationalSession && ! $request->hasValidSignature()) {
             abort(403);
         }
 
@@ -484,6 +490,23 @@ class IndexController extends Controller
 
     private function cognifitSdkVersion(): ?string
     {
+        $configuredVersion = trim((string) config('services.cognifit.sdk_version'));
+
+        if ($configuredVersion !== '') {
+            return $configuredVersion;
+        }
+
+        $cacheKey = 'cognifit.sdk_version';
+        $cachedVersion = rescue(
+            fn () => Cache::get($cacheKey),
+            null,
+            report: false
+        );
+
+        if (filled($cachedVersion)) {
+            return $cachedVersion;
+        }
+
         try {
             $response = Http::timeout(8)
                 ->acceptJson()
@@ -495,7 +518,19 @@ class IndexController extends Controller
                 return null;
             }
 
-            return $this->extractCognifitVersion($response->json() ?? trim($response->body()));
+            $version = $this->extractCognifitVersion($response->json() ?? trim($response->body()));
+
+            if (! filled($version)) {
+                return null;
+            }
+
+            rescue(
+                fn () => Cache::put($cacheKey, $version, now()->addHours(12)),
+                null,
+                report: false
+            );
+
+            return $version;
         } catch (Throwable $th) {
             return null;
         }
