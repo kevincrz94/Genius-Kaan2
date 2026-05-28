@@ -549,7 +549,6 @@
                 <nav class="nav-actions">
                     <a href="{{ route('home') }}" class="btn btn-secondary">Inicio</a>
                     <a href="{{ route('user.login') }}" class="btn btn-primary">Ingresar</a>
-                    <a href="{{ route('admin.showLogin') }}" class="btn btn-secondary">Panel admin</a>
                 </nav>
             </div>
         </div>

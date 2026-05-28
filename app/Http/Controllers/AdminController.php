@@ -35,80 +35,23 @@ class AdminController extends Controller
 
     public function login()
     {
-        if (session('admin_id')) {
-            return redirect()->back();
-        }
-
-        $title = 'Ingreso';
-
-        $data = compact('title');
-
-        return view('admin.login')->with($data);
+        return redirect()->route('user.login');
 
     }
 
     public function loginCheck(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-
-        try {
-            $emailCheck = $request->email;
-            $passwordCheck = $request->password;
-
-            $adminEmail = null;
-            $adminPassword = null;
-
-            $getAdminData = $this->database()
-                ? customBlock::getFireBaseData('admin', $this->database())
-                : collect([]);
-
-            if ($getAdminData && isset($getAdminData['email'], $getAdminData['password'])) {
-                $adminEmail = $getAdminData['email'];
-                $adminPassword = $getAdminData['password'];
-            }
-
-            $adminEmail = $adminEmail ?: config('admin.email');
-            $adminPassword = $adminPassword ?: config('admin.password');
-
-            if ($adminEmail != $emailCheck) {
-                return redirect()->back()->with('error', 'Este acceso es solo para administrador. Usa el correo configurado en ADMIN_EMAIL.');
-            }
-
-            if ($passwordCheck != $adminPassword) {
-                return redirect()->back()->with('error', 'Contraseña no válida.');
-            }
-
-            $generateToken = StringHelper::randomString(20);
-
-            /***** This method is working for the generation of the logs *****/
-            $logArray = [
-                'log' => $generateToken,
-                'type' => 'Ingreso',
-                'created_at' => date('Y-m-d H:i:s'),
-            ];
-
-            if ($this->database()) {
-                customBlock::generateLogs('logs', $logArray, $this->database());
-            }
-            /***** End Method *****/
-
-            session()->put('admin_id', $generateToken);
-
-            return redirect()->route('admin.dashboard')->with('success', 'Sesión iniciada correctamente.');
-
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Ocurrió un error.');
-        }
+        return redirect()->route('user.login')->with('error', 'Usa el acceso institucional unificado.');
     }
 
     public function logout()
     {
+        session()->forget('auth_user_id');
+        session()->forget('operational_user_id');
         session()->forget('admin_id');
+        session()->forget('admin_role');
 
-        return redirect()->route('admin.showLogin')->with('success', 'Sesión cerrada correctamente.');
+        return redirect()->route('user.login')->with('success', 'Sesión cerrada correctamente.');
     }
 
     public function dashboard()
@@ -436,6 +379,7 @@ class AdminController extends Controller
             'image' => 'nullable|image',
             'age' => 'nullable|integer|min:1|max:120',
             'gender' => 'nullable|in:male,female,other',
+            'role' => 'required|in:user,admin,super_admin',
             'password' => 'required',
             'confirm_password' => 'nullable|same:password',
         ]);
@@ -465,7 +409,12 @@ class AdminController extends Controller
             'gender' => $request->filled('gender') ? $request->gender : null,
             'password' => $request->password,
             'status' => 1,
+            'role' => $request->role,
         ]);
+
+        if ($user->role !== 'user') {
+            return redirect()->route('admin.user.management')->with('success', 'Perfil administrativo creado correctamente.');
+        }
 
         try {
             $userToken = $this->registerCognifitUser($user, 'es', $request->password);
@@ -663,6 +612,7 @@ class AdminController extends Controller
                     'gender' => $gender !== '' ? strtolower($gender) : null,
                     'password' => $password,
                     'status' => 1,
+                    'role' => 'user',
                 ]);
 
                 try {
@@ -716,6 +666,7 @@ class AdminController extends Controller
             'operational_group' => $user->operationalGroup?->name,
             'assignment_area' => $user->assignment_area,
             'status' => $user->status,
+            'role' => $user->role ?? 'user',
             'user_token' => $user->cognifit_user_token,
             'cognifit_user_token' => $user->cognifit_user_token,
             'cognifit_locale' => $user->cognifit_locale,

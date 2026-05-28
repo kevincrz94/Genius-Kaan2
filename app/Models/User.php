@@ -31,6 +31,7 @@ class User extends Authenticatable
         'gender',
         'password',
         'status',
+        'role',
         'cognifit_user_token',
         'cognifit_locale',
         'cognifit_registered_at',
@@ -61,6 +62,16 @@ class User extends Authenticatable
             'status' => 'integer',
             'cognifit_registered_at' => 'datetime',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'super_admin'], true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
     }
 
     public function cognitiveSessions()

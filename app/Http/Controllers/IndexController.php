@@ -117,11 +117,15 @@ class IndexController extends Controller
 
     public function showLogin()
     {
+        if (session('admin_id')) {
+            return redirect()->route('admin.dashboard');
+        }
+
         if (session('operational_user_id')) {
             return redirect()->route('user.games');
         }
 
-        $pageTitle = 'Genius Kaan | Acceso operativo';
+        $pageTitle = 'Genius Kaan | Acceso institucional';
 
         return view('user.login', compact('pageTitle'));
     }
@@ -138,6 +142,35 @@ class IndexController extends Controller
             ->where('status', 1)
             ->first();
 
+        if ($user && Hash::check($credentials['password'], $user->password)) {
+            $request->session()->regenerate();
+            session()->put('auth_user_id', $user->id);
+
+            if ($user->isAdmin()) {
+                session()->put('admin_id', $user->id);
+                session()->put('admin_role', $user->role);
+                session()->forget('operational_user_id');
+
+                return redirect()->route('admin.dashboard');
+            }
+
+            session()->put('operational_user_id', $user->id);
+            session()->forget('admin_id');
+            session()->forget('admin_role');
+
+            return redirect()->route('user.games');
+        }
+
+        if ($this->matchesConfiguredAdmin($credentials['email'], $credentials['password'])) {
+            $request->session()->regenerate();
+            session()->put('auth_user_id', 'configured-super-admin');
+            session()->put('admin_id', 'configured-super-admin');
+            session()->put('admin_role', 'super_admin');
+            session()->forget('operational_user_id');
+
+            return redirect()->route('admin.dashboard');
+        }
+
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             return redirect()
                 ->back()
@@ -152,7 +185,10 @@ class IndexController extends Controller
 
     public function logout()
     {
+        session()->forget('auth_user_id');
         session()->forget('operational_user_id');
+        session()->forget('admin_id');
+        session()->forget('admin_role');
 
         return redirect()->route('user.login')->with('success', 'Sesión cerrada correctamente.');
     }
@@ -465,6 +501,14 @@ class IndexController extends Controller
         }
 
         return $scores;
+    }
+
+    private function matchesConfiguredAdmin(string $email, string $password): bool
+    {
+        return filled(config('admin.email'))
+            && filled(config('admin.password'))
+            && hash_equals((string) config('admin.email'), $email)
+            && hash_equals((string) config('admin.password'), $password);
     }
 
     private function operationalUser(): ?User

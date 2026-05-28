@@ -94,7 +94,7 @@
 
                     <div class="cta-row">
                         <button type="submit" class="btn btn-primary">Abrir entrenamiento</button>
-                        <a href="{{ route('admin.showLogin') }}" class="btn btn-secondary">Ir al panel admin</a>
+                        <a href="{{ route('user.login') }}" class="btn btn-secondary">Ir al acceso institucional</a>
                     </div>
                 </form>
             </article>

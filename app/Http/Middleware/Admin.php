@@ -15,11 +15,10 @@ class Admin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(session()->has("admin_id"))
-        {
+        if (session()->has('admin_id') && in_array(session('admin_role'), ['admin', 'super_admin'], true)) {
             return $next($request);
-        } else {
-            return redirect()->route("admin.login")->with("error", "Please login to continue.");
         }
+
+        return redirect()->route('user.login')->with('error', 'Inicia sesión con perfil administrador para continuar.');
     }
 }

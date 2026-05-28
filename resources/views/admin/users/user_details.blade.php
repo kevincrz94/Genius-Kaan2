@@ -33,13 +33,13 @@
                     <i class="fa fa-download"></i>
                     Descargar PDF
                 </a>
-                @if (isset($info['user_token']) && $info['user_token'] != null)
+                @if (($info['role'] ?? 'user') === 'user' && isset($info['user_token']) && $info['user_token'] != null)
                     <button class="btn btn-warning btn-sm btn-rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#changeLocaleModal{{ $info['id'] }}">
                         <i class="fa fa-globe"></i>
                         Cambiar idioma
                     </button>
-                @else
+                @elseif (($info['role'] ?? 'user') === 'user')
                     <button class="btn btn-success btn-sm btn-rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#registerInGameModal{{ $info['id'] }}">
                         <i class="fa fa-user-plus"></i>
@@ -56,6 +56,9 @@
     </div>
 
     <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between">Perfil:
+            <span>{{ str_replace('_', ' ', $viewData::printData($info, 'role')) }}</span>
+        </li>
         <li class="list-group-item d-flex justify-content-between">Género:
             <span>{{ $viewData::printData($info, 'gender') }}</span>
         </li>

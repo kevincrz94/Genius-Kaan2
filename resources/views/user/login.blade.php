@@ -3,26 +3,26 @@
 @section('content')
     <section class="hero">
         <div class="panel hero-copy">
-            <span class="eyebrow">Acceso operativo</span>
+            <span class="eyebrow">Acceso institucional</span>
             <h1>
-                Ingresa a tus
-                <span class="highlight">entrenamientos cognitivos</span>.
+                Ingresa al
+                <span class="highlight">entorno Genius Kaan</span>.
             </h1>
             <p class="lead">
-                Usa el correo y la contraseña asignados por el administrador para consultar los juegos disponibles y
-                comenzar una sesión Cognifit.
+                Usa el correo y la contraseña asignados. El sistema abrirá el panel administrativo o los juegos
+                Cognifit según el perfil autorizado.
             </p>
 
             <div class="badge-row">
+                <span class="soft-chip">Superusuario</span>
+                <span class="soft-chip">Administrador</span>
                 <span class="soft-chip">Elemento operativo</span>
-                <span class="soft-chip">Acceso institucional</span>
-                <span class="soft-chip">Sesiones Cognifit</span>
             </div>
         </div>
 
         <div class="panel card session-card">
             <span class="eyebrow">Iniciar sesión</span>
-            <h2>Acceso de elemento.</h2>
+            <h2>Acceso unificado.</h2>
 
             @if (session('error'))
                 <div class="hero-note" style="color:#8a1f11;background:rgba(220,53,69,.08);">

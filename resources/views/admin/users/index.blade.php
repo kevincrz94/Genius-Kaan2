@@ -52,6 +52,8 @@
                                     <br>
                                     <span>{{ $viewData::printData($user, 'email') }}</span>
                                     <br>
+                                    <small>Perfil: {{ str_replace('_', ' ', $viewData::printData($user, 'role')) }}</small>
+                                    <br>
                                     <small>{{ $viewData::printData($user, 'unit') }} / {{ $viewData::printData($user, 'badge_number') }}</small>
                                 </li>
                             @endforeach

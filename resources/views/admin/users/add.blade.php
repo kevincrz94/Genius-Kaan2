@@ -39,6 +39,14 @@
                                             value="{{ old('email') }}" required>
                                     </div>
                                     <div class="col-lg-4 form-group">
+                                        <label>Perfil</label>
+                                        <select name="role" class="form-control" required>
+                                            <option value="user" @selected(old('role', 'user') === 'user')>Usuario operativo</option>
+                                            <option value="admin" @selected(old('role') === 'admin')>Administrador</option>
+                                            <option value="super_admin" @selected(old('role') === 'super_admin')>Superusuario</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-4 form-group">
                                         <label>Edad</label>
                                         <input type="number" class="form-control" placeholder="Edad" name="age"
                                             value="{{ old('age') }}">
