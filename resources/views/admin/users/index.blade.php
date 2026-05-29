@@ -31,6 +31,10 @@
                         <i class="fa-solid fa-file-excel me-1"></i>
                         Plantilla
                     </a>
+                    <button id="exportUsersTable" class="btn btn-outline-success" type="button">
+                        <i class="fa fa-download me-1"></i>
+                        Exportar tabla
+                    </button>
                     <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#importModal">
                         <i class="fa fa-upload me-1"></i>
                         Importar
@@ -280,6 +284,42 @@
                 table.search('');
                 table.columns().search('');
                 table.draw();
+            });
+
+            $('#exportUsersTable').on('click', function() {
+                const headers = [];
+                $('#usersTable thead th').each(function(index) {
+                    if (index < 9) {
+                        headers.push($(this).text().trim());
+                    }
+                });
+
+                const rows = [headers];
+
+                table.rows({ search: 'applied' }).every(function() {
+                    const row = [];
+                    $(this.node()).find('td').each(function(index) {
+                        if (index < 9) {
+                            row.push($(this).text().replace(/\s+/g, ' ').trim());
+                        }
+                    });
+                    rows.push(row);
+                });
+
+                const csv = rows
+                    .map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(','))
+                    .join('\n');
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const date = new Date().toISOString().slice(0, 10);
+
+                link.href = url;
+                link.download = `elementos-${date}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
             });
         });
     </script>

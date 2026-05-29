@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CognitiveSession;
 use App\Models\CognitiveSkillScore;
 use App\Models\User;
+use App\Services\CognifitSessionSyncService;
 use App\Services\CognifitService;
 use App\Services\customBlock;
 use App\Services\FileHelper;
@@ -323,16 +324,19 @@ class IndexController extends Controller
 
         $completedSessions = $user->cognitiveSessions()
             ->where('status', 'completed');
+        $pendingSessions = $user->cognitiveSessions()
+            ->whereIn('status', ['sync_pending', 'sync_delayed']);
 
         $stats = [
             'completed_sessions' => (clone $completedSessions)->count(),
+            'pending_sessions' => (clone $pendingSessions)->count(),
             'total_minutes' => (int) (clone $completedSessions)->sum('duration_minutes'),
             'average_score' => round((float) ((clone $completedSessions)->whereNotNull('score')->avg('score') ?? 0), 1),
             'last_session_at' => optional((clone $completedSessions)->latest('completed_at')->first()?->completed_at)->format('d/m/Y H:i'),
         ];
 
         $latestSessions = $user->cognitiveSessions()
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'sync_pending', 'sync_delayed', 'sync_failed'])
             ->latest('completed_at')
             ->take(5)
             ->get();
@@ -422,48 +426,19 @@ class IndexController extends Controller
             'mode' => ['nullable', 'string', 'max:80'],
         ]);
 
-        $playedGames = [];
-        $scores = [];
-
-        if ($validated['status'] === 'completed') {
-            try {
-                $cognifit = app(CognifitService::class);
-                $playedGames = $cognifit->playedGames($user);
-                $scores = $cognifit->historicalScores($user);
-            } catch (Throwable $th) {
-                report($th);
-            }
-        }
-
-        $latestGame = $this->latestPlayedGame($playedGames, $validated['game_key']);
-
-        $session = CognitiveSession::create([
-            'user_id' => $user->id,
-            'area' => 'cognifit',
-            'game_key' => $validated['game_key'],
-            'duration_minutes' => $this->durationFromGame($latestGame),
-            'status' => $validated['status'] === 'completed' ? 'completed' : 'cancelled',
-            'score' => $this->scoreFromGame($latestGame),
-            'started_at' => now(),
-            'completed_at' => now(),
-            'metadata' => [
-                'mode' => $validated['mode'] ?? 'gameMode',
-                'cognifit_game' => $latestGame,
-                'synced_at' => now()->toISOString(),
-            ],
-        ]);
-
-        $storedScores = $this->storeCognifitSkillScores($user, $session, $scores);
+        $syncResult = app(CognifitSessionSyncService::class)->recordLauncherCallback($user, $validated);
+        /** @var CognitiveSession $session */
+        $session = $syncResult['session'];
 
         return response()->json([
             'status' => true,
-            'message' => $validated['status'] === 'completed'
-                ? 'Resultados sincronizados.'
-                : 'Actividad cancelada registrada.',
+            'message' => $syncResult['message'],
             'session_id' => $session->id,
+            'sync_status' => $session->status,
+            'results_ready' => $syncResult['synced'],
             'score' => $session->score,
-            'skill_scores' => $storedScores,
-            'played_games' => count((array) ($playedGames['historicalPlayedGames'] ?? [])),
+            'skill_scores' => $syncResult['skill_scores'],
+            'played_games' => $syncResult['played_games'],
         ]);
     }
 

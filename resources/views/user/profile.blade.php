@@ -134,6 +134,10 @@
                 <strong>{{ $stats['completed_sessions'] }}</strong>
             </article>
             <article class="profile-stat-card">
+                <span>En procesamiento</span>
+                <strong>{{ $stats['pending_sessions'] }}</strong>
+            </article>
+            <article class="profile-stat-card">
                 <span>Tiempo acumulado</span>
                 <strong>{{ $stats['total_minutes'] }} min</strong>
             </article>
@@ -175,6 +179,13 @@
                 @if ($latestSessions->isNotEmpty())
                     <div class="profile-history-list">
                         @foreach ($latestSessions as $session)
+                            @php
+                                $statusLabel = match ($session->status) {
+                                    'sync_pending', 'sync_delayed' => 'Procesando',
+                                    'sync_failed' => 'Revisión requerida',
+                                    default => null,
+                                };
+                            @endphp
                             <div class="profile-history-item">
                                 <div class="profile-history-copy">
                                     <strong>{{ $session->game_key ?: 'Simulador cognitivo' }}</strong>
@@ -184,7 +195,9 @@
                                     </p>
                                 </div>
 
-                                @if (filled($session->score))
+                                @if ($statusLabel)
+                                    <span class="profile-history-badge profile-history-badge-muted">{{ $statusLabel }}</span>
+                                @elseif (filled($session->score))
                                     <span class="profile-history-badge">{{ round((float) $session->score, 1) }}/100</span>
                                 @else
                                     <span class="profile-history-badge profile-history-badge-muted">Sin puntaje</span>
