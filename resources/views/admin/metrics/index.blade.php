@@ -8,10 +8,32 @@
                     <h3 class="mb-1">Panel de aptitud cognitiva operativa</h3>
                     <p class="text-muted mb-0">Seguimiento por elemento, unidad, grupo y categoría.</p>
                 </div>
+                <form method="post" action="{{ route('admin.metrics.sync-cognifit') }}">
+                    @csrf
+                    @foreach ($filters as $key => $value)
+                        @if (filled($value))
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <button type="submit" class="btn btn-outline-success">
+                        <i class="fa fa-rotate me-1"></i>
+                        Sincronizar pendientes
+                    </button>
+                </form>
                 <a href="{{ route('admin.metrics.comparative') }}" class="btn btn-outline-primary">
                     <i class="fe fe-target me-1"></i>
                     Análisis comparativo
                 </a>
+            </div>
+
+            <div class="alert alert-info d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <strong>Estado CogniFit:</strong>
+                    {{ $syncSummary['pending'] }} sesiones en procesamiento,
+                    {{ $syncSummary['due'] }} listas para revisar,
+                    {{ $syncSummary['failed'] }} con revisiÃ³n requerida.
+                </div>
+                <span class="small text-muted">La sincronizaciÃ³n manual consulta solo sesiones vencidas o pendientes.</span>
             </div>
 
             <div class="card customShadow mb-3">

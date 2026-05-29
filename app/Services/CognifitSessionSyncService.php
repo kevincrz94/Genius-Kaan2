@@ -51,6 +51,19 @@ class CognifitSessionSyncService
 
     public function syncDueSessions(int $limit = 50): array
     {
+        return $this->syncQuery($this->dueSessionsQuery(), $limit);
+    }
+
+    public function syncDueSessionsForUser(User $user, int $limit = 20): array
+    {
+        return $this->syncQuery(
+            $this->dueSessionsQuery()->where('user_id', $user->id),
+            $limit
+        );
+    }
+
+    private function syncQuery($query, int $limit): array
+    {
         $summary = [
             'checked' => 0,
             'synced' => 0,
@@ -58,15 +71,7 @@ class CognifitSessionSyncService
             'failed' => 0,
         ];
 
-        CognitiveSession::query()
-            ->with('user')
-            ->whereIn('status', ['sync_pending', 'sync_delayed'])
-            ->where(function ($query) {
-                $query->whereNull('scheduled_for')
-                    ->orWhere('scheduled_for', '<=', now());
-            })
-            ->oldest('scheduled_for')
-            ->oldest('id')
+        $query
             ->limit($limit)
             ->get()
             ->each(function (CognitiveSession $session) use (&$summary) {
@@ -84,6 +89,19 @@ class CognifitSessionSyncService
             });
 
         return $summary;
+    }
+
+    private function dueSessionsQuery()
+    {
+        return CognitiveSession::query()
+            ->with('user')
+            ->whereIn('status', ['sync_pending', 'sync_delayed'])
+            ->where(function ($query) {
+                $query->whereNull('scheduled_for')
+                    ->orWhere('scheduled_for', '<=', now());
+            })
+            ->oldest('scheduled_for')
+            ->oldest('id');
     }
 
     public function attemptSync(CognitiveSession $session, bool $immediate = false): array

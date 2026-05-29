@@ -37,6 +37,15 @@
                         <i class="fa fa-file-pdf me-1"></i>
                         Imprimir reporte
                     </a>
+                    @if (($syncSummary['pending'] ?? 0) > 0 || $hasCredential)
+                        <form method="post" action="{{ route('admin.metrics.user.sync-cognifit', ['user' => $info['id']]) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="fa fa-rotate me-1"></i>
+                                Forzar sincronizaciÃ³n
+                            </button>
+                        </form>
+                    @endif
                     @if ($canSync)
                         <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#syncCognifitModal">
                             <i class="fa fa-link me-1"></i>
@@ -65,6 +74,14 @@
                             </h5>
                         </div>
                         <ul class="list-group list-group-flush">
+                            <li class="d-flex justify-content-between align-items-center list-group-item">
+                                Resultados en proceso:
+                                <span class="badge bg-info">{{ $syncSummary['pending'] ?? 0 }}</span>
+                            </li>
+                            <li class="d-flex justify-content-between align-items-center list-group-item">
+                                RevisiÃ³n requerida:
+                                <span class="badge bg-warning text-dark">{{ $syncSummary['failed'] ?? 0 }}</span>
+                            </li>
                             <li class="d-flex justify-content-between align-items-center list-group-item">
                                 Género:
                                 <span class="fw-bold">{{ $genderLabel }}</span>

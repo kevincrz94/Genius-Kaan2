@@ -21,9 +21,11 @@ Route::prefix('admin')->group(function () {
 
         Route::prefix('metrics')->group(function () {
             Route::get('/', [AdminMetricsController::class, 'index'])->name('admin.metrics.index');
+            Route::post('/sync-cognifit', [AdminMetricsController::class, 'syncCognifit'])->name('admin.metrics.sync-cognifit');
             Route::get('/comparative', [AdminMetricsController::class, 'comparative'])->name('admin.metrics.comparative');
             Route::get('/users/{user}', [AdminMetricsController::class, 'user'])->name('admin.metrics.user');
             Route::post('/users/{user}/metrics', [AdminMetricsController::class, 'storeUserMetric'])->name('admin.metrics.user.store');
+            Route::post('/users/{user}/sync-cognifit', [AdminMetricsController::class, 'syncUserCognifit'])->name('admin.metrics.user.sync-cognifit');
         });
 
         Route::prefix('catalogs')->group(function () {

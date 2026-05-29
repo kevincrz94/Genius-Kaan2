@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\CognitiveSkillScore;
+use App\Models\CognitiveSession;
 use App\Models\OperationalAlert;
 use App\Models\OperationalGroup;
 use App\Models\OperationalMetricSnapshot;
 use App\Models\SecurityUnit;
 use App\Models\User;
+use App\Services\CognifitSessionSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -47,6 +49,7 @@ class AdminMetricsController extends Controller
             ->get();
 
         $summary = $this->summary($users, $metrics, $activeAlerts, $filters);
+        $syncSummary = $this->syncSummary($filters);
         $categoryAverages = $this->categoryAverages($metrics);
         $unitAverages = $this->unitAverages($metrics);
         $groupAverages = $this->groupAverages($metrics);
@@ -60,6 +63,7 @@ class AdminMetricsController extends Controller
             'groups',
             'users',
             'summary',
+            'syncSummary',
             'categoryAverages',
             'unitAverages',
             'groupAverages',
@@ -67,6 +71,25 @@ class AdminMetricsController extends Controller
             'riskElements',
             'activeAlerts'
         ))->with('categories', self::CATEGORIES);
+    }
+
+    public function syncCognifit(Request $request, CognifitSessionSyncService $syncService)
+    {
+        $limit = max(1, min(100, (int) $request->input('limit', 50)));
+        $summary = $syncService->syncDueSessions($limit);
+
+        return redirect()
+            ->route('admin.metrics.index', $request->only(['security_unit_id', 'operational_group_id', 'category', 'user_id']))
+            ->with('success', $this->syncMessage($summary));
+    }
+
+    public function syncUserCognifit(User $user, CognifitSessionSyncService $syncService)
+    {
+        $summary = $syncService->syncDueSessionsForUser($user, 20);
+
+        return redirect()
+            ->route('admin.user.profile', ['id' => $user->id])
+            ->with('success', $this->syncMessage($summary));
     }
 
     public function user(User $user)
@@ -285,6 +308,42 @@ class AdminMetricsController extends Controller
             'active_alerts' => $alerts->count(),
             'reinforcement_required' => $metrics->where('score', '<', 60)->pluck('user_id')->unique()->count(),
         ];
+    }
+
+    private function syncSummary(array $filters): array
+    {
+        $query = CognitiveSession::query()
+            ->whereIn('status', ['sync_pending', 'sync_delayed', 'sync_failed'])
+            ->when($filters['user_id'] ?? null, fn ($query, $id) => $query->where('user_id', $id))
+            ->when($filters['security_unit_id'] ?? null, function ($query, $id) {
+                $query->whereHas('user', fn ($userQuery) => $userQuery->where('security_unit_id', $id));
+            })
+            ->when($filters['operational_group_id'] ?? null, function ($query, $id) {
+                $query->whereHas('user', fn ($userQuery) => $userQuery->where('operational_group_id', $id));
+            });
+
+        return [
+            'pending' => (clone $query)->whereIn('status', ['sync_pending', 'sync_delayed'])->count(),
+            'failed' => (clone $query)->where('status', 'sync_failed')->count(),
+            'due' => (clone $query)
+                ->whereIn('status', ['sync_pending', 'sync_delayed'])
+                ->where(function ($dueQuery) {
+                    $dueQuery->whereNull('scheduled_for')
+                        ->orWhere('scheduled_for', '<=', now());
+                })
+                ->count(),
+        ];
+    }
+
+    private function syncMessage(array $summary): string
+    {
+        return sprintf(
+            'Sincronización CogniFit: %d revisadas, %d sincronizadas, %d en procesamiento, %d fallidas.',
+            $summary['checked'],
+            $summary['synced'],
+            $summary['delayed'],
+            $summary['failed'],
+        );
     }
 
     private function categoryAverages(Collection $metrics): Collection

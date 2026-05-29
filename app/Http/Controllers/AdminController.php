@@ -178,6 +178,16 @@ class AdminController extends Controller
             ->latest('id')
             ->limit(10)
             ->get();
+        $syncSummary = [
+            'pending' => CognitiveSession::query()
+                ->where('user_id', $user->id)
+                ->whereIn('status', ['sync_pending', 'sync_delayed'])
+                ->count(),
+            'failed' => CognitiveSession::query()
+                ->where('user_id', $user->id)
+                ->where('status', 'sync_failed')
+                ->count(),
+        ];
 
         $getToken = $user->cognifit_user_token;
         if ($getToken && $getToken != '-') {
@@ -226,6 +236,7 @@ class AdminController extends Controller
             'brainGames',
             'brainGameTitles',
             'localSessions',
+            'syncSummary',
             'catalogAreas',
             'roleLabels',
             'genderLabels'
